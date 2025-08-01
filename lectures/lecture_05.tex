@@ -1,0 +1,601 @@
+\documentclass[12pt,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathtext,cmap,multirow} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{minted}
+
+\graphicspath{{./figs/05}}
+
+\title[Лекция 5]
+{Пороговая сегментация и морфологическая обработка изображений}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}{Содержание}
+\begin{itemize}
+    \item Пороговая сегментация изображений
+    \begin{itemize}
+        \item постоянный порог
+        \item метод Оцу
+        \item переменный порог
+    \end{itemize}
+    \item Бинарная морфология изображений
+    \begin{itemize}
+        \item основные морфологические операции
+        \item некоторые основные морфологические алгоритмы
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача пороговой сегментации}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.25\textwidth]{fig1.pdf}
+    \includegraphics[width=0.25\textwidth]{fig2.pdf}
+\end{figure}
+
+\begin{itemize}
+ \item<1-> задача \textbf{сегментации} - классификация каждого пикселя
+    $$
+        (x,y)\mapsto k\in\left\{1,2,\ldots, K\right\}
+    $$
+ \item<2-> существует много DL и классических подходов 
+ \item<3-> \textbf{пороговая сегментация}: c постоянными или переменными порогами 
+\end{itemize}
+
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с одним постоянным порогом}
+Гистограмма изображения $f(x,y)$. Один объект на темном фоне.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.35\textwidth]{fig3.pdf}
+\end{figure}
+
+Сегментация с одним постоянным порогом $T$.
+$$
+g(x, y) =
+    \begin{cases}
+        1\,, & f(x,y) > T\\
+        0\,, & f(x,y) \leq T
+    \end{cases}
+$$
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с двумя постоянными порогами}
+Гистограмма изображения $f(x,y)$.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.35\textwidth]{fig4.pdf}
+\end{figure}
+
+Сегментация с постоянными порогами $T_1$ и $T_2$.
+$$
+    g(x, y) =
+    \begin{cases}
+        a\,, & f(x,y) > T_2 \\
+        b\,, & T_1 \leq f(x,y) \leq T_2 \\
+        c\,, & f(x,y) < T_1
+    \end{cases}
+$$
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Влияние освещения на сегментацию}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{fig5.pdf}
+\end{figure}
+Как уменьшить влияние перепада яркости?
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Влияние освещения на сегментацию}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig6.pdf}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{fig14.pdf}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Влияние шума на сегментацию}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig7.pdf}
+\end{figure}
+Как уменьшить влияние шума?
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Влияние шума на сегментацию}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig8.pdf}
+    \caption*{Сегментация сглаженного изображения.}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Итеративный алгоритм подбора порога}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig9.pdf}
+    \caption*{Пример изображения с двумя пиками на гистограмме}
+\end{figure}
+Как автоматически подобрать подходящий порог?
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Итеративный алгоритм подбора порога}
+\begin{itemize}
+    \item[1.]<1-> выбирать некоторую начальную оценку значения порога $T$
+    \item[2.]<2-> сегментировать изображение с помощью порога $T$
+    $$
+        g(x, y) =
+        \begin{cases}
+            1\,, & f(x,y) > T\\
+            0\,, & f(x,y) \leq T
+        \end{cases}
+    $$
+    в результате образуются два класса пикселей: $C_1$ и $C_2$.
+    \item[3.]<3-> вычислить значения $\mu(C_1)$ и $\mu(C_2)$ средних значений
+  яркостей пикселей в каждом классе $C_1$ и $C_2$
+    \item[4.]<4-> вычислить новое значение порога
+    $$
+        T = \frac{\mu(C_1)+\mu(C_2)}{2}
+    $$
+    \item[5.]<5-> повторять шаги 2-4 до тех пор, пока разница значений $T$
+    при соседних итерациях не окажется меньше значения наперед заданного параметра $\Delta T$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод Оцу}
+
+Подберем порог таким образом, что бы дисперсия в каждом классе была минимальна.
+
+\medskip
+
+\textbf{Предварительные вычисления.}
+
+\begin{itemize}
+    \item для изображения $f(x,y)$ размера $H\times W$ вычислим гистограмму
+    $$
+        \left\{n_{\,i}\right\}\,,\quad i=0,1,2,\ldots,255
+    $$
+    \item для каждого значения $i=0,1,2,\ldots,255$ вычислим вероятность того,
+    что пиксель принимает значение $i$ и функцию распределения
+    $$
+        p_{i}=\mathbf{P}\left[f = i\right]=\frac{n_{i}}{M\cdot N}
+    $$
+    $$
+        F_i=\mathbf{P}\left[f \leqslant i\right]=\sum_{j=0}^i p_{j}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод Оцу}
+
+\textbf{Вычисление порога методом Оцу:} 
+\medskip
+
+для каждого порога $t=1,2,\ldots,255$
+\medskip
+
+\begin{itemize}
+    \item разобьем все пиксели на два класса
+    $$
+        C_1 = \left\{(x,y): f(x,y) < t\right\}\,,\quad
+        C_2 = \left\{(x,y): f(x,y) \geqslant t\right\}
+    $$
+    \item вычислим вероятности принадлежности к классам $C_1$ и $C_2$
+    $$
+        q_1(t) = \sum_{i=0}^t p_{i}=F(t)\,,\quad
+    $$
+    $$
+        q_2(t) =1-q_1(t)
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод Оцу}
+\begin{itemize}
+    \item найдем математические ожидания значений пикселей в каждом классе
+    $$
+        \mu_1(t)=\frac{1}{q_1}\sum_{i=0}^t i \cdot p_{i}
+    $$
+    $$
+        \mu_2(t)=\frac{1}{q_2}\sum_{i=t+1}^{255} i \cdot p_{i}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод Оцу}
+\begin{itemize}
+    \item вычислим дисперсии значений пикселей в каждом классе
+    $$
+        \sigma_1^2(t)=\frac{1}{q_1}\sum_{i=0}^t [i-\mu_1(t)]^2 \cdot p_{i}
+    $$
+    $$
+        \sigma_2^2(t)=\frac{1}{q_2}\sum_{i=t+1}^{255} [i-\mu_2(t)]^2 \cdot p_{i}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод Оцу}
+Рассмотрим функцию потерь
+$$
+    \mbox{Loss}(t)=q_1(t)\sigma_1^2(t)  + q_2(t)\sigma_2^2(t)
+$$
+Порог Оцу равен
+   $$
+    T=\arg\min_{0 < t < 256} \mbox{Loss}(t)
+   $$
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Переменный порог на основе локальных свойств изображения}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{fig10.pdf}
+\end{figure}
+Для каждого плавающего окна $S_{xy}$ вычислим матожидание и дисперсию
+$$
+  \mu_{xy}=\frac{1}{N}\sum_{S_{xy}}f(x,y)\,,\quad
+  \sigma_{xy}^2=\frac{1}{N-1}\sum_{S_{xy}}\left[f(x,y)-\mu_{xy}\right]^2
+$$
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Переменный порог на основе локальных свойств изображения}
+Сегментация с переменными порогами на основе статистик
+$$
+  g(x, y) =
+  \begin{cases}
+      1\,, & f(x,y) > a\cdot \sigma_{xy}\,\,\mbox{и}\,\, f(x,y) > b\cdot \mu_{xy}\\
+      0\,, & \mbox{в противном случае}
+  \end{cases}
+$$
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с помощью скользящего среднего}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.3\textwidth]{fig11.pdf}
+    \includegraphics[width=0.3\textwidth]{fig12.pdf}
+    \caption*{Пример, когда метод Оцу не работает.}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с помощью скользящего среднего}
+\begin{itemize}
+    \item обойти изображение $f(x,y)$ размера $H\times W$ в z-порядке по строкам
+    $$
+        f(x,y) \longmapsto z(k)\,,\quad k=1,2,\ldots,HW
+    $$
+    \item вычислить скользящее среднее по окну размера $n$
+    $$
+        m(k)=\frac{1}{n}\sum_{i=k+2-n}^{k+1}z_i=
+        m(k) + \frac{z(k+1)-z(k-n+1)}{n}\,,\quad
+        m(1)=\frac{z(1)}{n}
+    $$
+    \item сегментировать изображение
+    $$
+    g(x, y) =
+        \begin{cases}
+            1\,, & f(x,y) > a \cdot m(k)\\
+            0\,, & \mbox{в противном случае}
+        \end{cases}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с помощью скользящего среднего}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.3\textwidth]{fig11.pdf}
+    \includegraphics[width=0.3\textwidth]{fig13.pdf}
+    \caption*{
+        Пример сегментации с помощью скользящего среднего.\\
+        $n=20$, $a=0.5$
+    }
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Бинарная морфология изображений}
+
+Бинарная \textbf{морфология} преобразует маски в маски.
+\medskip
+
+Основные морфологические операции.
+\begin{itemize}
+    \item отражение / сдвиг
+    \item  эрозия / дилатация
+    \item размыкание / замыкание
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Отражение и сдвиг}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{fig15.pdf}
+\end{figure}
+\begin{itemize}
+    \item центральное отражение (поворот на $180^{\circ}$) множества
+    $$
+        \hat{B}=\left\{b: -b\in B\right\}
+    $$
+    \item сдвиг множества на вектор $z=(z_1,z_2)$
+    $$
+        B_z=\left\{b: b-z\in B\right\}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Эрозия}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{fig16.pdf}
+\end{figure}
+Эрозия множества $A$ по множеству (структурному элементу, ядру) $B$
+$$
+    A \ominus B = \left\{z: B_z\subset A\right\}=
+    \left\{z: B_z\cap A^c=\varnothing\right\}
+$$
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Дилатация}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.45\textwidth]{fig17.pdf}
+\end{figure}
+$$
+    A \oplus B = \left\{z: \hat{B}_z\cap A\ne\varnothing\right\}
+$$
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Двойственность эрозии и дилатации}
+$$
+    \left(A \ominus B\right)^c = A^c\oplus\hat{B}
+$$
+\medskip
+$$
+    \left(A \oplus B\right)^c = A^c\ominus\hat{B}
+$$
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Размыкание (opening)}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{fig18.pdf}
+\end{figure}
+$$
+    A \circ B = \left(A\ominus B\right)\oplus B
+$$
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Замыкание (closing)}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{fig19.pdf}
+\end{figure}
+$$
+    A \bullet B = \left(A\oplus B\right)\ominus B
+$$
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Свойства размыкания и замыкания}
+\begin{itemize}
+    \item<1->
+    $$
+        A\circ B\subset A\,,\quad
+        A\subset A\bullet B
+    $$
+    \item<2->
+    $$
+        \left(A\circ B\right)\circ B=A\circ B\,,\quad
+        \left(A\bullet B\right)\bullet B=A\bullet B
+    $$
+    \item<3->
+    $$
+        \left(A\bullet B\right)^c=A^c\circ \hat{B}\,,\quad
+        \left(A\circ B\right)^c=A^c\bullet \hat{B}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Пример: фильтрация зашумленной маски}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.8\textheight]{fig20.pdf}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразование <<попадание/пропуск>> (hit-or-miss)}
+$$
+    I\circledast B_{1,2}=
+    \left(A\ominus B_1\right)\cap
+    \left(A^c\ominus B_2\right)
+$$
+\begin{figure}
+    \centering
+    \includegraphics[height=0.7\textheight]{fig21.pdf}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Некоторые основные морфологические алгоритмы}
+\begin{itemize}
+    \item выделение границ
+    \item заполнение дырок
+    \item утончение
+    \item утолщение
+    \item построение остова
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Выделение границ}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig22.pdf}
+    \includegraphics[height=0.4\textheight]{fig23.pdf}
+\end{figure}
+$$
+    \beta(A)=A-(A\ominus B)
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Заполнение дырок}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.3\textwidth]{fig24.pdf}
+    \includegraphics[height=0.4\textheight]{fig25.pdf}
+\end{figure}
+$$
+    X_k = (X_{k-1}\oplus B)\cap I^c\,,\quad
+    k=1,2,3,\ldots
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Утончение}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.7\textheight]{fig26.pdf}
+\end{figure}
+$$
+    A\otimes B=A-(A\circledast B)
+$$
+$$
+    A\otimes\{B^1,B^2,\ldots,B^n\}=
+    \left(\left(\cdots\left(\left(A\otimes B^1\right)\otimes B^2\right)\cdots\right)\otimes B^n\right)
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Утолщение}
+$$
+    A\odot B=A\cup(A\circledast B)
+$$
+$$
+    A\odot\{B^1,B^2,\ldots,B^n\}=
+    \left(\left(\cdots\left(\left(A\odot B^1\right)\odot B^2\right)\cdots\right)\odot B^n\right)
+$$
+Для утолщения множества $A$
+сначала строится множество $C = A^c$, проводится его утончение, а затем строится
+$C^c$.
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{fig27.pdf}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Построение остова (skeletonization)}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig28.pdf}
+\end{figure}
+$$
+    S(A)=\bigcup_{k=0}^K S_k(A)
+$$
+$$
+    S_k(A)=(A\ominus k\cdot B)-(A\ominus k\cdot B)\circ B
+$$
+$$
+    K=\max\left\{k: (A\ominus k\cdot B)\ne \emptyset\right\}
+$$
+\end{frame}
+
+\end{document}
+
+

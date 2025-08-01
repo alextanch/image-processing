@@ -1,0 +1,433 @@
+\documentclass[12pt,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathtext,cmap,multirow} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{minted}
+
+\graphicspath{{./figs/02}}
+
+\title[Лекция 2]{Арифметические и геометрические операции над изображениями}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Взвешенная сумма изображений}
+\begin{itemize}
+    \item изображения одинакового размера $H\times W$
+    $$
+    A = \left\{a_{i,j}\right\}\,,\quad B = \left\{b_{i,j}\right\}\,,\quad
+    i=1,2,\ldots,H\,,\quad
+    j=1,2,\ldots,W
+    $$
+    \item взвешенная сумма
+    $$
+        C=\alpha\cdot A + \beta\cdot B
+    $$
+    \item сумма изображений при $\alpha=1$, $\beta=1$
+    $$
+        C=A+B
+    $$
+    \item разность изображений при $\alpha=1$, $\beta=-1$
+    $$
+        C=A-B
+    $$
+    \item blending при $0<\alpha<1$ и $\beta=1-\alpha$
+    $$
+        C=\alpha\cdot A+(1-\alpha)\cdot B
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Уменьшение шума при сложении изображений}
+    Изображения с аддитивным гауссовским шумом
+    $$
+    A_n = A + \varepsilon_n\,,\quad \varepsilon_n\sim\mathcal{N}(0,\sigma^2)\,,\quad
+    n=1,2\ldots,N
+    $$
+    Усредним зашумленные изображения
+    $$
+        B=\frac{1}{N}\sum_{n=1}^N A_n
+    $$
+    Математическое ожидание
+    $$
+        \mathbf{E}[B]=\frac{1}{N}\sum_{n=1}^N\left(\mathbf{E}[A]+\mathbf{E}[\varepsilon_n]\right)=A
+    $$
+    Дисперсия
+    $$
+        \mathbf{D}[B]=\frac{1}{N^2}\sum_{n=1}^N\left(\mathbf{D}[A]+\mathbf{D}[\varepsilon_n]\right)=
+        \frac{\sigma^2}{N}
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Умножение и деление изображений}
+    \begin{itemize}
+        \item умножение изображений $A\cdot B$ 
+         
+        \begin{figure}
+            \centering
+            \includegraphics[height=0.3\textheight]{mul_images.pdf}
+        \end{figure}
+
+        \item деление изображений $A / B$ 
+         
+        \begin{figure}
+            \centering
+            \includegraphics[height=0.3\textheight]{div_images.pdf}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Улучшение контрастности изображения }
+    \begin{figure}[t]%
+        \centering
+        \subfloat{
+            \includegraphics[width=0.2\textwidth]{stretch1.pdf}
+        }
+        \subfloat{
+            \includegraphics[width=0.3\textwidth]{stretch2.pdf}
+        }
+        \subfloat{
+            \includegraphics[width=0.2\textwidth]{stretch3.pdf}
+        }
+    \end{figure}
+    
+    \begin{itemize} 
+        \item  $B=T(A)$
+        \item Гамма-коррекция $B=A^\gamma$ 
+         
+        \begin{figure}
+            \centering
+            \includegraphics[height=0.3\textheight]{gamma.pdf}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Гистограмма изображения}
+    $A$ -- одноканальное, $b$ - битное изображение размера $H\times W$
+    $$
+        A=\left\{a_{ij}\right\},\quad
+        a_{ij}\in\left\{0,1,\ldots,L-1\right\},\quad
+        L=2^b,\quad
+        i=1,2,\ldots ,H,\quad
+        j=1,2,\ldots ,W
+    $$
+    \begin{itemize}
+        \item гистограмма изображения
+        $$
+            n_l = \left|\left\{a_{ij}: a_{ij}=l\right\}\right|\,,\quad
+            l=0,1,\ldots ,L-1
+        $$
+        \item $p_l$ -- вероятность появления пикселя со значением яркости $l$
+        $$
+            p_l=\frac{n_l}{H\cdot W},\qquad
+            l=0,1,\ldots ,L-1
+        $$
+         \item сумма вероятностей равна единице
+        $$
+            \sum_{l=0}^{L-1}p_l=\frac{1}{H\cdot W}\sum_{l=0}^{L-1}n_l=1
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Эквализации гистограммы изображения}
+    \begin{figure}[t]
+        \includegraphics[width=0.8\textwidth]{histogram.pdf}
+    \end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Преобразование случайной величины к равномерному распределению}
+    \begin{itemize}
+        \item $X \sim p(x)$ -- непрерывная cлучайная величина $X$ имеет плотность $p(x)$
+        \item функция распределения случайной величины
+        $$
+            y=F(x)=\mathbf{P}[X<x]=\int\limits_0^xp(t)\,dt
+        $$
+        \item новая случайная величина $Y=F\left(X\right)$ будет иметь распределение
+        $$
+            q(y)=p(x)\left|x'_y\right|
+        $$
+        \item вычислим $q(y)$
+        $$
+            y'_x=\frac{d}{dx}\int\limits_0^xp(t)\,dt=p(x)
+            \quad\Rightarrow\quad 
+            x'_y=\frac{1}{p(x)}
+            \quad\Rightarrow\quad
+            q(y)=p(x)\left|\frac{1}{p(x)}\right|=1
+        $$
+        \item таким образом случайная величина $Y$ распределена равномерно
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Эквализации гистограммы изображения}
+    \begin{itemize}
+        \item непрерывная равномерная случайная величина
+        $$
+            y=F(x)=\mathbf{P}[X<x]=\int\limits_0^xp(t)\,dt
+        $$
+        \item если преобразовать значения пикселей по формуле
+        $$
+            y_l=\sum_{m=0}^l p_m\,,\quad y_l\in[0,1]
+        $$
+        \item то получим примерно равномерное распределение
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Пример эквализации гистограммы}
+    \begin{center}
+    \begin{tabular}{ |c|p{1cm}|c|c|c|  }
+        \hline
+        \multicolumn{5}{|c|}{\textbf{Трехбитовое изображение $L=8$, $64\times64$ пикселя}} \\
+        \hline
+        $l$ & $n_l$ & $p_l=n_l/64^2$ & $y_l=\sum_{m=0}^l p_m$ & $l\mapsto\lceil(L-1)\cdot y_l\rceil$\\
+        \hline
+        \hline
+        0 & 790  & 0.19 & 0.19 & $0\mapsto1$\\
+        1 & 1023 & 0.25 & 0.44 & $1\mapsto3$\\
+        2 & 850  & 0.21 & 0.65 & $2\mapsto5$\\
+        3 & 656  & 0.16 & 0.81 & $3\mapsto6$\\
+        4 & 329  & 0.08 & 0.89 & $4\mapsto7$\\
+        5 & 245  & 0.06 & 0.95 & $5\mapsto7$\\
+        6 & 122  & 0.03 & 0.98 & $6\mapsto7$\\
+        7 & 81   & 0.02 & 1.0  & $7\mapsto7$\\
+        \hline
+    \end{tabular}
+    \end{center}
+    \begin{figure}[t]%
+        \centering
+        \subfloat{\includegraphics[width=0.2\textwidth]{equalization1.pdf}}
+        \subfloat{\includegraphics[width=0.2\textwidth]{equalization2.pdf}}    
+    \end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Интегральное изображение}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{integral_image2.png}
+        \includegraphics[height=0.3\textheight]{integral_image1.png}
+    \end{figure}
+    \begin{itemize}
+        \item интегральное изображение
+        $$
+            b(x,y)=\sum_{i=0}^x\sum_{j=0}^ya(i,j)
+        $$
+        \item рекуррентная формула, вычислительная сложность $O(H\cdot W)$
+        $$
+            b(x,y)= a(x,y) + b(x,y-1) + b(x-1,y) - b(x-1,y-1)
+        $$
+        \item сумма пикселей в прямоугольнике $ABCD$
+        $$
+            b(A) + b(C) - b(B) - b(D)
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Применение интегральных изображений для вычисления локальных статистик}
+    \begin{figure}
+            \centering
+            \includegraphics[height=0.3\textheight]{lochist1.pdf}
+    \end{figure}
+    \begin{itemize}
+        \item выборочное среднее в прямоугольнике $S_{xy}$
+        $$
+            \mu_{xy}=\frac{1}{H\cdot W}\sum_{i,j\in S_{xy}} a(i,j)
+        $$
+        \item выборочная дисперсия
+        $$
+            \sigma^2_{xy}=
+            \frac{1}{H\cdot W}\sum_{i,j\in S_{xy}} \left[a(i,j)-\mu\right]^2=
+            \frac{1}{H\cdot W}\sum_{i,j\in S_{xy}} a^2(i,j) - \mu^2(x,y)
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Использование локальных статистик для улучшения изображения}
+    \begin{figure}[t]
+        \includegraphics[height=0.35\textheight]{lochist3.pdf}
+        \caption*{$a=0$, $b=0.1$, $c=0$, $d=0.1$, $e=23$, $m=n=3$}
+    \end{figure}
+    $$
+        b(x,y) = 
+        \begin{cases}
+            e \cdot a(x,y) & \mbox{если} \quad a\mu<\mu_{xy}<b\mu \quad\mbox{и}\quad c\sigma < \sigma_{xy} < d\sigma \\
+            a(x,y)\,, & \mbox{в противном случае}
+        \end{cases}
+    $$
+    $\mu$, $\sigma^2$ -- выборочные среднее и дисперсия всего изображения
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Поворот и масштабирование изображения}
+    \begin{figure}[t]
+        \includegraphics[height=0.33\textheight]{rotation.png}
+    \end{figure}
+    \begin{itemize}
+        \item прямое преобразование $(x,y)\mapsto(x',y')$
+        $$
+            \begin{bmatrix}
+                x' \\ y'
+            \end{bmatrix} =
+            s\cdot\mathbf{R}
+            \begin{bmatrix} 
+                x - c_x \\ y - c_y
+            \end{bmatrix} +
+            \begin{bmatrix} 
+                c_x \\ c_y
+            \end{bmatrix}=
+            s\cdot\mathbf{R}
+            \begin{bmatrix}
+                x \\ y
+            \end{bmatrix}+
+            \mathbf{t}
+        $$
+        $$
+            \mathbf{R}=
+            \begin{bmatrix*}[r]
+                \cos\theta & -\sin\theta \\
+                \sin\theta & \cos\theta
+            \end{bmatrix*}\,,\quad
+            \mathbf{t}=
+            \left(\mathbf{I}-s\cdot\mathbf{R}\right)
+            \begin{bmatrix} 
+                c_x \\ c_y
+            \end{bmatrix}
+        $$
+        \item обратное преобразование $(x',y')\mapsto(x,y)$
+        $$
+            \begin{bmatrix} 
+                x \\ y
+            \end{bmatrix}=
+            \frac{1}{s}\mathbf{R}^T
+            \left(
+            \begin{bmatrix} 
+                x' \\ y'
+            \end{bmatrix}-
+            \mathbf{t}
+            \right)
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Интерполяция изображения методом ближайшего соседа}
+    \begin{figure}[t]
+        \includegraphics[height=0.4\textheight]{rotation.png}
+        \includegraphics[height=0.4\textheight]{bilinear.png}
+        \caption*{$f(x,y)$ -- исходное изображение, $g(x',y')$ -- повернутое изображение}
+    \end{figure}
+    \begin{itemize}
+        \item для каждого $x'=0,1,\ldots, W-1$, $y'=0,1,\ldots, H-1$ вычислить
+        $$
+            \begin{bmatrix} 
+                x \\ y
+            \end{bmatrix}=
+            \frac{1}{s}\mathbf{R}^T
+            \left(
+            \begin{bmatrix} 
+                x' \\ y'
+            \end{bmatrix}-
+            \mathbf{t}
+            \right)
+        $$
+        \item $(x_i, y_i)$ -- ближайший к $(x,y)$ пиксель в узлах $2\times 2$ решетки
+        $$
+            g(x', y')=f(x_i,y_i)
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Билинейная интерполяция изображения}
+    \begin{figure}[t]
+        \includegraphics[height=0.4\textheight]{bilinear.png}
+    \end{figure}
+    $$
+        g(x', y')=a_1+a_2\cdot x + a_3\cdot y + a_4\cdot x\cdot y
+    $$
+    Коэффициенты находятся из условий
+    $$
+        a_1+a_2\cdot x_i + a_3\cdot y_i + a_4\cdot x_i\cdot y_i=f(x_i,y_i)\,,\quad
+        i=1,2,3,4
+    $$
+    В итоге получим
+    $$
+        g(x', y')=f(x_1,y_2)(1-x)(1-y)+f(x_1,y_1)x(1-y)+f(x_2,y_2)(1-x)y+f(x_2,y_1)xy
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Бикубическая интерполяция изображения}
+    \begin{figure}[t]
+        \includegraphics[height=0.4\textheight]{bicubic.png}
+    \end{figure}
+    $$
+        g(x', y')=\sum_{n=0}^3\sum_{m=0}^3 a_{nm}x^ny^m
+    $$
+    Коэффициенты $a_{nm}$ находятся из условий
+    $$
+        \sum_{n=0}^3\sum_{m=0}^3 a_{nm}x_i^ny_i^m=f(x_i,y_i)\,,\quad
+        i=1,2,\ldots,16
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Сравнение качества интерполяций}
+    \begin{figure}[t]
+        \includegraphics[width=\textwidth]{interpolation.pdf}
+    \end{figure}    
+\end{frame}
+
+\end{document}

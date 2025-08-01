@@ -1,0 +1,467 @@
+\documentclass[12pt,t,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathtext,cmap,multirow} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{minted}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\graphicspath{{./figs/03}}
+
+\title[Лекция 3]{Пространственные методы фильтрации изображений}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Одномерная корреляция}
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \vspace{-20pt}
+    \begin{center}
+        \includegraphics[width=0.24\textwidth]{fig1.pdf}
+    \end{center}
+    \vspace{-20pt}
+    \vspace{1pt}
+\end{wrapfigure}
+исходный сигнал
+$$
+    f(x)\quad x=1,2,\ldots,L
+$$
+ядро
+$$
+    w(s)\quad s=-n,\ldots,n\,,\quad
+    N=2n+1
+$$
+одномерная корреляция
+$$
+    (w\bullet f)(x)=\sum_{s=-n}^n w(s)f(x+s)
+$$
+длина выходного сигнала $L$
+
+длина расширенного выходного сигнала $L+N-1$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Одномерная свертка}
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \vspace{-20pt}
+    \begin{center}
+        \includegraphics[width=0.24\textwidth]{fig2.pdf}
+    \end{center}
+    \vspace{-20pt}
+    \vspace{1pt}
+\end{wrapfigure}
+исходный сигнал
+$$
+    f(x)\quad x=1,2,\ldots,L
+$$
+ядро
+$$
+    w(s)\quad s=-n,\ldots,n\,,\quad
+    N=2n+1
+$$
+одномерная свертка
+$$
+    (w\circ f)(x)=\sum_{s=-n}^n w(s)f(x-s)
+$$
+длина выходного сигнала $N$
+
+длина расширенного выходного сигнала $L+N-1$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Двумерная корреляция}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.29\textheight]{fig3.pdf}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig4.pdf}
+\end{figure}
+$$
+    (w\bullet f)(x,y)=\sum_{s=-n}^n\sum_{t=-m}^m w(s,t)f(x+s,y+t)
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Двумерная свертка}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.29\textheight]{fig3.pdf}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig5.pdf}
+\end{figure}
+$$
+    (w\circ f)(x,y)=\sum_{s=-n}^n\sum_{t=-m}^m w(s,t)f(x-s,y-t)
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Padding}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{padding.png}
+    \end{center}
+    \begin{itemize}
+        \item \textbf{zerro padding} -- дополняем нулями
+        \item \textbf{replicate padding} -- повторяются ближайшие пиксели с границ изображения
+        \item \textbf{mirror padding} -- зеркальное отражение пикселей относительно границ
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{padding.pdf}
+    \end{center}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Свойства корреляции и свертки}
+    \begin{itemize}
+        \item корреляция и свертка -- примеры линейных фильтров
+        \item если ядро $w$ симметрично при повороте на $180^\circ$,
+              то свертка совпадает с корреляцией
+        \item свойства корреляции и свертки
+        \begin{center}
+        \begin{tabular}{ |l|c|c| } 
+            \hline
+            \textbf{Свойства} & \textbf{Свертка} & \textbf{Корреляция} \\
+            \hline
+            коммутативность  & $f\circ g=g\circ f$ & --- \\ 
+            ассоциативность  & $f\circ (g\circ h) = (f\circ g)\circ h$ & --- \\ 
+            дистрибутивность & $f\circ(g+h)=f\circ g + f\circ h$ & $f\bullet(g+h)=f\bullet g + f\bullet h$ \\ 
+            \hline
+        \end{tabular}
+        \end{center}
+        \item композиция свертки
+        $$
+            \left(w_k\circ\cdots\circ \left(w_2\circ (w_1\circ f)\right)\right) = 
+            \left(w_1\circ w_2\circ\cdots\circ w_k\right)\circ f
+        $$
+        Если размер всех ядер $N\times M$, то расширенный размер композиции 
+        $w_1\circ w_2\circ\cdots\circ w_k$ равен
+        $$
+            [N + k(N-1)]\times[M + k(M-1)]
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Сепарабельные свертки}
+\begin{itemize}
+    \item ядро свертки $w\in\mathbf{R}^{N\times M}$ называется сепарабельным, если
+    $$
+        w = u \cdot v^t\,,\quad u\in\mathbf{R}^N\,,\quad v\in\mathbf{R}^M
+    $$
+    \item из коммутативности и ассоциативности свертки
+    $$
+        w\circ f = (u\circ f) \circ v
+    $$ 
+    \item вычислительня эффиктивность
+    $$
+        \frac{(HW)\cdot (MN)}{(HW)\cdot(M+N)}=\frac{MN}{M+N}
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Сепарабельные свертки}
+\begin{itemize}
+    \item ядро $w$ -- сепарабельно, если $\mathrm{rank}(w)=1$ 
+    \item как найти $u$ и $v$ в произведении
+    $$
+        w = u \cdot v^t
+    $$
+    \begin{enumerate}
+        \item[(a)] найти ненулевой элемент $e\in w$
+        \item[(b)] пусть $c$, $r$ -- столбец и строка, содержащие элемент $e$, тогда
+        $$
+            u = c\,,\qquad
+            v = \frac{r^t}{e} 
+        $$
+    \end{enumerate}
+    \item Пример
+        $$
+            w = 
+            \begin{bmatrix*}[r]
+                1 & 2 & 1\\
+                2 & 4 & 2\\
+                1 & 2 & 1
+            \end{bmatrix*}\,,\quad
+            u =
+            \begin{bmatrix*}[r]
+                1 \\ 2\\ 1
+            \end{bmatrix*}\,,\quad
+            v = \frac{1}{2}
+            \begin{bmatrix*}[r]
+                2 \\ 4 \\ 2
+            \end{bmatrix*}=
+            \begin{bmatrix*}[r]
+                1 \\ 2 \\ 1
+            \end{bmatrix*}
+        $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Template Matching by Correlation}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{cats.jpg}
+    \includegraphics[height=0.1\textheight]{template.jpg}
+\end{figure}
+\begin{itemize}
+    \item $f$ -- исходное изображение размера $H\times W$
+    \item $g$ -- template изображение размера $h\times w$
+    \item функция потерь
+    $$
+        L(x, y)=\sum_{s=0}^{h-1}\sum_{t=0}^{w-1}\left[f(x+s,y+t)-g(s,t)\right]^2
+    $$
+    \item template matching
+    $$
+        x_\ast, y_\ast=\arg\min_{x,y}L(x,y)
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Template Matching by Correlation}
+    \begin{itemize}
+        \item преобразуем функцию потерь
+        $$
+            L(x,y)=\sum_{s,t} 
+            \left[f^2(x+s,y+t)+g^2(s,t)-2f(x+s,y+t)g(s,t)\right]
+        $$
+        \item очевидно, что
+        $$
+            \arg\min_{x,y}L(x,y)=
+            \arg\max_{x,y}\sum_{s,t} f(x+s,y+t)g(s,t)=
+            \arg\max_{x,y}(g\bullet f)(x,y)
+        $$
+        \item чтобы исключить влияние яркости максимизируют
+        $\mathrm{NCC}(x,y)$ (normalized cross-correlation)
+        $$
+            \mathrm{NCC}(x,y)=
+            \frac{\sum\limits_{s,t} f(x+s,y+t)g(s,t)}
+            {\sqrt{\sum\limits_{s,t} f^2(x+s,y+t)}\cdot\sqrt{\sum\limits_{s,t} g^2(s,t)}}
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Сглаживающие фильтры. Box--фильтр}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{boxfilter.png}
+    \end{center}
+    
+    Сглаживающие фильтры применяются для:
+    размытия изображения и уменьшения шума на изображении.
+
+    \begin{itemize}
+        \item box--фильтр размера $n\times n$
+        $$
+            g = w\circ f\,,\quad
+            w = \frac{1}{n^2}
+            \begin{bmatrix*}[r]
+                1 & 1 & \ldots & 1\\
+                1 & 1 & \ddots & 1\\
+                1 & 1 & \ldots & 1
+            \end{bmatrix*}
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Гауссовский фильтр}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{gaussian1.pdf}
+    \end{center}
+    Сепарабельное ядро гауссовского фильтра размера $n\times n$ 
+    $$
+        G(s,t)=K\exp\left\{-\frac{s^2+t^2}{2\sigma^2}\right\}\,,\quad
+        s,t=-n,\ldots,n\,,\quad
+        n\approx 3\sigma
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Сравнение box и гауссовской фильтрации}
+    \begin{center} 
+        \includegraphics[width=0.7\textwidth]{gaussian2.pdf}
+        \captionof*{figure}{Результат box и гауссовской фильтрации}
+    \end{center}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Медианная фильтрация}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{median_filter.png}
+    \end{center}
+    \begin{itemize}
+        \item нелинейный фильтр
+        \item устойчив к выбросам (salt-and-pepper noise)
+        \item не сильно размывает границы
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{median.pdf}
+    \end{center}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Билатеральная фильтрация}
+    $$
+        u(s,t,x,y)=\exp\left\{
+            -\frac{s^2+t^2}{2\sigma_d^2}-
+            \frac{[f(x+s,y+t)-f(x,y)]^2}{2\sigma_r^2}
+        \right\}
+    $$
+    $$
+        w(s,t,x,y)=\frac{u(s,t,x,y)}{\sum\limits_{s,t}u(s,t,x,y)}
+    $$
+    $$
+        g(x,y)=\sum\limits_{s,t}f(x+s,y+t)w(s,t,x,y)
+    $$
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{bilateral.png}
+    \end{center}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Guided filtering}
+    \begin{center}
+        \includegraphics[height=0.3\textheight]{guided.png}
+    \end{center}
+    Модель фильтрации
+    $$
+        f(x,y)\approx a_kh(x,y)+b_k\,,\quad (x,y)\in\omega_k
+    $$
+    Гребневая регрессия
+    $$
+    \arg\min\limits_{a_k,b_k}\sum_{(x,y)\in\omega_k}(a_kh(x,y)+b_k-f(x,y))^2+\lambda a_k^2
+    $$
+    $$
+        a_k=\dfrac{\mathbf{E}_k[hf]-\mathbf{E}_k[h]\mathbf{E}_k[f]}{\mathbf{D}_k[h]+\lambda}\,,\qquad
+        b_k=\mathbf{E}_k[f]-a_k\mathbf{E}_k[h]
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Повышение резкости с помощью фильтра Лапласа}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{signal.pdf}
+        \includegraphics[width=0.5\textwidth]{derivatives.pdf}
+    \end{center}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Повышение резкости с помощью фильтра Лапласа}
+    $$
+        g(x,y) = f(x,y) - \Delta f(x,y)
+    $$
+    Оператор Лапласа
+    $$
+        \Delta f(x,y)=\frac{\partial^2 f}{\partial x^2}+\frac{\partial^2 f}{\partial y^2}
+    $$
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{laplacian.pdf}
+        %\captionof*{figure}{5-точечный и 9-точечный  фильтр Лапласа}
+    \end{center}
+    Пятиточечная разностная схема оператора Лапласа
+    $$
+        \Delta f(x,y)\approx f(x+1,y)+f(x-1,y)+f(x,y+1)+f(x,y-1)-4f(x,y)
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Повышение резкости с помощью фильтрации Лапласа}
+    \begin{center}
+        \includegraphics[width=0.3\textwidth]{laplacian_sharpening.pdf}
+    \end{center}
+    \begin{itemize}
+        \item исходное размытое изображение
+        \item изображение, полученное 5-точечной фильтрацией Лапласа
+        \item повышение резкости с помощью 5-точечной фильтрации
+        \item повышение резкости с помощью 9-точечной фильтрации
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Выделение границ с помощью фильтра Собеля}
+    \begin{center}
+        \includegraphics[width=0.15\textwidth]{gradient1.pdf}
+    \end{center}
+    Градиент функции
+    $$
+        \nabla f(x,y) = [f'_x(x,y), f'_y(x,y)]
+    $$
+    Модуль градиента изображения $M(x,y)=\sqrt{(f'_x)^2+(f'_y)^2}$
+    $$
+        f'_x \approx (z_7+2z_8+z_9)-(z_1+2z_2+z_3)\,,\quad 
+        f'_y \approx (z_3+2z_6+z_9)-(z_1+2z_4+z_7)
+    $$
+    \begin{figure}[t]%
+        \centering
+        \includegraphics[width=0.15\textwidth]{gradient2.pdf}
+        \quad
+        \includegraphics[width=0.3\textwidth]{gradient3.pdf}
+    \end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Пример выделения границы фильтром Собеля}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{gradient4.pdf}
+    \end{center}
+    \begin{itemize}
+        \item чтобы уменьшить влияние шума, исходное изображение надо сгладить
+        \item оптическое изображение контактной линзы
+        \item градиент, полученный с помощью ядер Собела
+    \end{itemize}
+\end{frame}
+
+\end{document}

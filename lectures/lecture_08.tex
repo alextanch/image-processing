@@ -1,0 +1,441 @@
+\documentclass[12pt,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathtext,cmap,multirow,amsmath,tcolorbox} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{minted}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\graphicspath{{./figs/08}}
+
+\title[Лекция 8]{Проективная модель камеры}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Центральная проекция в евклидовых координатах}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{fig1.pdf}
+        \includegraphics[height=0.3\textheight]{fig2.pdf}
+    \end{figure}
+    Pinhole камера:
+    \begin{itemize}
+        \item \textbf{image plane} -- фокальная плоскость
+        \item $\mathbf{p}$ -- оптический центр  камеры
+        \item $f=\norm{\mathbf{p}-\mathbf{C}}$ -- фокусное расстояние
+        \item \textbf{principal axis} -- оптическая ось 
+        \item \textbf{principal plane} -- плоскость, параллельная image plane и содержащая $\mathbf{C}$
+    \end{itemize}
+    \medskip
+
+    \textbf{Центральная проекция} (из подобия треугольников):
+    $$
+        (X,Y,Z)\mapsto (x,y)\,,\quad x=f\frac{X}{Z}\,,\quad y=f\frac{Y}{Z}
+    $$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Центральная проекция в однородных координатах}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{fig1.pdf}
+    \end{figure}
+    \begin{itemize}
+        \item центральная проекция в однородных координатах
+        $$
+        \begin{bmatrix}
+            fX\\ fY\\ Z
+        \end{bmatrix}=
+        \begin{bmatrix}
+            f& 0& 0& 0\\
+            0& f& 0& 0\\
+            0& 0& 1& 0
+        \end{bmatrix}
+        \begin{bmatrix}
+            X\\ Y\\ Z\\ 1
+        \end{bmatrix}
+    $$
+    \item матрица камеры в случае центральной проекции
+    $$
+        P=\mathrm{diag}(f,f,1)\cdot[I\, |\, \mathbf{0}]\in\mathbf{R}^{3\times4}
+    $$
+    $$
+        \mathbf{x}=P\cdot\mathbf{X}
+    $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Сдвиг оптического центра}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{fig3.pdf}
+    \end{figure}
+    \begin{itemize}
+        \item в реальных камерах начало координат не совпадает c оптическим центром
+        $$
+            (X,Y,Z)\mapsto\left(f\frac{X}{Z}+x_0,f\frac{Y}{Z}+y_0\right)
+        $$
+        \item матрица калибровки камеры
+        $$
+            K=
+            \begin{bmatrix}
+                f& 0& x_0\\
+                0& f& y_0\\
+                0& 0& 1
+            \end{bmatrix}
+        $$
+        $$
+            \mathbf{x}=K[I\,|\,\mathbf{0}]\cdot\mathbf{X}_\mathrm{cam}
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Кооординаты на изображении}
+    \begin{itemize}
+        \item в цифровых камерах расстояние измеряют не в метрах, а в пикселях
+        $$
+            K=
+            \begin{bmatrix}
+                m_xf& 0& x_0\\
+                0& m_yf& y_0\\
+                0& 0& 1
+            \end{bmatrix}=
+            \begin{bmatrix}
+                f_x& 0& x_0\\
+                0& f_y& y_0\\
+                0& 0& 1
+            \end{bmatrix}
+        $$
+        $m_x$, $m_y$ -- количество пикселей в одном метре
+        \item система координат $(x,y)$ может быть косоугольной
+        $$
+            K=
+            \begin{bmatrix}
+                f_x& s& x_0\\
+                0& f_y& y_0\\
+                0& 0& 1
+            \end{bmatrix}
+        $$
+        \item число степеней свободы $\mathrm{dof}(K)=5$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Поворот и сдвиг системы координат}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig7.pdf}
+\end{figure}
+
+\begin{itemize}
+    \item преобразование координат из $C$ в $W$
+    $$
+        X_w=RX_c+T
+    $$
+    \item матрица поворота
+    $$
+        R^{-1}=R^T\,,\qquad 
+        \det(R)=1
+    $$
+    \item преобразование координат из $W$ в $C$
+    $$
+        X_c=R^T\left(X_w-T\right)
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Вычисление матрицы поворота}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig6.pdf}
+\end{figure}
+$$
+    \norm{\mathbf{r}_1}=\norm{\mathbf{r}_2}=\norm{\mathbf{r}_3}=1\,,\quad
+    \mathbf{r}_1\perp\mathbf{r}_2\perp\mathbf{r}_3
+$$
+Матрица поворота из $xyz$ в $XYZ$
+$$
+    R=
+    \begin{bmatrix}
+        r_{11}& r_{12}& r_{13}\\
+        r_{21}& r_{22}& r_{23}\\
+        r_{31}& r_{32}& r_{33}
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \mathbf{r}_1&
+        \mathbf{r}_2&
+        \mathbf{r}_3
+    \end{bmatrix}\,,\quad
+$$
+Число степеней свободы матрицы поворота:
+$$
+    \mathrm{dof}(R)=9-3-3=3
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Экспоненциальная система координат для вращений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig6.pdf}
+\end{figure}
+По вектору вращения
+$$
+    \omega=
+    \begin{bmatrix}
+        \omega_1\\
+        \omega_2\\
+        \omega_3
+    \end{bmatrix}
+    \quad\leftrightarrow\quad
+    \widehat{\omega}=
+    \begin{bmatrix}
+        0& -\omega_3& \omega_2\\
+        \omega_3& 0& -\omega_1\\
+        -\omega_2& \omega_1& 0
+    \end{bmatrix}
+$$
+можно построить матрицу поворота (формула Родрига)
+$$
+    R=e^{\widehat{\omega}}=
+    I+\frac{\widehat{\omega}}{\norm{\widehat{\omega}}}\sin\left(\norm{\widehat{\omega}}\right)+
+    \frac{\widehat{\omega}^2}{\norm{\widehat{\omega}}^2}\left[1-\cos\left(\norm{\widehat{\omega}}\right)\right]
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Экспоненциальная система координат для вращений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig6.pdf}
+\end{figure}
+По матрице поворота
+$$
+    R=
+    \begin{bmatrix}
+        r_{11}& r_{12}& r_{13}\\
+        r_{21}& r_{22}& r_{23}\\
+        r_{31}& r_{32}& r_{33}
+    \end{bmatrix}
+$$
+
+можно вычислить вектор вращения $\widehat\omega=\log(R)$
+$$
+    \norm{\omega}=\cos^{-1}\left(\frac{\mathrm{trace}(R)-1}{2}\right)\,,\quad
+    \omega=\frac{\norm{\omega}}{2\sin\left(\norm{\omega}\right)}
+    \begin{bmatrix}
+        r_{32} - r_{23} \\
+        r_{13} - r_{31} \\
+        r_{21} - r_{12} \\
+    \end{bmatrix}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Вращение и перемещение камеры}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.35\textheight]{fig4.pdf}
+    \end{figure}
+    \begin{itemize}
+        \item $\widetilde{\mathbf{C}}$, $\widetilde{\mathbf{X}}$ -- евклидовы координаты точки и центра камеры 
+        в мировой системе координат
+        $$
+            \widetilde{\mathbf{X}}_\mathrm{cam}=
+            R\cdot(\widetilde{\mathbf{X}}-\widetilde{\mathbf{C}})
+        $$
+        \item в однородных координатах
+        $$
+            \mathbf{X}_\mathrm{cam}=
+            \begin{bmatrix}
+                R& -R\widetilde{\mathbf{C}}\\
+                0& 1
+            \end{bmatrix}
+            \cdot\mathbf{X}
+            \quad\Rightarrow\quad
+            \mathbf{x}=
+            K[I\,|\,\mathbf{0}]\cdot\mathbf{X}_\mathrm{cam}=
+            K\,[R\,|\,-R\widetilde{\mathbf{C}}]\cdot\mathbf{X}
+        $$
+        \item матрица камеры в этом случае
+        $$
+            P=K\,[R\,|\,\mathbf{t}]\,,\quad
+            \mathbf{t}=-R\widetilde{\mathbf{C}}
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Внешние и внутренние параметры камеры}
+    $$
+            P=K\,[R\,|\,\mathbf{t}]\,,\quad
+            \mathbf{t}=-R\widetilde{\mathbf{C}}
+    $$
+    \begin{itemize}
+        \item внешние параметры камеры (extrinsics)
+        $$
+            R\,,\qquad \widetilde{\mathbf{C}}\,,\qquad \mathrm{dof}(R, \widetilde{\mathbf{C}}) = 3 + 3 = 6
+        $$
+        \item внутренние параметры камеры (intrinsics)
+        $$
+            K=
+            \begin{bmatrix}
+                f_x& s& x_0\\
+                0& f_y& y_0\\
+                0& 0& 1
+            \end{bmatrix}
+            \,,\qquad  \mathrm{dof}(K) = 5
+        $$
+        \item $\mathrm{dof}(P)=5+6=11$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Проективная камера}
+    \begin{itemize}
+        \item \textbf{проективная камера}: $M\in\mathbf{R}^{3\times3}$, $\mathbf{p}_4\in\mathbf{R}^{3}$
+        \[
+            P=[M\,|\,\mathbf{p}_4]\in\mathbf{R}^{3\times4}\,,\qquad
+            \det(M)\ne0
+        \]
+        \item в однородных координатах 
+        $$
+            \mathbf{x}=P\mathbf{x}
+        $$
+        $P$ определяется с точностью до множителя $\mathrm{dof}(P)=11$
+        \item зная $K$, $R$ и $\mathbf{t}$ можно найти  $M$ и $\mathbf{p}_4$
+        $$
+            P=K\,[R\,|\,\mathbf{t}]=[KR\,|\,K\mathbf{t}]
+            \quad\Rightarrow\quad
+            M=KR\,,\quad
+            \mathbf{p}_4=K\mathbf{t}
+        $$
+        \item зная $M$ и $\mathbf{p}_4$ можно вычислить $K$, $R$ и $\mathbf{t}$ c помощью матричного $\mathbf{RQ}$ разложения
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Анатомия проективной камеры}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.25\textheight]{fig5.pdf}
+    \end{figure}
+    $$
+        \mathbf{x}=P\mathbf{X}\,,\qquad
+        P=[M\,|\,\mathbf{p}_4]=
+        \begin{bmatrix}
+            \mathbf{P}_1\\
+            \mathbf{P}_2\\
+            \mathbf{P}_3
+        \end{bmatrix}
+    $$
+    \begin{itemize}
+        \item $\mathbf{P}^T_2\mathbf{X}=0$ -- плоскость $y=0$, $\mathbf{P}_1$ -- плоскость $y=0$, $\mathbf{P}_3$ -- principal plane
+        \item центр камеры
+        $$
+            P\mathbf{C}=\mathbf{0}\qquad\Rightarrow\qquad
+            \mathbf{C}=
+            \begin{bmatrix}
+                -M^{-1}\mathbf{p}_4\\
+                1
+            \end{bmatrix}
+        $$
+        \item уравнение оптического луча, точки которого проектируются в $\mathbf{x}$
+        $$
+            \mathbf{X}=
+            \mathbf{C}
+            +\lambda
+            \begin{bmatrix}
+                M^{-1}\mathbf{x} \\ 
+                0
+            \end{bmatrix}\,,\quad
+            \lambda\in\mathbf{R}
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Поворот камеры вокруг ее центра}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig8.pdf}
+\end{figure}
+Проекции для двух камер
+$$
+    \mathbf{x}=K[I\,|\,\mathbf{0}]\cdot\mathbf{X}
+$$
+$$
+    \mathbf{x}'=KR[I\,|\,\mathbf{0}]\cdot\mathbf{X}=
+    KRK^{-1}K[I\,|\,\mathbf{0}]\cdot\mathbf{X}=KRK^{-1}\cdot\mathbf{x}
+$$
+значит координаты на изображениях связаны гомографией
+$$
+    \mathbf{x}'=H\cdot\mathbf{x}\,,\qquad
+    H=KRK^{-1}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Применение: построение панорамного изображения}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.8\textheight]{fig9.pdf}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Явление паралакса при смещении центра камеры}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig10.pdf}
+    \includegraphics[height=0.4\textheight]{fig11.pdf}
+\end{figure}
+\end{frame}
+
+\end{document}

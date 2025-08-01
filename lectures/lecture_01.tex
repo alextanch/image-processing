@@ -1,0 +1,509 @@
+\documentclass[12pt,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathtext,cmap,multirow} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{minted}
+
+\graphicspath{{./figs/01}}
+
+\title[Лекция 1]{Цифровое изображение. Цветовые модели}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Примеры цифровых изображений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{galaxy.jpg}
+    \includegraphics[height=0.3\textheight]{thermography.jpg}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{mri.jpg}
+    \includegraphics[height=0.3\textheight]{electron_microscopy.jpg}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Черно-белое (binary) изображение}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{coordinates.png}
+    \includegraphics[height=0.3\textheight]{black_whight.png}
+\end{figure}
+$$
+  f(m,n)\in\left\{0,1\right\}
+$$
+\begin{itemize}
+    \item Черно-белое изображение - это одноканальное однобитное изображение.
+    \item $0$ - черный цвет, $1$ - белый цвет
+    \item хорошо подходит для хранения масок
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Полутоновое (grayscale) изображение}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{coordinates.png}
+    \includegraphics[height=0.3\textheight]{gray_image.png}
+\end{figure}
+$$
+  f(m,n)\in\left\{0,1,\ldots,255\right\}
+$$
+\begin{itemize}
+    \item Полутоновое изображение - это одноканальное восьмибитное изображение.
+    \item При изменении значения пикселя $f(m,n)$ от 0 до 255, 
+    цвет меняется в градациях серого от черного к белому.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветное RGB изображение}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{RGB_image.png}
+    \includegraphics[height=0.3\textheight]{lena.png}
+\end{figure}
+$$
+  f_k(m,n)\in\left\{0,1,\ldots,255\right\}\,\quad
+  k=1,2,3
+$$
+\begin{itemize}
+    \item Цветное RGB изображение - это трехканальное восьмибитное изображение.
+    \item Каналы $k=1,2,3$ соответствуют красному (R), зеленому (G) и синему (B) цвету.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Математическое описание цифровых изображений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{digital_image.jpg}
+\end{figure}
+
+Цифровое изображение задается набором $K$ матриц (каналов) $M\times N$ 
+и числом бит $B$
+$$
+    \mathbf{F}=\left\{f_{k}(m,n)\right\},\quad
+    m=0,1,\ldots,M-1,\quad
+    n=0,1,\ldots,N-1,\quad
+    k=1,2,\ldots,K
+$$
+$$
+    f_{k}(m,n)\in\left\{0,1,\ldots,2^B-1\right\}
+$$
+\end{frame}
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Формирование цифрового изображения}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{acquisition.pdf}
+\end{figure}
+\begin{itemize}
+    \item при формировании цифрового изображения непрерывный сигнал преобразуется
+    в дискретный
+    \item затем дискретный сигнал сжимается и сохраняется
+    \item на каждом шаге обработки теряется информация, 
+    что приводит к возникновению артефактов
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сэмплирование и квантизации непрерывного сигнала}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.55\textheight]{sampling.pdf}
+\end{figure}
+\begin{itemize}
+    \item при сэмплировании значения непрерывного сигнала вычисляются в узлах сетки
+    \item при квантизации диапазон значений сигнала  разбивается на конечное число уровней и значения округляются до ближайших к ним уровням
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Артефакты сэмплирования}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.75\textheight]{sampling_artefacts.pdf}
+    \caption*{Артефакты сэмплирования при 930 dpi, 300 dpi, 150 dpi и 75 dpi.}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Артефакты квантования}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.7\textheight]{quantization_artefacts.pdf}
+    \caption*{Шумы камеры и сатурация - артефакты квантизации (слишком большой шаг квантизации).}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Артефакты квантования}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{jpeg_artifacts.png}
+\end{figure}
+График демонстрирует артефакты при JPEG сжатии изображения и
+зависимость метрики качества \textbf{PSNR (dB)}
+$$
+  \mbox{PSNR}(A,B)=10\cdot\log_{10}\frac{255^2\cdot M\cdot N}{||A - B||_F^2}
+$$
+от коэффициента сжатия.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Видимый свет}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{light.png}
+\end{figure}
+\begin{itemize}
+    \item \textbf{видимый свет} -- поток электромагнитных волн разных длин волн
+    \item \textbf{монохромный свет} - свет состоящий из волн только одной длины волны
+    \item человек воспринимает длины волн $360\,\mbox{нм} < \lambda < 830\,\mbox{нм}$
+    \item человек отличает примерно $1000$ оттенков цветов и $20$ оттенков серого
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Спектральная плотность излучения}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{D65.png}
+    \caption*{Cпектральная плотность для дневного света (источник $D65$)}
+\end{figure}
+\begin{itemize}
+    \item свет состоит из множества волн с разными длинами волн $\lambda$
+    \item \textbf{спектральная плотность излучения} $I(\lambda)$ --
+  плотность потока излучения, приходящуюся на длину волны $\lambda$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Элементы зрительного восприятия}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.25\textheight]{eye.pdf}
+    \includegraphics[height=0.25\textheight]{absorption.pdf}
+\end{figure}
+Сетчатка человеческого глаза содержит два вида рецепторов:
+\begin{itemize}
+    \item \textbf{палочки} -- отвечают за сумеречное зрение
+    \item \textbf{колбочки} -- обеспечивают цветовое зрение
+    \item cуществует три типа колбочек, которые в основном чувствительны к синему, зеленому и красному свету
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Эксперимент Райта и Гилда}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.45\textheight]{color_experiment.jpg}
+\end{figure}
+Эксперимент Дэвида Райта и Джона Гилда в 1920-х годах:
+\begin{itemize}
+    \item многие цвета нельзя разложить в сумму трех базовых цветов
+    \item если к цвету, который не получается разложить, добавить определенный цвет из
+    базовых, то получившийся цвет раскладывается по трём базовым цветам
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовая модель XYZ}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{XYZ.png}
+\end{figure}
+В 1931 году разработана цветовая модель \textbf{XYZ}:
+\begin{itemize}
+    \item зафиксированы три положительные весовые функции
+    $x(\lambda)$, $y(\lambda)$, $z(\lambda)$
+    \item координаты света со  спектральной плотностью $I(\lambda)$ равны
+    $$
+        X = \int\limits_{360}^{830} {x}(\lambda)I(\lambda)\,d\lambda\,,\quad
+        Y = \int\limits_{360}^{830} {y}(\lambda)I(\lambda)\,d\lambda\,,\quad
+        Z = \int\limits_{360}^{830} {z}(\lambda)I(\lambda)\,d\lambda
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовая модель XYZ}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{CIEXYZ.png}
+\end{figure}
+Из формул видно, что отображение $I(\lambda) \mapsto (X\,,Y\,,Z)$ линейно:
+\begin{itemize}
+    \item при сложении световых потоков координаты цветов тоже складываются
+    \item при увеличении потока в $\alpha$ раз его координаты тоже увеличиваются
+    в $\alpha$ раз
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовая модель xyY}
+Удобно перейти к так называемым \textbf{хроматическим координатам} $x$ и $y$ при помощи следующих уравнений:
+$$
+    x = \frac{X}{X + Y + Z}\,,\quad
+    y = \frac{Y}{X + Y + Z}
+$$
+
+В результате мы получаем цветовую модель \textbf{xyY}.
+
+Ниже приводятся формулы для обратных преобразований из \textbf{xyY} в \textbf{XYZ}:
+$$
+    X = \frac{Y}{y}x\,,\quad
+    Z = \frac{Y}{y}(1 - x - y)
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Хроматическая диаграмма}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{Yxy.png}
+\end{figure}
+\begin{itemize}
+    \item \textbf{xроматическая диаграмма} -- множества хроматических координат $(x,y)$
+    всех различаемых глазом человека цветов
+    \item дуга на диаграмме соответствует монохроматическим цветам $360\,\mbox{нм} < \lambda  < 830\,\mbox{нм}$
+    \item все цвета внутри любого треугольника можно представить в виде взвешенной суммы трех цветов в вершинах треугольника
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовая модель sRGB}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.45\textheight]{sRGB.png}
+\end{figure}
+$$
+    \begin{bmatrix}
+    R \\ G \\ B
+    \end{bmatrix} =
+    \begin{bmatrix}
+        3.2405 & -1.5372 & -0.4985\\
+        -0.9693 & 1.8760& 0.0416\\
+        0.0556 & -0.2040 & 1.0573
+    \end{bmatrix}
+    \cdot
+    \begin{bmatrix}
+    X \\ Y \\ Z
+    \end{bmatrix}
+$$
+$$
+    R =
+    \begin{cases}
+        1.055 \cdot R^{1/2.4} - 0.055\,, & R > 0.0031\\
+        12.92 \cdot R\,,                 & R \leq 0.0031
+    \end{cases}
+    \,,\quad
+    R =
+    \begin{cases}
+        0\,,  & R < 0\\
+        1 \,, & R > 1
+    \end{cases}
+$$
+
+Для $G$, $B$ формулы аналогичные.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Свойства RGB}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.45\textheight]{RGB.pdf}
+    \includegraphics[height=0.35\textheight]{RGB_cube.pdf}
+\end{figure}
+\begin{itemize}
+    \item не все цвета могут быть представлены в \textbf{RGB} модели
+    \item модель \textbf{RGB}, как и \textbf{XYZ}, является аддитивной (при сложении световых потоков соответствующие координаты цветов тоже складываются)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовое пространство HSV}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{HSV.png}
+\end{figure}
+\textbf{HSV} моделирует, как художники воспринимают цвет
+\begin{itemize}
+    \item $0^\circ \leqslant H < 360^\circ$  \textbf{тон (hue)}, чистый оттенок цвета
+    \item $0\leqslant S \leqslant 1$  \textbf{насыщенность (saturation)},
+    насколько цвет близок к чистому цвету
+    \item $0< V \leqslant 1$  \textbf{яркость (value)}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовое пространство HSV}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{HSV.png}
+\end{figure}
+$$
+    V = \max(R,G,B)\,,\quad
+    S=1-\frac{\min(R,G,B)}{\max(R,G,B)}
+$$
+$$
+    h =
+    \begin{cases}
+        60(G-B)/\delta\,, & R=V\\
+        60(B-R)/\delta+120\,, & G=V\\
+        60(R-G)/\delta+240\,, & B=V
+    \end{cases}\,,\quad
+    \delta = V(1-S)
+$$
+$$
+    H = h \mod 360^\circ
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовая модель YCbCr}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{YCbCr.png}
+\end{figure}
+\begin{align*}
+    Y  &= 0.299\cdot R + 0.587\cdot G + 0.114\cdot B \\
+    Cb &= 0.564 \cdot (B - Y) + 0.5 \\
+    Cr &= 0.713 \cdot (R - Y) + 0.5
+\end{align*}
+\begin{itemize}
+    \item $Y$ -- канал яркости
+    \item $Cb$, $Cr$ -- цветовые каналы
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовая аугментация изображений. Изменение тона}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{hue_adjust.png}
+\end{figure}
+\begin{itemize}
+    \item сконвертировать изображение в цветовое пространство \textbf{HSV}
+    \item изменить плоскость тона \textbf{H} (hue) по формуле
+    $$
+      \mathbf{H} = (\mathbf{H} + \alpha) \mod 360\,,\quad
+      0 < \alpha < 360
+    $$
+    \item сконвертировать изображение обратно в цветовое пространство \textbf{RGB}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Изменение насыщенности}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{saturation_adjust.png}
+\end{figure}
+\begin{itemize}
+    \item найти яркость изображения $\mathbf{Y}$
+    \item преобразовать цветовые плоскости \textbf{R}, \textbf{G} и \textbf{B} по формулам
+    \begin{align}
+      \mathbf{R} &= \beta \cdot \mathbf{R} + (1-\beta)\cdot\mathbf{Y}\\
+      \mathbf{G} &= \beta \cdot \mathbf{G} + (1-\beta)\cdot\mathbf{Y}\\
+      \mathbf{B} &= \beta \cdot \mathbf{B} + (1-\beta)\cdot\mathbf{Y}
+  \end{align}
+  где $0 < \beta < 1$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Изменение контрастности}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{contrast_adjust.png}
+\end{figure}
+\begin{itemize}
+    \item найти яркость изображения $\mathbf{Y}$ и вычислить среднюю яркость $\bar{\mathbf{Y}}$
+    \item преобразовать цветовые плоскости \textbf{R}, \textbf{G} и \textbf{B} по формулам
+    \begin{align*}
+      \mathbf{R} &= \gamma \cdot \mathbf{R} + (1-\gamma)\cdot\bar{\mathbf{Y}}\\
+      \mathbf{G} &= \gamma \cdot \mathbf{G} + (1-\gamma)\cdot\bar{\mathbf{Y}} \\
+      \mathbf{B} &= \gamma \cdot \mathbf{B} + (1-\gamma)\cdot\bar{\mathbf{Y}}
+  \end{align*}
+  где $0 < \gamma < 1$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Изменение яркости}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{brightness_adjust.png}
+\end{figure}
+\begin{itemize}
+    \item цветовые плоскости \textbf{R}, \textbf{G} и \textbf{B} умножить на коэффициент $0 < \delta < 1$
+    \begin{align*}
+        \mathbf{R} &= \delta \cdot \mathbf{R} \\
+        \mathbf{G} &= \delta \cdot \mathbf{G} \\
+        \mathbf{B} &= \delta \cdot \mathbf{B}
+    \end{align*}
+\end{itemize}
+\end{frame}
+
+
+\end{document}
+

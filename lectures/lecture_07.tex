@@ -1,0 +1,698 @@
+\documentclass[12pt,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathtext,cmap,multirow} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{minted}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\graphicspath{{./figs/07}}
+
+\title[Лекция 7]{Гомография. Алгоритм RANSAC}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Однородные координаты точек плоскости}
+    \begin{itemize}
+        \item переход из евклидовых координат к однородным
+        $$
+            \mathbf{R}^2\ni
+            \begin{bmatrix}
+                x\\ y
+            \end{bmatrix}
+            \mapsto 
+            \mathbf{x}=
+            \lambda
+            \begin{bmatrix}
+                x\\ y\\ 1
+            \end{bmatrix}=
+            \begin{bmatrix}
+                x_1\\ x_2\\ x_3
+            \end{bmatrix}\,,\quad
+            \lambda \ne 0
+        $$
+        \item переход от однородных координат к евклидовым
+        $$
+            \mathbf{x}=
+            \begin{bmatrix}
+                x_1\\ x_2\\ x_3
+            \end{bmatrix}
+            \mapsto
+            \begin{bmatrix}
+                x\\ y
+            \end{bmatrix}\in\mathbf{R}^2
+            \quad\mbox{где}\quad
+            x = \frac{x_1}{x_3}\,,\quad
+            y = \frac{x_2}{x_3}
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Однородные координаты точек плоскости}
+    \begin{itemize}
+        \item пример перехода из евклидовых координат к однородным
+        $$
+            (1,2)\mapsto 
+            \begin{bmatrix}
+                1\\ 2\\ 1
+            \end{bmatrix}\,,
+            \quad
+            (1,2)\mapsto 
+            \begin{bmatrix}
+                2\\ 4\\ 2
+            \end{bmatrix}\,,
+            \quad
+            (1,2)\mapsto 
+            \begin{bmatrix}
+                -1\\ -2\\ -1
+            \end{bmatrix}
+        $$
+        \item пример перехода от однородных координат к евклидовым
+        $$
+            \begin{bmatrix}
+                1\\ 2\\ 1
+            \end{bmatrix}
+            \mapsto
+            \left(\frac{1}{1}, \frac{2}{1}\right)=(1, 2)\,,
+            \quad
+            \begin{bmatrix}
+                2\\ 4\\ 2
+            \end{bmatrix}
+            \mapsto
+            \left(\frac{2}{2}, \frac{4}{2}\right)=(1, 2)
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Идеальные точки (точки на бесконечности)}
+    \begin{itemize}
+        \item идеальные точки
+        $$
+            \mathbf{x}=
+            \begin{bmatrix}
+                x_1\\ x_2\\ 0
+            \end{bmatrix}
+        $$
+        \item идеальные точки в евклидовой плоскости лежат на бесконечности
+        $$
+            x=\frac{x_1}{0}=\infty\,,\quad
+            y=\frac{x_2}{0}=\infty
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Проективная плоскость}
+    \begin{itemize}
+        \item \textbf{проективная плоскость (проективное пространство)}
+        $$
+            \mathbf{P}^2=\left\{ 
+                \mathbf{x}
+            \right\}\,,\quad
+            \mathbf{x}\sim\mathbf{x'}
+            \quad\Leftrightarrow\quad
+            \mathbf{x}=\lambda\mathbf{x'}\,,
+            \quad\lambda\ne 0
+        $$
+        \item точка в $\mathbf{R}^2$ определяет \textbf{одну} точку в $\mathbf{P}^2$
+        $$
+            \mathbf{R}^2\ni(x,y)^T\mapsto 
+            \mathbf{x}=
+            \lambda\cdot(x,y,1)^T
+            \in \mathbf{P}^2\,,\quad
+            \forall\lambda\ne0
+        $$
+        \item точка в $\mathbf{P}^2$ определяет точку в $\mathbf{R}^2$ (может быть и на $\infty$)
+        $$
+            \mathbf{R}^2\ni\mathbf{x}=
+            (x_1,x_2,x_3)^T\mapsto 
+            \left(\frac{x_1}{x_3},\frac{x_2}{x_3}\right)^T
+            \in \mathbf{R}^2
+        $$
+        \item точка в $\mathbf{P}^2$ однозначно определяется двумя отношениями
+        $$
+            x_1:x_2:x_3
+            \quad\Rightarrow\quad
+            \dim\mathbf{P}^2=2
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Однородные координаты прямых на плоскости}
+    \begin{itemize}
+        \item все эти уравнения задают одну и ту же прямую в $\mathbf{R}^2$
+        $$
+            (\lambda a)x+(\lambda b)y+(\lambda c)=0\,,\quad
+            \lambda\ne0
+        $$
+        \item однородные координаты прямой на плоскости
+        $$
+            ax+by+c=0
+            \quad\mapsto\quad
+            \mathbf{l} = 
+            \lambda
+            \begin{bmatrix}
+                a\\ b\\ c
+            \end{bmatrix}
+            \in \mathbf{P}^2\,,\quad 
+            \lambda \ne 0
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Однородные координаты прямых на плоскости}
+\begin{itemize}
+    \item точка $(x,y)$ лежит на прямой $ax+by+c=0$
+    $$
+        ax+by+c=0
+        \quad\Leftrightarrow\quad
+        \mathbf{x}^T\cdot\mathbf{l}=\mathbf{l}^T\cdot\mathbf{x}=0
+    $$
+    \item точка пересечения двух прямых 
+    $$
+        \mathbf{x}=\mathbf{l}\times\mathbf{l'}
+    $$
+    \item прямая, проходящая через две точки 
+    $$
+        \mathbf{l}=\mathbf{x}\times\mathbf{x'}
+    $$
+    \item две параллельные прямые пересекаются в идеальной точке
+    $$
+        (a,b,c)^T\times(a,b,c')^T=(c'-c)\cdot(b,-a,0)^T=(b,-a,0)^T
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Однородные координаты прямых на плоскости}
+\begin{itemize}
+    \item пример: точка пересечения прямых $x=1$, $y=1$
+    $$
+        \mathbf{x}=\mathbf{l}\times\mathbf{l'}=
+        \begin{bmatrix}
+            1\\ 0\\ -1
+        \end{bmatrix}
+        \times
+        \begin{bmatrix}
+            0\\ 1\\ -1
+        \end{bmatrix}=
+        \begin{bmatrix}
+            \mathbf{i}& \mathbf{j}& \mathbf{k}\\
+            1& 0& -1\\
+            0& 1& -1
+        \end{bmatrix}=
+        \begin{bmatrix}
+            1\\ 1\\ 1
+        \end{bmatrix}
+        \quad\Rightarrow\quad
+        (1,1)
+    $$
+    \item пример: прямая, проходящая через точки $(1,0)$, $(0,1)$
+    $$
+        \mathbf{l}=\mathbf{x}\times\mathbf{x'}=
+        \begin{bmatrix}
+            1\\ 0\\ 1
+        \end{bmatrix}
+        \times
+        \begin{bmatrix}
+            0\\ 1\\ 1
+        \end{bmatrix}=
+        \begin{bmatrix}
+            \mathbf{i}& \mathbf{j}& \mathbf{k}\\
+            1& 0& 1\\
+            0& 1& 1
+        \end{bmatrix}=
+        \begin{bmatrix}
+            -1\\ -1\\ 1
+        \end{bmatrix}=
+        \begin{bmatrix}
+            1\\ 1\\ -1
+        \end{bmatrix}
+        \quad\Rightarrow\quad
+        x+y-1=0
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Идеальная прямая}
+\begin{itemize}
+    \item \textbf{идеальная прямая}  
+    $$
+        \mathbf{l}_\infty=
+        \begin{bmatrix}
+            0\\ 0\\ 1
+        \end{bmatrix}
+    $$
+    \item все идеальные точки лежат на идеальной прямой
+    $$
+        (x_1,x_2,0)\cdot\mathbf{l}_\infty=
+        (x_1,x_2,0)\cdot
+        \begin{bmatrix}
+            0\\ 0\\ 1
+        \end{bmatrix}=
+        0
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Гомография (проективное преобразование}
+\begin{itemize}
+    \item \textbf{гомография} - невырожденное линейное преобразование в $\mathbf{P}^2$
+    $$
+        h(\mathbf{x})=\mathrm{H}\cdot\mathbf{x}=
+        \begin{bmatrix}
+            h_{11}& h_{12}& h_{13}\\
+            h_{21}& h_{22}& h_{23}\\
+            h_{31}& h_{32}& h_{33}
+        \end{bmatrix}\cdot
+        \begin{bmatrix}
+            x_1 \\ x_2 \\ x_3
+        \end{bmatrix}\,,\quad
+        \det \mathrm{H}\ne 0
+    $$  
+    \item гомография переводит прямые в прямые
+    $$
+        \mathbf{l'}=\mathrm{H}^{-T}\cdot \mathbf{l}
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Примеры проективных преобразований}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{fig3.pdf}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{fig4.pdf}
+    \includegraphics[width=0.5\textwidth]{fig5.pdf}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Иерархия проективных преобразований}
+$$
+\mbox{Euclidian}\subset
+\mbox{Similarity}\subset
+\mbox{Affine}\subset
+\mbox{Homography}
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Евклидовы преобразования}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.1\textwidth]{fig6.pdf}
+\end{figure}
+\begin{itemize}
+\item \textbf{евклидово преобразование}
+$$
+\mathbf{x'}=
+\begin{bmatrix}
+    x' \\ y' \\ 1
+\end{bmatrix}=
+\begin{bmatrix}
+    \cos\theta& -\sin\theta & t_x\\
+    \sin\theta& \cos\theta & t_y\\
+    0& 0& 1\\
+\end{bmatrix}\cdot
+\begin{bmatrix}
+    x \\ y \\ 1
+\end{bmatrix}=
+\begin{bmatrix}
+    \mathrm{R} & \mathbf{t}\\
+    \mathbf{0}& 1
+\end{bmatrix}\cdot\mathbf{x}
+$$ 
+\item три степени свободы $\mathrm{dof}=3$ (degrees of freedom)
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразования подобия}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.1\textwidth]{fig7.pdf}
+\end{figure}
+\begin{itemize}
+\item \textbf{преобразование подобия (similarity transform)}
+$$
+\mathbf{x'}=
+\begin{bmatrix}
+    s\cdot\mathrm{R} & \mathbf{t}\\
+    \mathbf{0}& 1
+\end{bmatrix}\cdot\mathbf{x}
+$$ 
+\item четыре степени свободы $\mathrm{dof}=4$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Аффинные преобразования}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.07\textwidth]{fig8.pdf}
+\end{figure}
+\begin{itemize}
+\item \textbf{аффинное преобразование}
+$$
+\mathbf{x'}=
+\begin{bmatrix}
+    \mathrm{A} & \mathbf{t}\\
+    \mathbf{0}& 1
+\end{bmatrix}\cdot\mathbf{x}
+\,,\quad
+\det \mathrm{A}\ne 0
+$$ 
+\item шесть степени свободы $\mathrm{dof}=6$
+\item точка на $\infty$ (идеальная точка) преобразуется в точку на $\infty$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Гомография}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.08\textwidth]{fig9.pdf}
+\end{figure}
+\begin{itemize}
+\item \textbf{проективное преобразование}
+$$
+\mathbf{x'}=
+\mathrm{H}\cdot\mathbf{x}
+\,,\quad
+\det \mathrm{H}\ne 0
+$$ 
+\item восемь степеней свободы $\mathrm{dof}=8$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Vanishing points and vanishing lines}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig11.pdf}
+    \includegraphics[height=0.4\textheight]{fig10.pdf}
+\end{figure}
+\begin{itemize}
+    \item \textbf{vanishing points} -- точки пересечения параллельных прямых на изображении
+    \item \textbf{vanishing line} -- прямая, которая проходит через vanishing points
+    \item при аффинном преобразовании, точки на $\infty$ остаются на $\infty$
+\end{itemize}
+$$
+    \begin{bmatrix}
+        \mathrm{A} & \mathbf{t}\\
+        \mathbf{0}& 1
+    \end{bmatrix}\cdot
+    \begin{bmatrix}
+        x_1\\ x_2\\ 0
+    \end{bmatrix}=
+    \begin{bmatrix}
+        x'_1\\ x'_2\\ 0
+    \end{bmatrix}
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Для чего нужна гомография}
+\begin{itemize}
+    \item построение панорамного изображения
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{fig1.pdf}
+        \includegraphics[height=0.4\textheight]{fig2.pdf}
+    \end{figure}
+    \medskip
+
+    \item ректификация
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{rectification.png}
+    \end{figure}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{The Direct Linear Transformation (DLT) algorithm}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{matches.png}
+\end{figure}
+\begin{itemize}
+    \item известно, что два изображения описываются гомографией
+    \item знаем точное соответствие точек на двух изображениях
+    $$
+        \begin{bmatrix}
+            x_i\\ y_i\\ w_i
+        \end{bmatrix}=
+        \mathbf{x}_i\leftrightarrow \mathbf{x}'_i=
+        \begin{bmatrix}
+            x'_i\\ y'_i\\ w'_i
+        \end{bmatrix}
+        \,,\quad i=1,2,\ldots n \geqslant 4
+    $$
+    \item хотим построить гомографию
+    $$
+        \mathbf{x}'_i= \mathrm{H}\mathbf{x}_i
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{The Direct Linear Transformation (DLT) algorithm}
+\begin{itemize}
+    \item умножим векторно на $\mathbf{x}'_i$
+    $$
+        \mathbf{x}'_i= \mathrm{H}\mathbf{x}_i
+        \quad\Rightarrow\quad
+        \mathbf{x}'_i\times\mathrm{H}\mathbf{x}_i=\mathbf{0}
+    $$
+    \item перепишем в матричном виде
+    $$
+        \mathrm{A}_i\mathbf{h}=
+        \begin{bmatrix}
+            \mathbf{0}^T& -w'_i\mathbf{x}_i^T& y'_i\mathbf{x}_i^T\\
+            w'_i\mathbf{x}_i^T& \mathbf{0}^T& -x'_i\mathbf{x}_i^T
+        \end{bmatrix}
+        \mathbf{h}=
+        \mathbf{0}
+        \quad\mbox{-- система }\, 2\times 9
+    $$
+    где
+    $$
+        \mathbf{h}=
+        \begin{bmatrix}
+            h_1\\
+            \vdots\\
+            h_9
+        \end{bmatrix}\,,\quad
+        \mathrm{H}=
+        \begin{bmatrix}
+            h_1& h_2& h_3\\
+            h_4& h_5& h_6\\
+            h_7& h_7& h_9
+        \end{bmatrix}
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{The Direct Linear Transformation (DLT) algorithm}
+\begin{itemize}
+    \item для $n$ точек, получим $2n\times 9$ систему однородных линейных уравнений 
+    $$
+        \mathrm{A}\mathbf{h}=
+        \begin{bmatrix}
+            \mathrm{A}_1\\
+            \vdots\\
+            \mathrm{A}_n
+        \end{bmatrix}
+        \mathbf{h}=
+        \mathbf{0}
+    $$
+    \item если $n\geqslant 4$, то $\mathrm{rank}(\mathrm{A})=8$
+    \item и система будет иметь одно линейно-независимое ненулевое решение
+    \item $\mathbf{h}$ определяется с точностью до множителя, поэтому часто нормируют
+    $$
+    \norm{\mathbf{h}}=1
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{The Direct Linear Transformation (DLT) algorithm}
+\begin{itemize}
+    \item на практике координаты точек определены неточно
+    $$
+        \mathbf{x}_i=\bar{\mathbf{x}}_i+\varepsilon_i
+    $$
+    $$
+        \mathbf{x}'_i=\bar{\mathbf{x}}'_i+\varepsilon'_i
+    $$
+    \item поэтому ищут приближенное решение системы $\mathrm{A}\mathbf{h}=\mathbf{0}$
+    $$
+        \mathbf{h}=\arg\min\,
+        \norm{\mathrm{A\mathbf{h}}}\,,\quad
+        \norm{\mathbf{h}}=1
+    $$
+    \item решением будет $\mathbf{h}$ -- последний столбец матрицы $\mathrm{V}$ 
+          в SVD разложении  
+          $$
+            \mathrm{A}=\mathrm{U}\mathrm{D}\mathrm{V}^T
+          $$
+          (диагональные элементы $\mathrm{D}$ упорядочены по убыванию)
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Нормализация координат точек}
+\begin{itemize}
+    \item элементы матриц $\mathrm{A}_i$ могут принимать как очень маленькие так и огромные значения
+    \item перед DLT координаты точек нормализуют c помощью преобразований подобий $S_1$, $S_2$
+    $$
+         \widetilde{\mathbf{x}}_i=S_1\mathbf{x}_i\,, \qquad
+         \widetilde{\mathbf{x}}'_i=S_2\mathbf{x}'_i\
+    $$
+    так чтобы
+    $$
+        \mathrm{mean}\{\widetilde{\mathbf{x}}_i\}=0\,,\quad 
+        \mathrm{std}\{\widetilde{\mathbf{x}}_i\}=1
+    $$
+    $$
+        \mathrm{mean}\{\widetilde{\mathbf{x}}'_i\}=0\,,\quad 
+        \mathrm{std}\{\widetilde{\mathbf{x}}'_i\}=1
+    $$
+    \item с помощью DLT вычисляют $\widetilde{H}$
+    \item гомография для координат $\mathbf{x}_i$, $\mathbf{x}'_i$ равна 
+    $$
+        H=S_2^{-1}\tilde{H}S_1
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Алгебраические расстояния. Ошибки репроекции}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.2\textheight]{fig12.pdf}
+\end{figure}
+\begin{itemize}
+    \item DLT - линейный метод, в нем минимизируется алгебраические ошибки,
+          точки заданы ищем 9 параметров гомографии
+    $$
+        \norm{\mathrm{A}\mathbf{h}}^2=\sum_i \norm{\mathrm{A}_i\mathbf{h}}=
+        \sum_i d_{\mbox{alg}}(\mathbf{x}'_i, \mathrm{H}\mathbf{x}_i)
+        \rightarrow\min
+    $$
+    \item более точный метод - нелинейная минимизация ошибок репроекций: 
+    ищем $\hat{\mathbf{x}}_i$  и $\hat{\mathrm{H}}$ ($2n+8$ параметров)
+    $$
+        \sum_i \norm{\mathbf{x}_i-\hat{\mathbf{x}}_i}^2+
+        \norm{\mathbf{x}'_i-\hat{\mathbf{x}}'_i}^2\rightarrow\min\,,\quad
+        \hat{\mathbf{x}}'_i=\mathrm{H}\hat{\mathbf{x}}_i
+    $$
+    \item решается алгоритмом Левенберга-Марквардта, DLT -- начальное приближение
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{RANdom SAmple Consensus (RANSAC)}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.25\textheight]{fig13.pdf}
+    \includegraphics[height=0.25\textheight]{fig14.pdf}
+\end{figure}
+\begin{itemize}
+    \item поры точек = outliers + inliers
+    \item в данных много выбросов, DLT даст плохой результат
+    \item с помощью RANSAC можно отфильтровать данные и оценить $\mathrm{H}$
+    только на inliers 
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Алгоритм RANSAC}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.25\textheight]{fig15.pdf}
+\end{figure}
+\begin{itemize}
+    \item[1.] \textbf{robust estimation}: повторить $N$ раз
+    \begin{itemize}
+        \item[(a)] выбрать 4 случайных соответствий $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$
+                   и вычислить $\mathrm{H}$ методом DLT
+        \item[(b)] разделить точки на inliers и outliers по порогу $t$
+                   $$
+                    \norm{\mathbf{x}'_i-\mathrm{H}\mathbf{x}_i}<t
+                   $$
+    \end{itemize} 
+    \item[2.] выбрать $\mathrm{H}$ c наибольшим числом inliers
+    \item[3.] \textbf{optimal estimation}: минимизируя ошибки репроекций на inliers метотодом Левенберга-Марквардта
+          вычислить финальную гомографию $\mathrm{H}$
+\end{itemize}
+Число итераций $N$ и порог $t$ выбираются адаптивно.
+\end{frame}
+
+
+\end{document}

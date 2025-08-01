@@ -1,0 +1,20 @@
+.vscode
+.ipynb_checkpoints
+.DS_Store
+__pycache__/
+_minted
+
+solutions/
+presentations/
+
+# LaTeX
+*.toc
+*.gz
+*.snm
+*.out
+*.nav
+*.log
+*.fls
+*.aux
+*.vrb
+*.fdb_latexmk

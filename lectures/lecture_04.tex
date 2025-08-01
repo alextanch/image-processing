@@ -1,0 +1,406 @@
+\documentclass[12pt,t,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathtext,cmap,multirow} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{minted}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\graphicspath{{./figs/04}}
+
+\title[Лекция 4]{Частотные методы фильтрации изображений}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Дискретный базис Фурье}
+\begin{itemize}
+    \item базис Фурье для изображения размера $M\times N$
+    $$
+        \varphi(\boldsymbol{\omega},\boldsymbol{x}) = e^{-2\pi i(ux/M+vy/N)}\,,\qquad
+        \boldsymbol{\omega}=(u,v)\,,\quad
+        \mathbf{x}=(x,y)
+    $$
+    \item $\varphi(\boldsymbol{0},\boldsymbol{x})=1$
+    \item $\boldsymbol{\omega}$ -- направление волн, $\norm{\boldsymbol{\omega}}$ --  частота волн
+    $$
+        \mathrm{Re}\left[\varphi(\boldsymbol{\omega},\boldsymbol{x})\right]=\cos\left[2\pi(ux/M+vy/N)\right]
+    $$
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.4\textheight]{fig1.png}
+        \caption*{$\boldsymbol{\omega}=(1,2)$\hspace{2cm} $\boldsymbol{\omega}=(5,-5)$}
+    \end{figure}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Дискретное преобразование Фурье (DFT)}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.32\textheight]{fig2.png}
+\end{figure}
+\begin{itemize}
+    \item дискретное преобразование Фурье изображения $f(\boldsymbol{x})$ размера $M\times N$
+    $$
+        F(\boldsymbol{\omega})=\sum_{x=0}^{M-1}\sum_{y=0}^{N-1}f(\boldsymbol{x})\varphi(\boldsymbol{\omega},\boldsymbol{x})=
+        \sum_{\boldsymbol{x}}f(\boldsymbol{x})\varphi(\boldsymbol{\omega},\boldsymbol{x})
+    $$
+    \item спектр Фурье
+    $$
+        |F(\boldsymbol{\omega})|
+    $$
+    \item фазовый спектр Фурье
+    $$
+        \arg F(\boldsymbol{\omega})
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Быстрое преобразование Фурье (FFT)}
+$$
+    F(\boldsymbol{\omega})=\sum_{x=0}^{M-1}\sum_{y=0}^{N-1}f(\boldsymbol{x})\varphi(\boldsymbol{\omega},\boldsymbol{x})
+$$    
+$$
+    \boldsymbol{\omega}=(u,v)\,,\quad
+    0\leqslant u < M\,,\quad 0\leqslant v < N
+$$
+\begin{itemize}
+    \item вычислительна сложность (число сложений и умножений) DFT
+    $$
+        \mathcal{O}[(MN)^2]
+    $$ 
+    \item вычислительна сложность FFT
+    $$
+        MN\cdot \mathcal{O}[\ln(MN)]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Периодичность. Сдвиг спектра}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig4.png}
+    \includegraphics[height=0.4\textheight]{fig3.pdf}
+    \includegraphics[height=0.3\textheight]{fig5.png}
+\end{figure}
+\begin{itemize}
+    \item значение DFT в самой низкой частоте $\boldsymbol{\omega}=(0,0)$
+    $$
+        F(\boldsymbol{0})=\sum_{\boldsymbol{x}}f(\boldsymbol{x})\varphi(\boldsymbol{0},\boldsymbol{x})=
+        \sum_{\boldsymbol{x}}f(\boldsymbol{x})
+    $$ 
+    \item периодичность DFT
+    $$
+        F(u+M,v+N)=F(u,v)
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Инвариантность спектра Фурье при сдвиге изображения}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.45\textheight]{fig6.png}
+\end{figure}
+\begin{itemize}
+    \item при сдвиге изображения спектр Фурье не меняется
+    \begin{align*}
+        \left|\sum_{\boldsymbol{x}}f(\boldsymbol{x}+\boldsymbol{x}_0)\varphi(\boldsymbol{\omega},\boldsymbol{x})\right|&=
+        \left|e^{2\pi i(x_0u/M+y_0v/N)}\sum_{\boldsymbol{x}'}f(\boldsymbol{x}')\varphi(\boldsymbol{\omega},\boldsymbol{x}')\right|=\\
+        &=\left|\sum_{\boldsymbol{x}'}f(\boldsymbol{x}')\varphi(\boldsymbol{\omega},\boldsymbol{x}')\right|
+    \end{align*}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Спектр Фурье при повороте изображения}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{fig7.png}
+\end{figure}
+\begin{itemize}
+    \item при повороте изображения на угол $\alpha$, спектр Фурье тоже повернется на угол $\alpha$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Обратное дискретное преобразование Фурье (IDFT)}
+\begin{itemize}
+    \item дискретное преобразование Фурье
+    $$
+        F(\boldsymbol{\omega})=\sum_{\boldsymbol{x}}f(\boldsymbol{x})\varphi(\boldsymbol{\omega},\boldsymbol{x})=
+        \sum_{x=0}^{M-1}\sum_{y=0}^{N-1}f(x,y)e^{-2\pi i(ux/M+vy/N)}
+    $$
+    \item обратное дискретное преобразование Фурье
+    $$
+        f(\boldsymbol{x})=\frac{1}{MN}\sum_{\boldsymbol{\omega}}F(\boldsymbol{\omega})\varphi^\ast(\boldsymbol{\omega},\boldsymbol{x})
+        =\frac{1}{MN}\sum_{u=0}^{M-1}\sum_{v=0}^{N-1}F(u,v)e^{2\pi i(ux/M+vy/N)}
+    $$
+    \item обозначения
+    $$
+        F = \mathcal{F}[f]\,,\qquad
+        f = \mathcal{F}^{-1}[F]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразование Фурье свертки}
+\begin{itemize}
+    \item  свертка изображения $f$ с ядром $h$
+    $$
+        (f\circ h)(x,y)=\sum_{m=0}^{M-1}\sum_{n=0}^{N-1}f(m,n)h(x-m,y-n)
+    $$
+    \item теорема о свертке
+    $$
+        \mathcal{F}[f\circ h]=\mathcal{F}[f]\cdot \mathcal{F}[h]
+    $$
+    \medskip
+    $$
+        \mathcal{F}[f\cdot h]=\mathcal{F}[f]\circ \mathcal{F}[h]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Вычисление свертки с помощью преобразования Фурье}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig9.pdf}
+\end{figure}
+\begin{itemize}
+    \item  преобразование Фурье изображения и ядра свертки
+    $$
+        F=\mathcal{F}[f]\,,\qquad H=\mathcal{F}[h]
+    $$
+    \item теорема о свертке
+    $$
+        \mathcal{F}[f\circ h]=\mathcal{F}[f]\cdot \mathcal{F}[h]=F\cdot H
+    $$
+    \item вычисление свертки с помощью преобразования Фурье
+    $$
+        f\circ h =\mathcal{F}^{-1}[F\cdot H]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Фильтрация в частотной области}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.6\textheight]{fig10.pdf}
+\end{figure}
+\begin{itemize}
+    \item фильтрация низких и высоких частот
+    $$
+        H\,,\quad F=\mathcal{F}[f]\qquad\mapsto\qquad g =\mathcal{F}^{-1}[F\cdot H]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Фильтрация в частотной области}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{fig11.pdf}
+    \includegraphics[height=0.5\textheight]{fig12.pdf}
+\end{figure}
+\begin{itemize}
+    \item фильтрация шума в частотной области
+    $$
+        H\,,\quad F=\mathcal{F}[f]\qquad\mapsto\qquad g =\mathcal{F}^{-1}[F\cdot H]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Идеальный фильтр низких частот}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig13.pdf}
+\end{figure}
+$$
+    D(u,v)=\sqrt{\left(u - M/2\right)^2+\left(v - N/2\right)^2}
+$$
+\medskip
+$$
+    H(u, v) =
+    \begin{cases}
+        1\,, & D(u,v) < D_0\\
+        0\,, &  D(u,v) \geqslant D_0
+    \end{cases}
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Идеальный фильтр низких частот}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.7\textheight]{fig14.pdf}
+    \caption*{Исходное изображение $688\times688$. Результат фильтрации $D_0=10,30,60,160,460.$}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Гауссовский фильтр низких частот}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig15.pdf}
+\end{figure}
+$$
+    D(u,v)=\sqrt{\left(u - M/2\right)^2+\left(v - N/2\right)^2}
+$$
+\medskip
+$$
+    H(u,v)=e^{-D^2(u,v)/2D_0^2}
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Гауссовский фильтр низких частот}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.7\textheight]{fig16.pdf}
+    \caption*{Исходное изображение $688\times688$. Результат фильтрации $D_0=10,30,60,160,460.$}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Фильтр низких частот Баттерворта}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig17.pdf}
+\end{figure}
+$$
+    D(u,v)=\sqrt{\left(u - M/2\right)^2+\left(v - N/2\right)^2}
+$$
+\medskip
+$$
+    H(u,v)=\frac{1}{1+ \left[D(u,v)/D_0\right]^{2n}}
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Фильтр низких частот Баттерворта}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.7\textheight]{fig18.pdf}
+    \caption*{Исходное изображение $688\times688$. \\ 
+              Результат фильтрации $n=2.25$, $D_0=10,30,60,160,460.$}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Идеальный фильтр высоких частот}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig19.pdf}
+\end{figure}
+$$
+    H_{\mathrm{HP}}(u,v) = 1 - H_{\mathrm{LP}}(u,v)
+$$
+\medskip
+$$
+    H(u, v) =
+    \begin{cases}
+        0\,, & D(u,v) < D_0\\
+        1\,, &  D(u,v) \geqslant D_0
+    \end{cases}
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Гауссовский фильтр высоких частот}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig20.pdf}
+\end{figure}
+$$
+    H_{\mathrm{HP}}(u,v) = 1 - H_{\mathrm{LP}}(u,v)
+$$
+\medskip
+$$
+    H(u, v) = 1 - e^{-D^2(u,v)/2D_0^2}
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Фильтр высоких частот Баттерворта}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig21.pdf}
+\end{figure}
+$$
+    H_{\mathrm{HP}}(u,v) = 1 - H_{\mathrm{LP}}(u,v)
+$$
+\medskip
+$$
+    H(u,v)=\frac{1}{1+ \left[D_0/D(u,v)\right]^{2n}}
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Пример фильтрации высоких частот}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig22.pdf}
+    \caption*{Исходное изображение}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig23.pdf}
+    \caption*{Идеальная, гауссовская и фильтрация Баттерворта}
+\end{figure}
+\end{frame}
+
+\end{document}
