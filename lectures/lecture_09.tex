@@ -44,7 +44,7 @@
     \begin{figure}
         \centering
         \includegraphics[height=0.3\textheight]{fig10.pdf}
-        \includegraphics[height=0.3\textheight]{fig11.pdf}
+        \includegraphics[height=0.25\textheight]{fig11.pdf}
     \end{figure}
     \begin{itemize}
         \item по соответствиям между 3D точками $\mathbf{X}_i$ и 2D точками $\mathbf{x}_i$ на изображении
@@ -233,6 +233,10 @@
     \item эта задача нелинейной оптимизации решается итеративными методами,
     такими, как алгоритм Гаусса-Ньютона, Левенберга-Марквардта, etc.
     \item начальное приближение для $K, R, \mathbf{t}$ можно найти из DLT оценки $P$
+    \item Perspective-n-Point (PnP): $K$ известно, ищем внешние параметры
+    $$
+        R, \mathbf{t} = \arg\min\sum_i \norm{\mathbf{x}_i-P\mathbf{X}_i}^2
+    $$
 \end{itemize}
 \end{frame}
 
