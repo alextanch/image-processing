@@ -509,12 +509,12 @@ $$
 \begin{frame}
 \frametitle{ColorJitter аугментация}
 \begin{itemize}
-    \item случайным образом выбрать коэффициенты $\alpha$, $\beta$, $\gamma$, $\delta$ из диапазона
+    \item случайным образом выбрать коэффициенты $\alpha$, $\beta$, $\gamma$, $\delta$ из диапазонов
     \begin{align*}
-        0 < \alpha_1 &< \alpha < \alpha_2 < 360 \\
-        0 < \beta_1 &< \beta < \beta_2 < 1 \\
-        0 < \gamma_1 &< \gamma < \gamma_2 < 1 \\
-        0 < \delta_1 &< \delta < \delta_2 < 1
+        \alpha &\in [\alpha_1, \alpha_2] \\
+        \beta &\in [\beta_1, \beta_2] \\
+        \gamma &\in [\gamma_1, \gamma_2] \\
+        \delta &\in [\delta_1, \delta_2]
     \end{align*}
     \item к изображению последовательно применить цветовые преобразования
     тона, насыщенности, контрастности и яркости
