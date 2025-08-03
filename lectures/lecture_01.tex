@@ -112,18 +112,19 @@ $$
     \centering
     \includegraphics[height=0.3\textheight]{digital_image.jpg}
 \end{figure}
-
-Цифровое изображение задается набором $K$ матриц (каналов) $M\times N$ 
-и числом бит $B$
-$$
-    \mathbf{F}=\left\{f_{k}(m,n)\right\},\quad
-    m=0,1,\ldots,M-1,\quad
-    n=0,1,\ldots,N-1,\quad
-    k=1,2,\ldots,K
-$$
-$$
-    f_{k}(m,n)\in\left\{0,1,\ldots,2^B-1\right\}
-$$
+\begin{itemize}
+    \item цифровое изображение $\mathbf{F}$ -- трехмерный массив (тензор) размера $M\times N\times K$
+    \item цифровое изображение задается набором $K$ матриц (каналов) $M\times N$
+    $$
+        \mathbf{F}=\left\{f_{k}(m,n)\right\},\quad
+        m=0,1,\ldots,M-1,\quad
+        n=0,1,\ldots,N-1,\quad
+        k=1,2,\ldots,K
+    $$
+    $$
+        f_{k}(m,n)\in\left\{0,1,\ldots,2^B-1\right\}
+    $$
+\end{itemize}
 \end{frame}
 
 
