@@ -48,9 +48,8 @@ $$
   f(m,n)\in\left\{0,1\right\}
 $$
 \begin{itemize}
-    \item Черно-белое изображение - это одноканальное однобитное изображение.
+    \item черно-белое изображение - это одноканальное однобитное изображение
     \item $0$ - черный цвет, $1$ - белый цвет
-    \item хорошо подходит для хранения масок
 \end{itemize}
 \end{frame}
 
@@ -66,15 +65,15 @@ $$
   f(m,n)\in\left\{0,1,\ldots,255\right\}
 $$
 \begin{itemize}
-    \item Полутоновое изображение - это одноканальное восьмибитное изображение.
-    \item При изменении значения пикселя $f(m,n)$ от 0 до 255, 
-    цвет меняется в градациях серого от черного к белому.
+    \item полутоновое изображение - это одноканальное восьмибитное изображение
+    \item при изменении значения пикселя $f(m,n)$ от 0 до 255, 
+    цвет меняется в градациях серого от черного к белому
 \end{itemize}
 \end{frame}
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{Цветное RGB изображение}
+\frametitle{RGB изображение}
 \begin{figure}
     \centering
     \includegraphics[height=0.3\textheight]{RGB_image.png}
@@ -85,8 +84,8 @@ $$
   k=1,2,3
 $$
 \begin{itemize}
-    \item Цветное RGB изображение - это трехканальное восьмибитное изображение.
-    \item Каналы $k=1,2,3$ соответствуют красному (R), зеленому (G) и синему (B) цвету.
+    \item RGB изображение -- трехканальное восьмибитное изображение
+    \item каналы $k=1,2,3$ соответствуют красному (R), зеленому (G) и синему (B) цвету
 \end{itemize}
 \end{frame}
 
@@ -202,7 +201,7 @@ $$
 \begin{itemize}
     \item \textbf{видимый свет} -- поток электромагнитных волн разных длин волн
     \item \textbf{монохромный свет} - свет состоящий из волн только одной длины волны
-    \item человек воспринимает длины волн $360\,\mbox{нм} < \lambda < 830\,\mbox{нм}$
+    \item человек воспринимает длины волн $360\,\mbox{нм}=\lambda_1 < \lambda < \lambda_2=830\,\mbox{нм}$
     \item человек отличает примерно $1000$ оттенков цветов и $20$ оттенков серого
 \end{itemize}
 \end{frame}
@@ -243,7 +242,8 @@ $$
 \frametitle{Эксперимент Райта и Гилда}
 \begin{figure}
     \centering
-    \includegraphics[height=0.45\textheight]{color_experiment.jpg}
+    \includegraphics[height=0.5\textheight]{color_experiment.jpg}
+    \includegraphics[height=0.3\textheight]{color_mix.png}
 \end{figure}
 Эксперимент Дэвида Райта и Джона Гилда в 1920-х годах:
 \begin{itemize}
@@ -258,7 +258,7 @@ $$
 \frametitle{Цветовая модель XYZ}
 \begin{figure}
     \centering
-    \includegraphics[height=0.3\textheight]{XYZ.png}
+    \includegraphics[height=0.4\textheight]{XYZ.png}
 \end{figure}
 В 1931 году разработана цветовая модель \textbf{XYZ}:
 \begin{itemize}
@@ -266,9 +266,9 @@ $$
     $x(\lambda)$, $y(\lambda)$, $z(\lambda)$
     \item координаты света со  спектральной плотностью $I(\lambda)$ равны
     $$
-        X = \int\limits_{360}^{830} {x}(\lambda)I(\lambda)\,d\lambda\,,\quad
-        Y = \int\limits_{360}^{830} {y}(\lambda)I(\lambda)\,d\lambda\,,\quad
-        Z = \int\limits_{360}^{830} {z}(\lambda)I(\lambda)\,d\lambda
+        X = \int\limits_{[\lambda_1,\lambda_2]} {x}(\lambda)I(\lambda)\,d\lambda\,,\quad
+        Y = \int\limits_{[\lambda_1,\lambda_2]} {y}(\lambda)I(\lambda)\,d\lambda\,,\quad
+        Z = \int\limits_{[\lambda_1,\lambda_2]} {z}(\lambda)I(\lambda)\,d\lambda
     $$
 \end{itemize}
 \end{frame}
@@ -316,7 +316,7 @@ $$
 \begin{itemize}
     \item \textbf{xроматическая диаграмма} -- множества хроматических координат $(x,y)$
     всех различаемых глазом человека цветов
-    \item дуга на диаграмме соответствует монохроматическим цветам $360\,\mbox{нм} < \lambda  < 830\,\mbox{нм}$
+    \item дуга на диаграмме соответствует монохроматическим цветам $\lambda_1 < \lambda  < \lambda_2$
     \item все цвета внутри любого треугольника можно представить в виде взвешенной суммы трех цветов в вершинах треугольника
 \end{itemize}
 \end{frame}
@@ -477,12 +477,12 @@ $$
     \includegraphics[height=0.4\textheight]{contrast_adjust.png}
 \end{figure}
 \begin{itemize}
-    \item найти яркость изображения $\mathbf{Y}$ и вычислить среднюю яркость $\bar{\mathbf{Y}}$
+    \item найти яркость изображения $\mathbf{Y}$ и вычислить среднюю яркость $\overline{\mathbf{Y}}$
     \item преобразовать цветовые плоскости \textbf{R}, \textbf{G} и \textbf{B} по формулам
     \begin{align*}
-      \mathbf{R} &= \gamma \cdot \mathbf{R} + (1-\gamma)\cdot\bar{\mathbf{Y}}\\
-      \mathbf{G} &= \gamma \cdot \mathbf{G} + (1-\gamma)\cdot\bar{\mathbf{Y}} \\
-      \mathbf{B} &= \gamma \cdot \mathbf{B} + (1-\gamma)\cdot\bar{\mathbf{Y}}
+      \mathbf{R} &= \gamma \cdot \mathbf{R} + (1-\gamma)\cdot\overline{\mathbf{Y}}\\
+      \mathbf{G} &= \gamma \cdot \mathbf{G} + (1-\gamma)\cdot\overline{\mathbf{Y}} \\
+      \mathbf{B} &= \gamma \cdot \mathbf{B} + (1-\gamma)\cdot\overline{\mathbf{Y}}
   \end{align*}
   где $0 < \gamma < 1$
 \end{itemize}
