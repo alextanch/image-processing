@@ -38,21 +38,6 @@
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{Примеры цифровых изображений}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.3\textheight]{galaxy.jpg}
-    \includegraphics[height=0.3\textheight]{thermography.jpg}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.3\textheight]{mri.jpg}
-    \includegraphics[height=0.3\textheight]{electron_microscopy.jpg}
-\end{figure}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
 \frametitle{Черно-белое (binary) изображение}
 \begin{figure}
     \centering
@@ -103,6 +88,21 @@ $$
     \item Цветное RGB изображение - это трехканальное восьмибитное изображение.
     \item Каналы $k=1,2,3$ соответствуют красному (R), зеленому (G) и синему (B) цвету.
 \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Примеры цифровых изображений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{galaxy.jpg}
+    \includegraphics[height=0.3\textheight]{thermography.jpg}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{mri.jpg}
+    \includegraphics[height=0.3\textheight]{electron_microscopy.jpg}
+\end{figure}
 \end{frame}
 
 %------------------------------------------------------------
@@ -426,7 +426,7 @@ $$
     Cr &= 0.713 \cdot (R - Y) + 0.5
 \end{align*}
 \begin{itemize}
-    \item $Y$ -- канал яркости
+    \item $Y$ -- канал яркости (Grayscale)
     \item $Cb$, $Cr$ -- цветовые каналы
 \end{itemize}
 \end{frame}
@@ -504,6 +504,22 @@ $$
 \end{itemize}
 \end{frame}
 
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{ColorJitter аугментация}
+\begin{itemize}
+    \item случайным образом выбрать коэффициенты $\alpha$, $\beta$, $\gamma$, $\delta$ из диапазона
+    \begin{align*}
+        0 < \alpha_1 &< \alpha < \alpha_2 < 360 \\
+        0 < \beta_1 &< \beta < \beta_2 < 1 \\
+        0 < \gamma_1 &< \gamma < \gamma_2 < 1 \\
+        0 < \delta_1 &< \delta < \delta_2 < 1
+    \end{align*}
+    \item к изображению последовательно применить цветовые преобразования
+    тона, насыщенности, контрастности и яркости
+    с параметрами $\alpha$, $\beta$, $\gamma$ и $\delta$
+\end{itemize}
+\end{frame}
 
 \end{document}
 
