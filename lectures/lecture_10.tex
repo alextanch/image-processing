@@ -1,0 +1,279 @@
+\documentclass[12pt,notheorems,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{amsmath,amsthm,thmtools,mathtext,cmap,multirow,tcolorbox} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\theoremstyle{definition} % Or \theoremstyle{plain}, \theoremstyle{remark}
+\newtheorem{result}{Результат}[section]
+
+\graphicspath{{./figs/10}}
+
+\title[Лекция 10]{Эпиполярная геометрия и фундаментальная матрица}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Постановка задачи}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{fig9.pdf}
+    \hspace{2cm}
+    \includegraphics[height=0.5\textheight]{fig8.pdf}
+\end{figure}
+Известны
+\begin{itemize}
+    \item внутренние параметры камер $K$, $K'$
+    \item соответствующие точки на изображениях $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$
+\end{itemize}
+Требуется
+\begin{itemize}
+    \item найти $(R,\textbf{t})$ -- положение одной камеры относительно другой 
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Эпиполярная геометрия}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig1.pdf}
+    \includegraphics[height=0.4\textheight]{fig2.pdf}
+\end{figure}
+\begin{itemize}
+    \item \textbf{baseline} -- отрезок, соединяющий центры камер $\boldsymbol{C}$, $\boldsymbol{C}'$
+    \item \textbf{epipole} -- точка пересечения baseline с плоскостью изображения
+    \item \textbf{epipolar plane} -- плоскость, содержащая $baseline$
+    \item \textbf{epipolar line} -- прямая пересечения эпиполярной плоскости с плоскостью изображения
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Эпиполярная геометрия}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig3.pdf}
+    \hspace{1cm}
+    \includegraphics[height=0.4\textheight]{fig4.pdf}
+\end{figure}
+\begin{itemize}
+    \item каждой точке $\mathbf{x}$ на левом изображении соответствует эпиполярная линия $\mathbf{l}'$ на правом
+    \item при изменении 3D точки $\mathbf{X}$, все эпиполярные линии на каждом изображении пересекаются в эпиполярных точках $\textbf{e}$, $\textbf{e}'$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Эпиполярная геометрия}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig5.pdf}
+    \hspace{0.5cm}
+    \includegraphics[height=0.35\textheight]{fig6.pdf}
+    \hspace{0.cm}
+    \includegraphics[height=0.35\textheight]{fig7.pdf}
+\end{figure}
+\begin{itemize}
+    \item точки на изображениях и соответствующие им эпиполярные линии
+    \item эпиполярные линии на каждом изображении пересекаются в эпиполярных точках
+    \item в примере эпиполярные точки лежат за границами изображений
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Фундаментальная матрица}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig11.pdf}
+\end{figure}
+\begin{itemize}
+    \item каждой точке $\mathbf{x}$ соответствует эпиполярная линия $\mathbf{l}'$
+    \item это отображение в однородных координатах задается \textbf{фундаментальной матрицей} $F\in\mathbf{R}^{3\times3}$
+    $$
+        \mathbf{l}'=F\cdot\mathbf{x}
+    $$ 
+    \item точка $\mathbf{x}'$, соответствующая точке $\mathbf{x}$, лежит на эпиполярной линии $\mathbf{l}'$
+    $$
+        \mathbf{x}\leftrightarrow\mathbf{x}'
+        \qquad\Leftrightarrow\qquad
+        \mathbf{x}'^{\,T}\cdot\mathbf{l}'=0
+        \qquad\Leftrightarrow\qquad
+        \mathbf{x}'^{\,T}F\mathbf{x}=0
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Фундаментальная матрица}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig11.pdf}
+\end{figure}
+\begin{itemize}
+    \item эпиполярная линия $\mathbf{l}'$ проходит через точки $\mathbf{e}'$, $\mathbf{x}'$
+    $$
+        \mathbf{l}'=\mathbf{e}'\times\mathbf{x}'=[\mathbf{e}']_\times\mathbf{x}'\,,\quad
+        [\mathbf{e}']_\times=\widehat{\mathbf{e}}'=
+        \begin{bmatrix*}[r]
+            0 & -e_3 & e_2\\
+            e_3 & 0 & -e_1\\
+            -e_2 & e_1 & 0
+        \end{bmatrix*}\,,\quad    
+    $$
+    \item точки $\mathbf{x}$, $\mathbf{x}'$, $\mathbf{X}$ и матрицы камер $P$, $P'$ удовлетворяют уравнениям
+    $$
+        P\cdot\mathbf{X}=\mathbf{x}\,,\qquad
+        P'\cdot\mathbf{X}=\mathbf{x}'
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Фундаментальная матрица}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig11.pdf}
+\end{figure}
+\begin{itemize}
+    \item пусть $P^+=\left(P^TP\right)^{-1}P^T$ -- псевдообратная матрица $P^+P=I$, тогда
+    $$
+        P\cdot\mathbf{X}=\mathbf{x}
+        \quad\Rightarrow\quad
+        \mathbf{X}=P^+\cdot\mathbf{x}
+        \quad\Rightarrow\quad
+        \mathbf{x}'=P'\cdot\mathbf{X}=P'P^+\cdot\mathbf{x}
+    $$
+    \item формула для фундаментальной матрицы
+    $$
+        \mathbf{l}'=[\mathbf{e}']_\times\mathbf{x}'=[\mathbf{e}']_\times P'P^+\cdot\mathbf{x}
+        \quad\Rightarrow\quad
+        F=[\mathbf{e}']_\times P'P^+
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Фундаментальная матрица}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig11.pdf}
+\end{figure}
+\begin{itemize}
+    \item в дальнейшем будем считать, что всемирная система координат совпадает
+          с системой координат левой камеры
+    $$
+        P=K\cdot[I\,|\,\mathbf{0}]\,,\qquad
+        P'=K'\cdot[R\,|\,\mathbf{t}]
+    $$
+    \item тогда, псевдообратная матрица
+    $$
+        P^+=\left(P^TP\right)^{-1}P^T=
+        \begin{bmatrix*}[c]
+            K^{-1}\\
+            \mathbf{0}^T
+        \end{bmatrix*}
+    $$
+    \item эпиполярные точки
+    $$
+        \mathbf{e}'=P'\cdot\mathbf{C}=
+        P'
+        \begin{bmatrix*}[c]
+            \mathbf{0}\\
+            1
+        \end{bmatrix*}=
+        K'\mathbf{t}\,,\quad
+        \mathbf{e}=P\cdot\mathbf{C}'=
+        P
+        \begin{bmatrix*}[c]
+            -R^T\mathbf{t}\\
+            1
+        \end{bmatrix*}=
+        KR^T\mathbf{t}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Фундаментальная матрица}
+    \begin{result}
+        Фундаментальная матрица $F$, 
+        для любых двух соответствующих точек на изображениях $\mathbf{x}\leftrightarrow\mathbf{x}'$
+        удовлетворяет уравнению
+        $$
+            \mathbf{x}'^{\,T}F\mathbf{x}=0
+        $$
+        Выражения для фундаментальной матрицы
+         \begin{align*}
+            F&=[\mathbf{e}']_\times P'P^+\\
+            &=[\mathbf{e}']_\times K'RK^{-1}=
+            K'^{-T}RK^T[\mathbf{e}]_\times\\
+            &=\left[K'\mathbf{t}\right]_\times K'RK^{-1}=
+            K'^{-T}RK^T\left[KR^T\mathbf{t}\right]_\times
+        \end{align*}
+    \end{result} 
+\end{frame} 
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Свойства фундаментальной матрицы}
+    \begin{itemize}
+        \item для любых соответствующих точек $\mathbf{x}\leftrightarrow\mathbf{x}'$
+        $$
+            \mathbf{x}'^{\,T}F\mathbf{x}=0
+            \qquad\Leftrightarrow\qquad
+            \mathbf{x}^{\,T}F^T\mathbf{x}'=0
+        $$
+        \item $F$ -- для $(P\,,P')\quad\Leftrightarrow\quad$ $F^T$ для $(P'\,,P)$
+        \item эпиполярные линии
+        $$
+            \mathbf{l}'=F\mathbf{x}\,,\qquad
+            \mathbf{l}=F^T\mathbf{x}'
+        $$
+        \item эпиполярные точки $\mathbf{e}$, $\mathbf{e}'$ удовлетворяют уравнениям
+        $$
+            F\mathbf{e}=\mathbf{0}\,,\qquad
+            F^T\mathbf{e}'=\mathbf{0}
+        $$
+        \item в случае $P=K\cdot[I\,|\,\mathbf{0}]$, $P'=K'\cdot[R\,|\,\mathbf{t}]$, фундаментальная матрица равна
+        $$
+            F=K'^{-T}RK^T\left[KR^T\mathbf{t}\right]_\times
+        $$
+        \item $\det(F)=0\quad\Rightarrow\quad\mathrm{rank}(F)=2\quad\Rightarrow\quad\mathrm{dot}(F)=7$
+    \end{itemize}
+\end{frame} 
+
+\end{document}
