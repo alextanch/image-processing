@@ -54,9 +54,9 @@
     \item внутренние параметры камер $K$, $K'$
     \item соответствующие точки на изображениях $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$
 \end{itemize}
-Требуется
+Требуется найти
 \begin{itemize}
-    \item найти $(R,\textbf{t})$ -- положение одной камеры относительно другой 
+    \item $(R,\textbf{t})$ -- положение одной камеры относительно другой 
 \end{itemize}
 \end{frame}
 
@@ -111,7 +111,7 @@
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{Фундаментальная матрица}
+\frametitle{Фундаментальная матрица (fundamental matrix)}
 \begin{figure}
     \centering
     \includegraphics[height=0.4\textheight]{fig11.pdf}
@@ -236,15 +236,16 @@
         $$
             \mathbf{x}'^{\,T}F\mathbf{x}=0
         $$
-        Выражения для фундаментальной матрицы
-         \begin{align*}
-            F&=[\mathbf{e}']_\times P'P^+\\
-            &=[\mathbf{e}']_\times K'RK^{-1}=
-            K'^{-T}RK^T[\mathbf{e}]_\times\\
-            &=\left[K'\mathbf{t}\right]_\times K'RK^{-1}=
-            K'^{-T}RK^T\left[KR^T\mathbf{t}\right]_\times
-        \end{align*}
+        \vspace{1mm}
     \end{result} 
+    Выражения для фундаментальной матрицы
+    \begin{align*}
+        F&=[\mathbf{e}']_\times P'P^+\\
+        &=[\mathbf{e}']_\times K'RK^{-1}=
+        K'^{-T}RK^T[\mathbf{e}]_\times\\
+        &=\left[K'\mathbf{t}\right]_\times K'RK^{-1}=
+        K'^{-T}RK^T\left[KR^T\mathbf{t}\right]_\times
+    \end{align*}
 \end{frame} 
 
 %------------------------------------------------------------
@@ -270,10 +271,199 @@
         $$
         \item в случае $P=K\cdot[I\,|\,\mathbf{0}]$, $P'=K'\cdot[R\,|\,\mathbf{t}]$, фундаментальная матрица равна
         $$
-            F=K'^{-T}RK^T\left[KR^T\mathbf{t}\right]_\times
+            F=\left[K'\mathbf{t}\right]_\times K'RK^{-1}
         $$
         \item $\det(F)=0\quad\Rightarrow\quad\mathrm{rank}(F)=2\quad\Rightarrow\quad\mathrm{dot}(F)=7$
     \end{itemize}
 \end{frame} 
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Существенная матрица (essential matrix)}
+    \begin{itemize}
+        \item \textbf{нормализованные координаты}
+        $$
+            \widehat{\mathbf{x}}=K^{-1}\mathbf{x}\,,\qquad
+            \widehat{\mathbf{x}}'=K^{'-1}\mathbf{x}'
+        $$
+        \item матрицы камер в нормализованных координатах
+        \begin{align*}
+            \mathbf{x}=P\mathbf{X}\,,\quad
+            P=K[I\,|\,\mathbf{0}]
+            \qquad&\Rightarrow\qquad
+            P=[I\,|\,\mathbf{0}]\,,\quad
+            \widehat{\mathbf{x}}=P\mathbf{X}\\
+            \mathbf{x}'=P'\mathbf{X}\,,\quad
+            P'=K'[R\,|\,\mathbf{t}]
+            \qquad&\Rightarrow\qquad
+            P'=[R\,|\,\mathbf{t}]\,,\quad
+            \widehat{\mathbf{x}}'=P'\mathbf{X}
+        \end{align*}
+        \item фундаментальная матрица в нормализованных координатах называется существенной
+        $$
+            \mathbf{x}'^{\,T}F\mathbf{x}=0
+            \qquad\Leftrightarrow\qquad
+            \widehat{\mathbf{x}}'E\widehat{\mathbf{x}}=0\,,\quad
+            E=K'^TFK
+        $$
+        \item в нормализованных координатах $K=K'=I$, $F=E$
+        $$
+            F=\left[K'\mathbf{t}\right]_\times K'RK^{-1}
+            \qquad\Rightarrow\qquad
+            E=\left[\mathbf{t}\right]_\times R
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Свойства существенной матрицы}
+$$
+    E=\left[\mathbf{t}\right]_\times R
+$$
+\begin{itemize}
+    \item $\mathrm{dot}(E)=5$
+    \item SVD разложение существенной матрицы
+    $$
+        \mathbf{R}^{3\times3}\ni E
+        \,\,\mbox{-- essential matrix}
+        \quad\Leftrightarrow\quad
+        E=U
+        \begin{bmatrix*}[c]
+            1 & 0 & 0\\
+            0 & 1 & 0\\
+            0 & 0 & 0
+        \end{bmatrix*}
+        V^T
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Относительное положение $(R,\mathbf{t})$ камер из $E$}
+В нормализованных координатах
+$$
+    P=[I\,|\,\mathbf{0}]\,,\qquad
+    P'=[R\,|\,\mathbf{t}]
+$$
+\begin{result}
+    Для существенной матрицы $E=U\mathrm{diag(1,1,0)V^T}$ возможны четыре решения
+    $$
+        R=UWV^T\,\,\mbox{или}\,\,UW^TV^T\,,\qquad
+        \mathbf{t}=\pm\mathbf{u}_3
+    $$
+    где
+    $$
+        W=
+        \begin{bmatrix*}[c]
+            0 & -1 & 0\\
+            1 & 0 & 0\\
+            0 & 0 & 1
+        \end{bmatrix*}
+        \,,\quad
+        \mathbf{u}_3
+        \,\,\mbox{-- третий столбец}\,\,
+        U
+        \quad\Rightarrow\quad
+        \norm{\mathbf{t}}=\norm{\pm\mathbf{u}_3}=1
+    $$
+    \textbf{Вывод}: зная $E$, можно найти относительное положение камер $(R,\mathbf{t})$ 
+    с точностью до величины сдвига
+\end{result}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Геометрическая интерпретация четырех решений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.6\textheight]{fig12.pdf}
+    \hspace{2cm}
+    \includegraphics[height=0.6\textheight]{fig9.pdf}
+\end{figure}
+Нужно выбрать то решение, для которого одна
+3D точка $\mathbf{X}$ будет находиться перед обеими камерами.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод нахождения относительного положения камер}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig8.pdf}
+    \hspace{2cm}
+    \includegraphics[height=0.4\textheight]{fig1.pdf}
+\end{figure}
+\begin{itemize}
+    \item вычислить фундаментальную матрицу $F$ по соответствиям $\mathbf{x}_i\leftrightarrow\mathbf{x}_i'$
+    \item по фундаментальной матрице найти существенную $E=K^{'\,T}FK$
+    \item из существенной матрицы $E$ найти относительное положение камер $(R,\mathbf{t})$
+    с точностью до длины вектора смещения центра камер $\mathbf{t}$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{DLT вычисление фундаментальной матрицы}
+\begin{itemize}
+    \item для каждой пары $\mathbf{x}\leftrightarrow\mathbf{x}'$ соответствующих точек на изображениях
+    $$
+        \mathbf{x}^{'\,T}F\mathbf{x}=0
+        \qquad\Leftrightarrow\qquad
+        (x',y',1)
+        \begin{bmatrix*}[c]
+            f_{11} & f_{12} & f_{13}\\
+            f_{21} & f_{22} & f_{23}\\
+            f_{31} & f_{32} & f_{33}
+        \end{bmatrix*}
+        \begin{bmatrix*}[c]
+            x\\ y\\1
+        \end{bmatrix*}
+        =0
+    $$
+    \item для $n\geqslant 8$ соответствий $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$, $i=1,2,\ldots,n$
+    $$
+        A\mathbf{f}=
+        \begin{bmatrix*}[c]
+            x'_1x_1 & x'_1y_1 & x'_1 & y'_1y_1 & y'_1 & x_1 & y_1 & 1\\
+            \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
+            x'_nx_n & x'_ny_n & x'_n & y'_ny_n & y'_n & x_n & y_n & 1
+        \end{bmatrix*}
+        \mathbf{f}
+        =0
+    $$
+    где 
+    $$
+        \mathbf{f}=(f_{11},f_{12},f_{13},f_{21},f_{22},f_{23},f_{31},f_{32},f_{33})^T
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{DLT вычисление фундаментальной матрицы}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig13.pdf}
+\end{figure}
+\begin{itemize}
+    \item если соответствующие точки $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$ заданы точно, то $\mathrm{rank}(A)=8$
+          и $\mathbf{f}$ находится с точностью до множителя
+    \item как правило, координаты точек заданы с погрешностями и в этом случае
+    $$
+        \mathbf{f}=\mathrm{arg}\min_{\norm{\mathbf{f}}=1}\norm{A\mathbf{f}}
+        \quad\Rightarrow\quad
+        \mathbf{f}\,\,\mbox{-- последний столбец}\,\, V\quad
+        \left(A=UDV^T\right)
+    $$
+    \item необходимо удовлетворить условию $\mathrm{rank}(F)=8$
+    $$
+        F=U\mathrm{diag}(r,s,t)V^T
+        \qquad\mapsto\qquad
+        F=U\mathrm{diag}(r,s,0)V^T
+    $$
+\end{itemize}
+\end{frame}
 
 \end{document}
