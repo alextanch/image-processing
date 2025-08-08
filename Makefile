@@ -11,7 +11,9 @@ clean:
 	find . -name '*.fls' -exec rm -fr {} +
 	find . -name '*.aux' -exec rm -fr {} +
 	find . -name '*.vrb' -exec rm -fr {} +
+	find . -name '*.thm' -exec rm -fr {} +
 	find . -name '*.fdb_latexmk' -exec rm -fr {} +
+	find . -name '.ipynb_checkpoints' -exec rm -fr {} +
 	rm -rf lectures/_minted
-	
+
 	

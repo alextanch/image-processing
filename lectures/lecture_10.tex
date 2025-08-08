@@ -341,7 +341,7 @@ $$
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{Относительное положение $(R,\mathbf{t})$ камер из $E$}
+\frametitle{Вычисление относительного положения камер}
 В нормализованных координатах
 $$
     P=[I\,|\,\mathbf{0}]\,,\qquad
@@ -351,7 +351,7 @@ $$
     Для существенной матрицы $E=U\mathrm{diag(1,1,0)V^T}$ возможны четыре решения
     $$
         R=UWV^T\,\,\mbox{или}\,\,UW^TV^T\,,\qquad
-        \mathbf{t}=\pm\mathbf{u}_3
+        \mathbf{t}=+\mathbf{u}_3\,\,\mbox{или}\,\,-\mathbf{u}_3
     $$
     где
     $$
@@ -368,7 +368,7 @@ $$
         \quad\Rightarrow\quad
         \norm{\mathbf{t}}=\norm{\pm\mathbf{u}_3}=1
     $$
-    \textbf{Вывод}: зная $E$, можно найти относительное положение камер $(R,\mathbf{t})$ 
+    \textbf{Вывод}: зная $E$, можно найти относительное положение правой камеры относительно левой 
     с точностью до величины сдвига
 \end{result}
 \end{frame}
@@ -405,7 +405,7 @@ $$
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{DLT вычисление фундаментальной матрицы}
+\frametitle{Линейная оценка фундаментальной матрицы}
 \begin{itemize}
     \item для каждой пары $\mathbf{x}\leftrightarrow\mathbf{x}'$ соответствующих точек на изображениях
     $$
@@ -422,13 +422,13 @@ $$
         \end{bmatrix*}
         =0
     $$
-    \item для $n\geqslant 8$ соответствий $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$, $i=1,2,\ldots,n$
+    \item для $n\geqslant 8$ соответствий $\mathbf{x}_i=(x_i,y_i,1)\leftrightarrow(x'_i,y'_i,1)=\mathbf{x}'_i$, $i=1,2,\ldots,n$
     $$
         A\mathbf{f}=
         \begin{bmatrix*}[c]
-            x'_1x_1 & x'_1y_1 & x'_1 & y'_1y_1 & y'_1 & x_1 & y_1 & 1\\
-            \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
-            x'_nx_n & x'_ny_n & x'_n & y'_ny_n & y'_n & x_n & y_n & 1
+            x'_1x_1 & x'_1y_1 & x'_1 & y'_1x_1 & y'_1y_1 & y'_1 & x_1 & y_1 & 1\\
+            \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
+            x'_nx_n & x'_ny_n & x'_n & y'_ny_n & y'_nx_n & y'_n & x_n & y_n & 1
         \end{bmatrix*}
         \mathbf{f}
         =0
@@ -442,7 +442,7 @@ $$
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{DLT вычисление фундаментальной матрицы}
+\frametitle{Линейная оценка фундаментальной матрицы}
 \begin{figure}
     \centering
     \includegraphics[height=0.3\textheight]{fig13.pdf}
@@ -464,6 +464,35 @@ $$
         F=U\mathrm{diag}(r,s,0)V^T
     $$
 \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Нелинейная оценка фундаментальной матрицы}
+Если предположить, что измеренные точки $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$
+отличаются от истинных точек $\widehat{\mathbf{x}}_i\leftrightarrow\widehat{\mathbf{x}}'_i$ на величину гауссовского шума
+$$
+    \mathbf{x}_i=\widehat{\mathbf{x}}_i+\varepsilon_i\,,\quad
+    \mathbf{x}'_i=\widehat{\mathbf{x}}'_i+\varepsilon'_i\,,\qquad
+    \varepsilon_i\,,\varepsilon'_i\sim\mathcal{N}(0, \sigma_i^2)
+$$
+то оценка фундаментальной матрицы получается методом максимального правдоподобия и сводиться к минимизации
+ошибки репроекции
+$$
+    \widehat{\mathbf{x}}_i\,,\,
+    \widehat{\mathbf{x}}'_i\,,\,
+    F:\qquad
+    \mathrm{arg}\min\sum_i
+    d\left(\mathbf{x}_i,\widehat{\mathbf{x}}_i\right)+
+    d\left(\mathbf{x}'_i,\widehat{\mathbf{x}}'_i\right)
+    \quad\mbox{при условии}\quad
+    \widehat{\mathbf{x}}^{'T}_iF\widehat{\mathbf{x}}_i=0
+$$
+Эта нелинейная задача решается итерационными методами (Гаусс-Ньютон, Левенберг-Марквард, etc.).
+\vspace{0.5cm}
+
+В качестве начального приближения используется линейна оценка $F$ и метод триангуляции для 
+$\widehat{\mathbf{x}}_i$, $\widehat{\mathbf{x}}'_i$.
 \end{frame}
 
 \end{document}
