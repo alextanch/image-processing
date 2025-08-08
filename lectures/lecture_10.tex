@@ -1,0 +1,498 @@
+\documentclass[12pt,notheorems,usepdftitle=false,aspectratio=1610]{beamer}
+
+\usetheme{Boadilla}
+%\usetheme{Madrid}
+%\usecolortheme{seahorse}
+
+\setbeamertemplate{navigation symbols}{}
+
+%\usefonttheme[onlymath]{serif}
+\usefonttheme[]{serif}
+%\useinnertheme{circles}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{amsmath,amsthm,thmtools,mathtext,cmap,multirow,tcolorbox} 				
+\usepackage{graphicx,wrapfig,subfig,mathtools,gensymb}
+\usepackage[font=small,labelfont=bf]{caption}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\theoremstyle{definition} % Or \theoremstyle{plain}, \theoremstyle{remark}
+\newtheorem{result}{Результат}[section]
+
+\graphicspath{{./figs/10}}
+
+\title[Лекция 10]{Эпиполярная геометрия и фундаментальная матрица}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Постановка задачи}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{fig9.pdf}
+    \hspace{2cm}
+    \includegraphics[height=0.5\textheight]{fig8.pdf}
+\end{figure}
+Известны
+\begin{itemize}
+    \item внутренние параметры камер $K$, $K'$
+    \item соответствующие точки на изображениях $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$
+\end{itemize}
+Требуется найти
+\begin{itemize}
+    \item $(R,\textbf{t})$ -- положение одной камеры относительно другой 
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Эпиполярная геометрия}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig1.pdf}
+    \includegraphics[height=0.4\textheight]{fig2.pdf}
+\end{figure}
+\begin{itemize}
+    \item \textbf{baseline} -- отрезок, соединяющий центры камер $\boldsymbol{C}$, $\boldsymbol{C}'$
+    \item \textbf{epipole} -- точка пересечения baseline с плоскостью изображения
+    \item \textbf{epipolar plane} -- плоскость, содержащая $baseline$
+    \item \textbf{epipolar line} -- прямая пересечения эпиполярной плоскости с плоскостью изображения
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Эпиполярная геометрия}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig3.pdf}
+    \hspace{1cm}
+    \includegraphics[height=0.4\textheight]{fig4.pdf}
+\end{figure}
+\begin{itemize}
+    \item каждой точке $\mathbf{x}$ на левом изображении соответствует эпиполярная линия $\mathbf{l}'$ на правом
+    \item при изменении 3D точки $\mathbf{X}$, все эпиполярные линии на каждом изображении пересекаются в эпиполярных точках $\textbf{e}$, $\textbf{e}'$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Эпиполярная геометрия}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig5.pdf}
+    \hspace{0.5cm}
+    \includegraphics[height=0.35\textheight]{fig6.pdf}
+    \hspace{0.cm}
+    \includegraphics[height=0.35\textheight]{fig7.pdf}
+\end{figure}
+\begin{itemize}
+    \item точки на изображениях и соответствующие им эпиполярные линии
+    \item эпиполярные линии на каждом изображении пересекаются в эпиполярных точках
+    \item в примере эпиполярные точки лежат за границами изображений
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Фундаментальная матрица (fundamental matrix)}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig11.pdf}
+\end{figure}
+\begin{itemize}
+    \item каждой точке $\mathbf{x}$ соответствует эпиполярная линия $\mathbf{l}'$
+    \item это отображение в однородных координатах задается \textbf{фундаментальной матрицей} $F\in\mathbf{R}^{3\times3}$
+    $$
+        \mathbf{l}'=F\cdot\mathbf{x}
+    $$ 
+    \item точка $\mathbf{x}'$, соответствующая точке $\mathbf{x}$, лежит на эпиполярной линии $\mathbf{l}'$
+    $$
+        \mathbf{x}\leftrightarrow\mathbf{x}'
+        \qquad\Leftrightarrow\qquad
+        \mathbf{x}'^{\,T}\cdot\mathbf{l}'=0
+        \qquad\Leftrightarrow\qquad
+        \mathbf{x}'^{\,T}F\mathbf{x}=0
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Фундаментальная матрица}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig11.pdf}
+\end{figure}
+\begin{itemize}
+    \item эпиполярная линия $\mathbf{l}'$ проходит через точки $\mathbf{e}'$, $\mathbf{x}'$
+    $$
+        \mathbf{l}'=\mathbf{e}'\times\mathbf{x}'=[\mathbf{e}']_\times\mathbf{x}'\,,\quad
+        [\mathbf{e}']_\times=\widehat{\mathbf{e}}'=
+        \begin{bmatrix*}[r]
+            0 & -e_3 & e_2\\
+            e_3 & 0 & -e_1\\
+            -e_2 & e_1 & 0
+        \end{bmatrix*}\,,\quad    
+    $$
+    \item точки $\mathbf{x}$, $\mathbf{x}'$, $\mathbf{X}$ и матрицы камер $P$, $P'$ удовлетворяют уравнениям
+    $$
+        P\cdot\mathbf{X}=\mathbf{x}\,,\qquad
+        P'\cdot\mathbf{X}=\mathbf{x}'
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Фундаментальная матрица}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{fig11.pdf}
+\end{figure}
+\begin{itemize}
+    \item пусть $P^+=\left(P^TP\right)^{-1}P^T$ -- псевдообратная матрица $P^+P=I$, тогда
+    $$
+        P\cdot\mathbf{X}=\mathbf{x}
+        \quad\Rightarrow\quad
+        \mathbf{X}=P^+\cdot\mathbf{x}
+        \quad\Rightarrow\quad
+        \mathbf{x}'=P'\cdot\mathbf{X}=P'P^+\cdot\mathbf{x}
+    $$
+    \item формула для фундаментальной матрицы
+    $$
+        \mathbf{l}'=[\mathbf{e}']_\times\mathbf{x}'=[\mathbf{e}']_\times P'P^+\cdot\mathbf{x}
+        \quad\Rightarrow\quad
+        F=[\mathbf{e}']_\times P'P^+
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Фундаментальная матрица}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig11.pdf}
+\end{figure}
+\begin{itemize}
+    \item в дальнейшем будем считать, что всемирная система координат совпадает
+          с системой координат левой камеры
+    $$
+        P=K\cdot[I\,|\,\mathbf{0}]\,,\qquad
+        P'=K'\cdot[R\,|\,\mathbf{t}]
+    $$
+    \item тогда, псевдообратная матрица
+    $$
+        P^+=\left(P^TP\right)^{-1}P^T=
+        \begin{bmatrix*}[c]
+            K^{-1}\\
+            \mathbf{0}^T
+        \end{bmatrix*}
+    $$
+    \item эпиполярные точки
+    $$
+        \mathbf{e}'=P'\cdot\mathbf{C}=
+        P'
+        \begin{bmatrix*}[c]
+            \mathbf{0}\\
+            1
+        \end{bmatrix*}=
+        K'\mathbf{t}\,,\quad
+        \mathbf{e}=P\cdot\mathbf{C}'=
+        P
+        \begin{bmatrix*}[c]
+            -R^T\mathbf{t}\\
+            1
+        \end{bmatrix*}=
+        KR^T\mathbf{t}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Фундаментальная матрица}
+    \begin{result}
+        Фундаментальная матрица $F$, 
+        для любых двух соответствующих точек на изображениях $\mathbf{x}\leftrightarrow\mathbf{x}'$
+        удовлетворяет уравнению
+        $$
+            \mathbf{x}'^{\,T}F\mathbf{x}=0
+        $$
+        \vspace{1mm}
+    \end{result} 
+    Выражения для фундаментальной матрицы
+    \begin{align*}
+        F&=[\mathbf{e}']_\times P'P^+\\
+        &=[\mathbf{e}']_\times K'RK^{-1}=
+        K'^{-T}RK^T[\mathbf{e}]_\times\\
+        &=\left[K'\mathbf{t}\right]_\times K'RK^{-1}=
+        K'^{-T}RK^T\left[KR^T\mathbf{t}\right]_\times
+    \end{align*}
+\end{frame} 
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Свойства фундаментальной матрицы}
+    \begin{itemize}
+        \item для любых соответствующих точек $\mathbf{x}\leftrightarrow\mathbf{x}'$
+        $$
+            \mathbf{x}'^{\,T}F\mathbf{x}=0
+            \qquad\Leftrightarrow\qquad
+            \mathbf{x}^{\,T}F^T\mathbf{x}'=0
+        $$
+        \item $F$ -- для $(P\,,P')\quad\Leftrightarrow\quad$ $F^T$ для $(P'\,,P)$
+        \item эпиполярные линии
+        $$
+            \mathbf{l}'=F\mathbf{x}\,,\qquad
+            \mathbf{l}=F^T\mathbf{x}'
+        $$
+        \item эпиполярные точки $\mathbf{e}$, $\mathbf{e}'$ удовлетворяют уравнениям
+        $$
+            F\mathbf{e}=\mathbf{0}\,,\qquad
+            F^T\mathbf{e}'=\mathbf{0}
+        $$
+        \item в случае $P=K\cdot[I\,|\,\mathbf{0}]$, $P'=K'\cdot[R\,|\,\mathbf{t}]$, фундаментальная матрица равна
+        $$
+            F=\left[K'\mathbf{t}\right]_\times K'RK^{-1}
+        $$
+        \item $\det(F)=0\quad\Rightarrow\quad\mathrm{rank}(F)=2\quad\Rightarrow\quad\mathrm{dot}(F)=7$
+    \end{itemize}
+\end{frame} 
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Существенная матрица (essential matrix)}
+    \begin{itemize}
+        \item \textbf{нормализованные координаты}
+        $$
+            \widehat{\mathbf{x}}=K^{-1}\mathbf{x}\,,\qquad
+            \widehat{\mathbf{x}}'=K^{'-1}\mathbf{x}'
+        $$
+        \item матрицы камер в нормализованных координатах
+        \begin{align*}
+            \mathbf{x}=P\mathbf{X}\,,\quad
+            P=K[I\,|\,\mathbf{0}]
+            \qquad&\Rightarrow\qquad
+            P=[I\,|\,\mathbf{0}]\,,\quad
+            \widehat{\mathbf{x}}=P\mathbf{X}\\
+            \mathbf{x}'=P'\mathbf{X}\,,\quad
+            P'=K'[R\,|\,\mathbf{t}]
+            \qquad&\Rightarrow\qquad
+            P'=[R\,|\,\mathbf{t}]\,,\quad
+            \widehat{\mathbf{x}}'=P'\mathbf{X}
+        \end{align*}
+        \item фундаментальная матрица в нормализованных координатах называется существенной
+        $$
+            \mathbf{x}'^{\,T}F\mathbf{x}=0
+            \qquad\Leftrightarrow\qquad
+            \widehat{\mathbf{x}}'E\widehat{\mathbf{x}}=0\,,\quad
+            E=K'^TFK
+        $$
+        \item в нормализованных координатах $K=K'=I$, $F=E$
+        $$
+            F=\left[K'\mathbf{t}\right]_\times K'RK^{-1}
+            \qquad\Rightarrow\qquad
+            E=\left[\mathbf{t}\right]_\times R
+        $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Свойства существенной матрицы}
+$$
+    E=\left[\mathbf{t}\right]_\times R
+$$
+\begin{itemize}
+    \item $\mathrm{dot}(E)=5$
+    \item SVD разложение существенной матрицы
+    $$
+        \mathbf{R}^{3\times3}\ni E
+        \,\,\mbox{-- essential matrix}
+        \quad\Leftrightarrow\quad
+        E=U
+        \begin{bmatrix*}[c]
+            1 & 0 & 0\\
+            0 & 1 & 0\\
+            0 & 0 & 0
+        \end{bmatrix*}
+        V^T
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Вычисление относительного положения камер}
+В нормализованных координатах
+$$
+    P=[I\,|\,\mathbf{0}]\,,\qquad
+    P'=[R\,|\,\mathbf{t}]
+$$
+\begin{result}
+    Для существенной матрицы $E=U\mathrm{diag(1,1,0)V^T}$ возможны четыре решения
+    $$
+        R=UWV^T\,\,\mbox{или}\,\,UW^TV^T\,,\qquad
+        \mathbf{t}=+\mathbf{u}_3\,\,\mbox{или}\,\,-\mathbf{u}_3
+    $$
+    где
+    $$
+        W=
+        \begin{bmatrix*}[c]
+            0 & -1 & 0\\
+            1 & 0 & 0\\
+            0 & 0 & 1
+        \end{bmatrix*}
+        \,,\quad
+        \mathbf{u}_3
+        \,\,\mbox{-- третий столбец}\,\,
+        U
+        \quad\Rightarrow\quad
+        \norm{\mathbf{t}}=\norm{\pm\mathbf{u}_3}=1
+    $$
+    \textbf{Вывод}: зная $E$, можно найти относительное положение правой камеры относительно левой 
+    с точностью до величины сдвига
+\end{result}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Геометрическая интерпретация четырех решений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.6\textheight]{fig12.pdf}
+    \hspace{2cm}
+    \includegraphics[height=0.6\textheight]{fig9.pdf}
+\end{figure}
+Нужно выбрать то решение, для которого одна
+3D точка $\mathbf{X}$ будет находиться перед обеими камерами.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод нахождения относительного положения камер}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{fig8.pdf}
+    \hspace{2cm}
+    \includegraphics[height=0.4\textheight]{fig1.pdf}
+\end{figure}
+\begin{itemize}
+    \item вычислить фундаментальную матрицу $F$ по соответствиям $\mathbf{x}_i\leftrightarrow\mathbf{x}_i'$
+    \item по фундаментальной матрице найти существенную $E=K^{'\,T}FK$
+    \item из существенной матрицы $E$ найти относительное положение камер $(R,\mathbf{t})$
+    с точностью до длины вектора смещения центра камер $\mathbf{t}$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Линейная оценка фундаментальной матрицы}
+\begin{itemize}
+    \item для каждой пары $\mathbf{x}\leftrightarrow\mathbf{x}'$ соответствующих точек на изображениях
+    $$
+        \mathbf{x}^{'\,T}F\mathbf{x}=0
+        \qquad\Leftrightarrow\qquad
+        (x',y',1)
+        \begin{bmatrix*}[c]
+            f_{11} & f_{12} & f_{13}\\
+            f_{21} & f_{22} & f_{23}\\
+            f_{31} & f_{32} & f_{33}
+        \end{bmatrix*}
+        \begin{bmatrix*}[c]
+            x\\ y\\1
+        \end{bmatrix*}
+        =0
+    $$
+    \item для $n\geqslant 8$ соответствий $\mathbf{x}_i=(x_i,y_i,1)\leftrightarrow(x'_i,y'_i,1)=\mathbf{x}'_i$, $i=1,2,\ldots,n$
+    $$
+        A\mathbf{f}=
+        \begin{bmatrix*}[c]
+            x'_1x_1 & x'_1y_1 & x'_1 & y'_1x_1 & y'_1y_1 & y'_1 & x_1 & y_1 & 1\\
+            \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
+            x'_nx_n & x'_ny_n & x'_n & y'_ny_n & y'_nx_n & y'_n & x_n & y_n & 1
+        \end{bmatrix*}
+        \mathbf{f}
+        =0
+    $$
+    где 
+    $$
+        \mathbf{f}=(f_{11},f_{12},f_{13},f_{21},f_{22},f_{23},f_{31},f_{32},f_{33})^T
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Линейная оценка фундаментальной матрицы}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{fig13.pdf}
+\end{figure}
+\begin{itemize}
+    \item если соответствующие точки $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$ заданы точно, то $\mathrm{rank}(A)=8$
+          и $\mathbf{f}$ находится с точностью до множителя
+    \item как правило, координаты точек заданы с погрешностями и в этом случае
+    $$
+        \mathbf{f}=\mathrm{arg}\min_{\norm{\mathbf{f}}=1}\norm{A\mathbf{f}}
+        \quad\Rightarrow\quad
+        \mathbf{f}\,\,\mbox{-- последний столбец}\,\, V\quad
+        \left(A=UDV^T\right)
+    $$
+    \item необходимо удовлетворить условию $\mathrm{rank}(F)=8$
+    $$
+        F=U\mathrm{diag}(r,s,t)V^T
+        \qquad\mapsto\qquad
+        F=U\mathrm{diag}(r,s,0)V^T
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Нелинейная оценка фундаментальной матрицы}
+Если предположить, что измеренные точки $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$
+отличаются от истинных точек $\widehat{\mathbf{x}}_i\leftrightarrow\widehat{\mathbf{x}}'_i$ на величину гауссовского шума
+$$
+    \mathbf{x}_i=\widehat{\mathbf{x}}_i+\varepsilon_i\,,\quad
+    \mathbf{x}'_i=\widehat{\mathbf{x}}'_i+\varepsilon'_i\,,\qquad
+    \varepsilon_i\,,\varepsilon'_i\sim\mathcal{N}(0, \sigma_i^2)
+$$
+то оценка фундаментальной матрицы получается методом максимального правдоподобия и сводиться к минимизации
+ошибки репроекции
+$$
+    \widehat{\mathbf{x}}_i\,,\,
+    \widehat{\mathbf{x}}'_i\,,\,
+    F:\qquad
+    \mathrm{arg}\min\sum_i
+    d\left(\mathbf{x}_i,\widehat{\mathbf{x}}_i\right)+
+    d\left(\mathbf{x}'_i,\widehat{\mathbf{x}}'_i\right)
+    \quad\mbox{при условии}\quad
+    \widehat{\mathbf{x}}^{'T}_iF\widehat{\mathbf{x}}_i=0
+$$
+Эта нелинейная задача решается итерационными методами (Гаусс-Ньютон, Левенберг-Марквард, etc.).
+\vspace{0.5cm}
+
+В качестве начального приближения используется линейна оценка $F$ и метод триангуляции для 
+$\widehat{\mathbf{x}}_i$, $\widehat{\mathbf{x}}'_i$.
+\end{frame}
+
+\end{document}

@@ -17,4 +17,5 @@ presentations/
 *.fls
 *.aux
 *.vrb
+*.thm
 *.fdb_latexmk
