@@ -428,40 +428,4 @@ $$
     \end{itemize}
 \end{frame}
 
-%---------------------------------------------------------------------
-\begin{frame}
-    \frametitle{Выделение границ с помощью фильтра Собеля}
-    \begin{center}
-        \includegraphics[width=0.15\textwidth]{gradient1.pdf}
-    \end{center}
-    Градиент функции
-    $$
-        \nabla f(x,y) = [f'_x(x,y), f'_y(x,y)]
-    $$
-    Модуль градиента изображения $M(x,y)=\sqrt{(f'_x)^2+(f'_y)^2}$
-    $$
-        f'_x \approx (z_7+2z_8+z_9)-(z_1+2z_2+z_3)\,,\quad 
-        f'_y \approx (z_3+2z_6+z_9)-(z_1+2z_4+z_7)
-    $$
-    \begin{figure}[t]%
-        \centering
-        \includegraphics[width=0.15\textwidth]{gradient2.pdf}
-        \quad
-        \includegraphics[width=0.3\textwidth]{gradient3.pdf}
-    \end{figure}
-\end{frame}
-
-%---------------------------------------------------------------------
-\begin{frame}
-    \frametitle{Пример выделения границы фильтром Собеля}
-    \begin{center}
-        \includegraphics[width=0.6\textwidth]{gradient4.pdf}
-    \end{center}
-    \begin{itemize}
-        \item чтобы уменьшить влияние шума, исходное изображение надо сгладить
-        \item оптическое изображение контактной линзы
-        \item градиент, полученный с помощью ядер Собела
-    \end{itemize}
-\end{frame}
-
 \end{document}
