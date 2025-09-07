@@ -1,0 +1,14 @@
+.vscode
+.ipynb_checkpoints
+.DS_Store
+__pycache__
+.ruff_cache
+*.egg-info
+
+data.zip
+
+/build
+/saves
+/output
+/solutions
+/lectures/latex
