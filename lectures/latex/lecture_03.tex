@@ -1,0 +1,351 @@
+\documentclass[
+    12pt, 
+    usepdftitle=false,
+    aspectratio=1610
+]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb
+}
+\usepackage[font=small,labelfont=bf]{caption}
+
+\graphicspath{{./figs/03}}
+
+\title[Лекция 3]{Методы улучшения качества изображений}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача улучшения контрастности изображений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{low_contrast.png}
+    \captionof*{figure}{Не контрастное vs. контрастное изображения}
+\end{figure}
+\begin{itemize}
+    \item эквализация гистограммы изображения
+    \item алгоритм CLAHE
+\end{itemize}
+\vspace{0.3cm}
+\end{frame}
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Гистограмма изображения}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{hist_1.png}
+\end{figure}
+$\mathbf{A}$ -- одноканальное, восьмибитное изображение размера $H\times W$
+    $$
+        \mathbf{A}=\left\{a_{ij}\right\},\quad
+        0\leqslant a_{ij}<L=256
+    $$
+    нормализованная гистограмма изображения
+    $$
+        p_k=\frac{n_k}{H\cdot W},\qquad
+        k=0,1,\ldots L-1
+    $$
+    $n_k$ -- число пикселей изображения, имеющих яркость $k$
+    $$
+        p_k = \mathbf{P}[a_{ij}=k]\qquad
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Примеры гистограмм}
+    \begin{figure}[t]
+        \includegraphics[width=0.9\textwidth]{histogram.pdf}
+    \end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Эквализация гистограммы изображения}
+\begin{itemize}
+        \item если у непрерывной случайной величины $X$ плотность распределения $p(x)$
+        \item функция распределения
+        $$
+            y=F(x)=\int\limits_{-\infty}^xp(t)\,dt
+        $$
+        \item то случайная величина $Y=F\left(X\right)$ будет иметь равномерное распределение
+        \item выравнивание гистограммы происходит по аналогичной формуле
+        $$
+            F_k=\sum_{i=0}^k p_i\qquad
+            k=0,1,2,\ldots,L-1
+        $$
+        $$
+            0\leqslant F_k \leqslant 1
+        $$
+        $$
+            k\quad\mapsto\quad
+            \left\lceil(L-1)\cdot F_k\right\rceil
+        $$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Пример эквализации гистограммы}
+    \begin{center}
+    \begin{tabular}{ |c|p{1cm}|c|c|c|  }
+        \hline
+        \multicolumn{5}{|c|}{\textbf{Трехбитовое изображение $L=8$, $64\times64$ пикселя}} \\
+        \hline
+        $k$ & $n_k$ & $p_k=n_k/64^2$ & $F_k=\sum_{i=0}^k p_i$ & $k\mapsto\lceil(L-1)\cdot F_k\rceil$\\
+        \hline
+        \hline
+        0 & 790  & 0.19 & 0.19 & $0\mapsto1$\\
+        1 & 1023 & 0.25 & 0.44 & $1\mapsto3$\\
+        2 & 850  & 0.21 & 0.65 & $2\mapsto5$\\
+        3 & 656  & 0.16 & 0.81 & $3\mapsto6$\\
+        4 & 329  & 0.08 & 0.89 & $4\mapsto7$\\
+        5 & 245  & 0.06 & 0.95 & $5\mapsto7$\\
+        6 & 122  & 0.03 & 0.98 & $6\mapsto7$\\
+        7 & 81   & 0.02 & 1.0  & $7\mapsto7$\\
+        \hline
+    \end{tabular}
+    \end{center}
+    \begin{figure}[t]%
+        \centering
+        \subfloat{
+            \includegraphics[width=0.2\textwidth]{equalization1.pdf}
+        }
+        \subfloat{
+            \includegraphics[width=0.2\textwidth]{equalization2.pdf}
+        }
+       
+    \end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Примеры эквализации гистограмм изображений}
+    \begin{figure}[t]
+        \includegraphics[height=0.85\textheight]{equalization3.pdf}
+    \end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{CLAHE (Contrast Limited Adaptive Histogram Equalization)}
+\begin{figure}[t]
+    \includegraphics[height=0.85\textheight]{CLAHE.png}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача повышения резкости изображения}
+\begin{figure}[t]
+    \includegraphics[height=0.5\textheight]{sharpening.png}
+\end{figure}
+\begin{itemize}
+    \item повышение резкости с помощью оператора Лапласа
+    \item повышение резкости с помощью нерезкого маскирования
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Повышение резкости с помощью оператора Лапласа}
+\begin{figure}[t]
+    \includegraphics[height=0.5\textheight]{unsharp3.png}
+    \hspace{1cm}
+    \includegraphics[height=0.5\textheight]{unsharp1.pdf}
+\end{figure}
+$$
+    g(x,y)=f(x,y)-\Delta f(x,y)
+$$
+оператор Лапласа
+$$
+    \Delta f=\frac{\partial^2 f}{\partial x^2}+\frac{\partial^2 f}{\partial y^2}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Вычисление оператора Лапласа с помощью свертки}
+\begin{itemize}
+     \item девятиточечная разностная схема для оператора Лапласа
+    \begin{align*} 
+        \Delta f(x,y)\approx &f(x+1,y)+f(x-1,y)+f(x,y+1)+f(x,y-1) +\\
+                            +&f(x-1,y-1)+f(x+1,y+1)+f(x-1,y+1)+f(x+1,y-1)\\
+                            -&8f(x,y)
+    \end{align*}
+    \item фильтр Лапласа
+    $$
+        \Delta f\approx
+        w \bullet f = w \circ f
+    $$
+    ядро свертки фильтра Лапласа
+    $$
+        w =
+        \begin{bmatrix*}[r]
+            1 & 1 & 1 \\
+            1 & -8 & 1 \\
+            1 & 1 & 1
+        \end{bmatrix*}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Пример повышения резкости с помощью фильтра Лапласа}
+\begin{figure}[t]
+    \includegraphics[height=0.6\textheight]{unsharp2.png}
+\end{figure}
+$$
+    g = f -
+    \begin{bmatrix*}[r]
+        1 & 1 & 1 \\
+        1 & -8 & 1 \\
+        1 & 1 & 1
+    \end{bmatrix*}
+    \circ f
+$$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Повышение резкости с помощью нерезкого маскирования}
+    \begin{wrapfigure}{r}{0.4\textwidth}
+        \begin{center}
+            \includegraphics[width=0.3\textwidth]{unsharp1.pdf}
+        \end{center}
+    \end{wrapfigure}
+    $$
+        g_{\mbox{mask}}(x,y)=f(x,y)-f_{\mbox{blur}}(x,y)
+    $$
+    $$
+        g(x, y) = f(x,y)+k\cdot g_{\mbox{mask}}(x,y)
+    $$
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{unsharp2.pdf}
+    \end{center}
+    \begin{itemize}
+        \item исходное изображение $f$
+        \item результат гауссовской фильтрации $f_{\mbox{blur}}$
+        \item $g_{\mbox{mask}}$
+        \item маскирование при $k=1$ и $k=4.5$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача уменьшения шума на изображении}
+\begin{center}
+    \includegraphics[height=0.5\textheight]{noise_reduction.png}
+\end{center}
+\begin{itemize}
+    \item медианная фильтрация
+    \item гауссовская фильтрация
+    \item билатеральная фильтрация
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Модели шума}
+\begin{center}
+    \includegraphics[height=0.5\textheight]{noises.png}
+\end{center}
+Аддитивный гауссовский шум и шум соли и перца
+$$
+    \mathbf{A}+\varepsilon
+$$
+\begin{itemize}
+    \item шум $\varepsilon$ -- имеет нормальное распределение
+    \item шум $\varepsilon$ -- имеет распределение Бернулли
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Уменьшение шума с помощью медианной фильтрации}
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{median_filter.png}
+    \end{center}
+    \begin{itemize}
+        \item нелинейный фильтр
+        \item устойчив к выбросам (salt-and-pepper noise)
+        \item не сильно размывает границы
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{median_filter_sample.png}
+    \end{center}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Уменьшение шума с помощью гауссовской фильтрации}
+\begin{center}
+    \includegraphics[height=0.3\textheight]{gauss_kernel.pdf}
+    \includegraphics[height=0.3\textheight]{gauss_filter.png}
+\end{center}
+Гауссовское ядро
+$$
+    w(s,t)=\exp\left\{-\frac{s^2+t^2}{2\sigma_s^2}\right\}
+    \qquad n = 2k+1\qquad k=\lceil 3\sigma_s\rceil
+$$
+Гауссовский фильтр
+$$
+    g(x,y)=\frac{\sum\limits_{s=-k}^k\sum\limits_{t=-k}^k w(s,t)f(x+s,y+t)}{\sum\limits_{s=-k}^k\sum\limits_{t=-k}^kw(s,t)}=
+    w\bullet f=w\circ f
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Уменьшение шума с помощью билатеральной фильтрации}
+\begin{center}
+    \includegraphics[width=0.4\textwidth]{bilateral_filter.png}
+\end{center}
+$$
+    w(s,t,x,y)=\exp\left\{-\frac{s^2+t^2}{2\sigma_s^2}-\frac{\left[f(x+s,y+t)-f(x,y)\right]^2}{2\sigma_c^2}\right\}
+    \quad n = 2k+1\quad k=\lceil 3\sigma_s\rceil
+$$
+билатеральная фильтрация
+$$
+    g(x,y)=\frac{\sum\limits_{s=-k}^k\sum\limits_{t=-k}^k w(s,t,x,y)f(x+s,y+t)}{\sum\limits_{s=-k}^k\sum\limits_{t=-k}^kw(s,t,x,y)}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\end{document}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{}
+\end{frame}

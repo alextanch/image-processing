@@ -1,0 +1,788 @@
+\documentclass[
+    12pt, 
+    usepdftitle=false,
+    aspectratio=1610
+]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb
+}
+\usepackage[font=small,labelfont=bf]{caption}
+
+\graphicspath{{./figs/01}}
+
+\title[Лекция 1]{
+    Цветовые и геометрические операции над изображениями
+}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{План лекции}
+\begin{itemize}
+    \item RGB изображение
+    \item цветовые пространства YCrCb, Grayscale и HSV
+    \item ColorJitter аугментация 
+    \item евклидовы и однородные координаты на плоскости 
+    \item геометрические преобразования над изображениями
+    \begin{itemize}
+        \item преобразование подобия
+        \item аффинное преобразование
+        \item проективное преобразование (гомография)
+    \end{itemize}
+    %\item гамма коррекция изображений
+    %\item эквализация гистограммы изображения
+\end{itemize}
+\end{frame}
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{RGB изображение}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{coffee.png}
+    \includegraphics[height=0.35\textheight]{rgb_image.png}
+\end{figure}
+\begin{itemize}
+    \item RGB изображение -- массив размера $H\times W\times 3$
+    \item изображение разбивается на цветовые плоскости (каналы)
+    $$
+        \mathbf{X}=\mathbf{R}\cup\mathbf{G}\cup\mathbf{B}
+    $$
+    \item изображение состоит из пикселей
+    $$
+        \mathbf{X}=\bigcup\limits_{ij}\mathbf{p}_{ij}
+        \qquad
+        \mathbf{p}_{ij}=\left(r_{ij}, g_{ij}, b_{ij}\right)
+        \qquad
+        i=0,1,\ldots,H-1
+        \quad
+        j=0,1,\ldots,W-1
+    $$
+    \item $0\leqslant r_{ij}, g_{ij}, b_{ij} \leqslant 255$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовое пространсво YCrCb}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{YCrCb.pdf}
+\end{figure}
+\begin{itemize}
+    \item преобразование из RGB в YCrCb
+    \begin{align*}
+        \mathbf{Y}  &= 0.299\cdot \mathbf{R} + 0.587\cdot \mathbf{G} + 0.114\cdot \mathbf{B} \\
+        \mathbf{Cr} &= 0.713 \cdot (\mathbf{R} - \mathbf{Y}) + 0.5 \\
+        \mathbf{Cb} &= 0.564 \cdot (\mathbf{B} - \mathbf{Y}) + 0.5 \\
+    \end{align*}
+    \item $\mathbf{Y}$ -- яркость изображения 
+    \item $\mathbf{Cr}$, $\mathbf{Cb}$ -- цветовые каналы
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Изображение в градациях серого (grayscale image)}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{grayscale.pdf}
+\end{figure}
+\begin{itemize}
+    \item \textbf{grayscale image} -- яркость изображения
+    $$
+        \mathbf{Y} = 0.299\cdot \mathbf{R} + 0.587\cdot \mathbf{G} + 0.114\cdot \mathbf{B}
+    $$
+    \item grayscale image -- одноканальный 8-битный массив размера $H\times W$
+    $$
+        \mathbf{Y}=\left\{p_{ij}\right\}\qquad
+        p_{ij}\in\{0,1,\ldots,255\}
+    $$
+    \item при изменении $0\leqslant p_{ij}\leqslant 255$, яркость меняется от черного к белому
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Цветовое пространство HSV}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{HSV_model.png}
+\end{figure}
+Цветовое пространство HSV моделирует восприятие цвета человеком.
+\begin{itemize}
+    \item $0^\circ \leqslant H < 360^\circ$  \textbf{тон (hue)}
+    \item $0\leqslant S \leqslant 1$  \textbf{насыщенность (saturation)}
+    \item $0\leqslant V \leqslant 1$  \textbf{"яркость" (value)}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразование из RGB в HSV}
+\begin{itemize}
+    \item V (value) -- яркость
+    $$
+        V = \max(R,G,B)\qquad
+        \mbox{где}\qquad
+        R=\frac{r}{255.0}\,,\quad
+        G=\frac{g}{255.0}\,,\quad
+        B=\frac{b}{255.0}
+    $$
+    \item S (saturation) -- насыщенность
+    $$
+        S=1-\frac{\min(R,G,B)}{\max(R,G,B)}
+    $$
+    \item H (hue) -- тон
+    $$
+    H' = \frac{60}{V(1-S)}\cdot
+    \begin{cases}
+        G-B\,, & R=V\\
+        B-R+2V(1-S)\,, & G=V\\
+        R-G+4V(1-S)\,, & B=V
+    \end{cases}
+    $$
+    $$
+        H = H' \mod 360^\circ
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразование из RGB в HSV}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.8\textheight]{HSV_sample.png}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Аугментация изображений}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{augmentation.png}
+\end{figure}
+\begin{itemize}
+    \item аугментация применяется, когда данных недостаточно для обучения нейронной сети или для повышения ее обобщающей способности
+    \item два основных вида аугментации: цветовая, геометрическая
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Изменение тона}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{hue_aug.png}
+\end{figure}
+\begin{itemize}
+    \item конвертировать $\mathbf{RGB}\mapsto\mathbf{HSV}$
+    \item изменить тон \textbf{H} (hue)
+    $$
+      \mathbf{H} = (\mathbf{H} + \alpha) \mod 360\,,\quad
+      0 < \alpha < 360
+    $$
+    \item конвертировать $\mathbf{HSV}\mapsto\mathbf{RGB}$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Изменение насыщенности}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{sat_aug.png}
+\end{figure}
+\begin{itemize}
+    \item найти grayscale изображение $\mathbf{Y}$
+    \item преобразовать цветовые плоскости \textbf{R}, \textbf{G} и \textbf{B} по формулам
+    \begin{align*}
+      \mathbf{R} &= \beta \cdot \mathbf{R} + (1-\beta)\cdot\mathbf{Y}\\
+      \mathbf{G} &= \beta \cdot \mathbf{G} + (1-\beta)\cdot\mathbf{Y}\\
+      \mathbf{B} &= \beta \cdot \mathbf{B} + (1-\beta)\cdot\mathbf{Y}
+    \end{align*}
+  где $0 < \beta < 1$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Изменение контрастности}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{cont_aug.png}
+\end{figure}
+\begin{itemize}
+    \item найти grayscale изображение $\mathbf{Y}$ и вычислить среднюю яркость $\mu\left(\mathbf{Y}\right)$
+    \item преобразовать \textbf{RGB} изображение \textbf{A}
+    $$
+      \mathbf{A} = \gamma \cdot \mathbf{A} + (1-\gamma)\cdot\mu\left(\mathbf{A}\right)
+    $$
+  где $0 < \gamma < 1$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Изменение яркости}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.4\textheight]{bright_aug.png}
+\end{figure}
+    \textbf{RGB} изображение \textbf{A} умножить на коэффициент $0 < \delta < 1$
+    $$
+        \mathbf{A} = \delta \cdot \mathbf{A}
+    $$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{ColorJitter аугментация}
+К изображению последовательно применяется
+цветовые преобразования
+
+\begin{itemize}
+    \item изменения тона с параметром $\alpha\in[0,360]$
+    \item изменения насыщенности с параметром $\beta\in[0,1]$
+    \item изменения контрастности с параметром $\gamma\in[0,1]$
+    \item изменения яркости с параметром $\delta\in[0,1]$
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Евклидовы (декартовы) координаты на плоскости}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.4\textheight]{xyaxis.jpg}
+    \end{figure}
+    \begin{itemize}
+        \item евклидовы координаты точек на плоскости
+        $$
+            \widetilde{\mathbf{x}}=
+            \begin{bmatrix*}[c]
+                x \\ y   
+            \end{bmatrix*}\in\mathbf{R}^2
+        $$
+        \item для координат пикселей на изображении $x$, $y$ -- целые и
+        \begin{align*}
+            &0\leqslant x \leqslant W-1 \\
+            &0\leqslant y \leqslant H-1
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Однородные координаты на плоскости}
+\begin{itemize}
+    \item переход от евклидовых координат к однородным координатам на проективной плоскости $\mathbf{P}^2$
+    $$
+        \mathbf{R}^2\ni\widetilde{\mathbf{x}}=
+        \begin{bmatrix*}[c]
+            x \\ y   
+        \end{bmatrix*}
+        \quad\mapsto\quad
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1
+        \end{bmatrix*}
+        =\mathbf{x}
+        \in\mathbf{P}^2
+    $$
+    \item переход от однородных координат к  евклидовым
+    $$
+        \mathbf{P}^2\ni\mathbf{x}=
+        \begin{bmatrix*}[c]
+            x_1 \\ x_2 \\ x_3
+        \end{bmatrix*}
+        \quad\mapsto\quad
+        \begin{bmatrix*}[c]
+            x_1/x_3 \\ x_2/x_3
+        \end{bmatrix*}
+        =\widetilde{\mathbf{x}}
+        \in\mathbf{R}^2
+    $$
+    \item $\mathbf{x}$ и $\lambda\cdot\mathbf{x}$ -- задают одну евклидову точку
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Сдвиг системы координат}
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{shift.png}
+    \end{figure}
+    $$
+        x' = x + t_x\,,\qquad
+        y' = y + t_y
+    $$
+    $$
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}=
+        \mathbf{T}(t_x,t_y)
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}
+        \qquad
+        \mathbf{T}(t_x,t_y)=
+        \begin{bmatrix*}[r]
+            1 & 0 & t_x \\
+            0 & 1 & t_y \\
+            0 & 0 & 1
+        \end{bmatrix*}
+    $$
+    $$
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}=
+        \mathbf{T}(-t_x,-t_y)
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Изменение масштаба системы координат}
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{scale.png}
+    \end{figure}
+    $$
+        x' = f_x\cdot x\,,\qquad
+        y' = f_y\cdot y
+    $$
+    $$
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}=
+        \mathbf{F}(f_x,f_y)
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}
+        \qquad
+        \mathbf{F}(f_x,f_y)=
+        \begin{bmatrix*}[r]
+            f_x & 0 & 0 \\
+            0 & f_y & 0 \\
+            0 & 0 & 1
+        \end{bmatrix*}
+    $$
+    $$
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}=
+        \mathbf{F}(1/f_x,1/f_y)
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Поворот системы координат}
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{rotation.png}
+    \end{figure}
+    $$
+        x' = x\cdot\cos\theta - y\cdot\sin\theta\,,\qquad
+        y' = x\cdot\sin\theta + y\cdot\cos\theta
+    $$
+    $$
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}=
+        \mathbf{R}(\theta)
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}
+        \qquad
+        \mathbf{R}(\theta)=
+        \begin{bmatrix*}[r]
+            \cos\theta & -\sin\theta & 0 \\
+            \sin\theta & \cos\theta & 0 \\
+            0 & 0 & 1
+        \end{bmatrix*}
+    $$
+    $$
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}=
+        \mathbf{R}(-\theta)
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Преобразование подобия (similarity transform)}
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{similarity.png}
+    \end{figure}
+    Преобразование подобия - поворот и масштабирование вокруг центра поворота
+    $$
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}=
+        \mathbf{S}\cdot
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}\qquad
+        \mathbf{S}=
+        \mathbf{T}(c_x,c_y)\cdot
+        \mathbf{F}(f, f)\cdot
+        \mathbf{R}(\theta)\cdot
+        \mathbf{T}(-c_x,-c_y)
+    $$
+    $$
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}=
+        \mathbf{S}^{-1}\cdot
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}
+        \qquad
+        \mathrm{dof}\left(\mathbf{S}\right)=4
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Аффинное преобразование системы координат}
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{affine.png}
+    \end{figure}
+    $$
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}=
+        \mathbf{A}\cdot
+        \begin{bmatrix*}[c]
+            x \\ y \\ 1    
+        \end{bmatrix*}
+        \qquad
+        \mathbf{A}=
+        \begin{bmatrix*}[r]
+            a_{11} & a_{12} & a_{13} \\
+            a_{21} & a_{22} & a_{23} \\
+            0 & 0 & 1
+        \end{bmatrix*}
+        \qquad
+        \mathrm{det}(\mathbf{A})\ne0
+        \qquad
+        \mathrm{dof}(\mathbf{A})=6
+    $$
+    Преобразование подобия -- частный случай аффинного преобразования.
+
+    $\mathbf{A}$ можно вычислить, задав координаты трех соответствующих точек 
+    $$
+        \begin{bmatrix*}[c]
+            x'_i \\ y'_i \\ 1    
+        \end{bmatrix*}=
+        \mathbf{A}\cdot
+        \begin{bmatrix*}[c]
+            x_i \\ y_i \\ 1    
+        \end{bmatrix*}
+        \qquad
+        i=1,2,3
+    $$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Проективное преобразование (гомография)}
+$$
+    \begin{bmatrix*}[c]
+        x'_1 \\ x'_2 \\ x'_3    
+    \end{bmatrix*}=
+    \mathbf{H}\cdot
+    \begin{bmatrix*}[c]
+        x \\ y \\ 1    
+    \end{bmatrix*}\qquad
+    \mathbf{H}=
+    \begin{bmatrix*}[r]
+        h_{11} & h_{12} & h_{13} \\
+        h_{21} & h_{22} & h_{23} \\
+        h_{31} & h_{32} & h_{33}
+    \end{bmatrix*}
+     \qquad
+    \mathrm{det}(\mathbf{H})\ne0
+    \qquad
+    \mathrm{dof}(\mathbf{H})=8
+$$
+$$
+    x'=\frac{x'_1}{x'_3}\qquad y'=\frac{x'_2}{x'_3}
+$$
+\begin{itemize}
+    \item аффинное преобразование -- частный случай проективного
+    \item матрицу $\mathbf{H}$ можно вычислить, задав координаты четырех соответствующих точек 
+          на изображениях
+    $$
+        \begin{bmatrix*}[c]
+            x'_i \\ y'_i 
+        \end{bmatrix*}
+        \quad\leftrightarrow\quad
+        \begin{bmatrix*}[c]
+            x_i \\ y_i   
+        \end{bmatrix*}\qquad
+        i=1,2,3,4
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Пимер проективного преобразования}
+\begin{figure}[t]
+    \includegraphics[width=0.5\textwidth]{projective3.pdf}
+    \includegraphics[width=0.6\textwidth]{projective4.pdf}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Пимер проективного преобразования}
+\begin{figure}[t]
+    \includegraphics[width=0.4\textwidth]{projective1.pdf}
+    \includegraphics[width=0.8\textwidth]{projective2.pdf}
+\end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Интерполяция значений пикселей на изображении}
+    \begin{figure}[t]
+        \includegraphics[width=0.2\textwidth]{interpolation.png}
+        \hspace{1cm}
+        \includegraphics[width=0.5\textwidth]{projective5.pdf}
+    \end{figure}
+    $$
+        \begin{bmatrix*}[c]
+            x_1 \\ x_2 \\ x_3    
+        \end{bmatrix*}=
+        \mathbf{H}^{-1}
+        \begin{bmatrix*}[c]
+            x' \\ y' \\ 1    
+        \end{bmatrix*}
+    $$
+    $$
+        x=\frac{x_1}{x_3}\quad
+        y=\frac{x_2}{x_3}
+    $$
+    $$
+        \mathbf{p}'(x',y')=f(x,y) 
+        \quad\mbox{-- зависит от метода интерполяции}
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Интерполяция изображений методом ближайшего соседа}
+    \begin{figure}[t]
+        \includegraphics[width=0.2\textwidth]{interpolation.png}
+    \end{figure}
+    \begin{itemize}
+        \item значения пикселей на преобразованном изображении равны
+        $$
+            \mathbf{p}'\left(x',y'\right)=f(x,y)
+        $$
+        \item в методе ближайшего соседа
+        $$
+            f(x,y)=\mathbf{p}\left(\mathrm{NearestNeighbor}(x,y)\right)
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Билинейная интерполяция изображений}
+    \begin{figure}[t]
+        \includegraphics[width=0.2\textwidth]{interpolation.png}
+    \end{figure}
+    \begin{itemize}
+        \item значения пикселей на преобразованном изображении равны
+        $$
+            \mathbf{p}'\left(x',y'\right)=f(x,y)
+        $$
+        \item для билинейной интерполяции
+        $$
+            f(x,y)=a+b\cdot x+c\cdot y+d\cdot xy
+        $$
+        \item коэффициенты $a$, $b$, $c$, $d$ находятся из условий
+        $$
+            f(x_i,y_i)=\mathbf{p}(x_i, y_i)\qquad i=1,2,3,4
+        $$
+        \url{https://en.wikipedia.org/wiki/Bilinear_interpolation}
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Бикубическая интерполяция изображений}
+    \begin{figure}[t]
+        \includegraphics[width=0.2\textwidth]{interpolation3.png}
+    \end{figure}
+    \begin{itemize}
+        \item значения пикселей на преобразованном изображении равны
+        $$
+            \mathbf{p}'\left(x',y'\right)=f(x,y)
+        $$
+        \item для билинейной интерполяции
+        $$
+            f(x,y)=\sum_{n,m=0}^3 f_{nm}x^ny^m
+        $$
+        \item коэффициенты $f_{nm}$ находятся из условий
+        $$
+            f(x_i,y_i)=\mathbf{p}(x_i, y_i)\qquad i=1,2,\ldots,16
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Сравнение интерполяций}
+    \begin{figure}[t]
+        \includegraphics[width=0.2\textwidth]{squares.png}
+    \end{figure}
+    \begin{figure}[t]
+        \includegraphics[width=0.2\textwidth]{nn_interpol.png}
+        \includegraphics[width=0.2\textwidth]{lin_interpol.png}
+        \includegraphics[width=0.2\textwidth]{bilin_interpol.png}
+        \caption*{Интерполяция методом ближайшего соседа, билинейная и бикубическая.}
+    \end{figure}
+
+\end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+% \frametitle{Гамма коррекция изображений}
+% \begin{figure}
+%     \centering
+%     \includegraphics[height=0.35\textheight]{gamma.pdf}
+%     \caption*{Графики функций $y=x^\gamma$, $0\leqslant x\leqslant 1$}
+% \end{figure}
+% \begin{itemize}
+%     \item гамма коррекция изображения $\mathbf{A}=\left\{a_{ij}\right\}$
+%     $$
+%         \mathbf{B} = \left\{255\cdot\left(\frac{a_{ij}}{255}\right)^\gamma\right\}
+%     $$
+%     \item $\gamma<1$ изображение становиться светлее 
+%     \item $\gamma>1$ изображение становиться темней
+%     \item $\gamma=1$ изображение не меняется
+% \end{itemize}
+% \end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+% \frametitle{LUT-преобразование (look-up table)}
+% \begin{itemize}
+%     \item LUT таблица
+%     $$
+%         \mathrm{table}=\left\{t_0,t_1,\ldots,t_{255}\right\}
+%     $$
+%     \item индексом в этой таблице является значение входной интенсивности, а в соответствующей ячейке находится значение выходной интенсивности
+%     \item LUT-преобразование сопоставляет каждому входному пикселю значение из таблицы 
+%     $$
+%         a_{ij} \quad\mapsto\quad t_{a_{ij}}
+%     $$
+%     \item время применения LUT к изображению значительно сокращается (обычно в изображениях
+%     пикселей гораздо больше, чем значений интенсивности)
+% \end{itemize}
+% \end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+% \frametitle{Гистограмма изображения}
+% \begin{figure}
+%     \centering
+%     \includegraphics[height=0.3\textheight]{cameraman.png}
+%     \includegraphics[height=0.3\textheight]{histogram.png}
+% \end{figure}
+% \begin{itemize}
+%     \item динамический диапазон пикселей $[0, 255]$ разбивается на интервалы (bins) 
+%     $$
+%         0=x_1<x_2<\cdots<x_{N+1}=255
+%     $$
+%     \item гистограмма изображения $\mathbf{A}=\left\{a_{ij}\right\}$ размера $H\times W$
+%     $$
+%         n_k = \left|\left\{x_k\leqslant a_{ij}< x_{k+1}\right\}\right|
+%         \qquad
+%         k=1,2,\ldots N
+%     $$
+%     \item нормализованная гистограмма
+%     $$
+%         p_k=\frac{n_k}{H\cdot W}\qquad
+%         p_k=\mathbf{P}[x_k\leqslant a_{ij}< x_{k+1}]
+%     $$
+% \end{itemize}
+% \end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+%     \frametitle{Прмеры гистограмм}
+%     \begin{figure}[t]
+%         \includegraphics[width=0.8\textwidth]{histogram.pdf}
+%     \end{figure}
+% \end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+%     \frametitle{Эквализация гистограммы изображения}
+%     \begin{itemize}
+%         \item если непрерывную случайную величину $X$ преобразовать с помощью ее функции распределения
+%         $$
+%             y=F(x)\qquad
+%             F(x)=\mathbf{P}[X<x]=\int\limits_{-\infty}^xp_X(t)\,dt
+%         $$
+%         \item то  с.в. $Y=F(X)$ будет иметь равномерное распределение на $[0,1]$
+%         \item по аналогии с непрерывной с.в., если преобразовать значения пикселей $a_{ij}$
+%         $$
+%            b_{ij}=\left\lceil255\cdot  \sum_{k=0}^{a_{ij}}p_k \right\rceil
+%            \qquad \mbox{(вычисляется с помощью LUT)}
+%         $$
+%         получим примерно равномерное распределение пикселей $b_{ij}$
+%     \end{itemize}
+% \end{frame}
+
+%--------------------------------------------------------
+\end{document}

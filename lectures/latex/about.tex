@@ -1,0 +1,182 @@
+\documentclass[
+    12pt, 
+    usepdftitle=false,
+    aspectratio=1610
+]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb
+}
+\usepackage[font=small,labelfont=bf]{caption}
+
+\title[Лекция 1]{
+    Цветовые и геометрические операции над изображениями
+}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+
+\textbf{Преподаватели}
+\begin{itemize}
+    \item лекции: Александр Танченко
+    \item практика: Александр Кодуков
+\end{itemize}
+\vspace{1cm}
+
+\textbf{Прислать на почту alex.tanch@gmail.com}
+\begin{itemize}
+    \item ФИО
+    \item telegram username
+    \item github username
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}    
+    \textbf{Курсы по CV}
+    \vspace{0.2cm}
+    \begin{itemize}
+    \item Анализ изображений
+    \item Глубокое обучение в задачах компьютерного зрения
+    \item Обработка видео
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+
+\textbf{Содержание курса <<Анализ изображений>>}
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item Цветовые и геометрические операции над изображениями
+    \item Пространственная и частотная обработка изображений
+    \item Методы улучшения качества изображений
+    \item Детекция границ на изображениях
+    \item Сегментация и морфологическая обработка изображений
+    \item Детекция и сопоставление ключевых точек на изображениях
+    \item Гомография. Сшивка изображений
+    \item Проективная модель камеры. Калибровка камеры
+    \item Эпиполярная геометрия. Относительное положение камер
+    \item Реконструкция 3D сцены
+    \item Методы понижения размерности многомерных данных. Классификация изображений
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+
+\textbf{Python}
+\begin{itemize}
+    \item numpy, scipy
+    \item opencv
+    \item matplotlib, plotly
+\end{itemize}
+\vspace{0.5cm}
+
+\textbf{Математика}
+\begin{itemize}
+    \item 2D и 3D геометрия, матрицы, системы, SVD и QR разложения
+    \item случайные величины, метод максимального правдоподобия
+    \item методы Гаусса-Ньютона, Левенберга-Марквардта
+\end{itemize}
+\vspace{0.5cm}
+
+\textbf{Книги}
+\begin{itemize}
+    \item Гонсалес, Вудс <<Цифровая обработка изображений>>
+    \item Hartley, Zisserman <<Multiple View Geometry in Computer Vision>>
+    \item Кэлер, Брэдски <<Изучаем OpenCV3>>
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \url{https://github.com/alextanch/image-processing}
+    \vspace{0.5cm}
+
+    \hspace{1cm}
+    \url{./lectues} \hspace{1.3cm} лекции
+    \vspace{0.2cm}
+
+    \hspace{1cm}
+    \url{./notebooks} \hspace{0.85cm} практика
+    \vspace{0.2cm}
+    
+    % \hspace{1cm}
+    % \url{./tasks} \hspace{1.8cm} задачи
+    % \vspace{0.2cm}
+    
+    \hspace{1cm}
+    \url{./data} \hspace{2cm} данные
+    \vspace{0.2cm}
+
+    \hspace{1cm}
+    \url{./books} \hspace{1.8cm} книги
+    \vspace{0.2cm}
+
+    \hspace{1cm}
+    \url{./README.md}   \hspace{0.9cm} установка python окружения
+    \vspace{0.2cm}
+
+    % \hspace{1cm}
+    % \url{./Makefile}   \hspace{1.1cm} форматирование кода (\textbf{make check})
+    % \vspace{0.2cm}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\begin{itemize}
+    \item баллы за модуль
+    $$
+        \left\lceil10\cdot\frac{t}{T}\right\rceil
+    $$
+    \begin{align*}
+        T\quad  &\mbox{-- общее число домашек в модуле} \\
+        t\quad  &\mbox{-- число зачтенных домашек в модуле}
+    \end{align*}
+    \item срок сдачи домашек -- две недели
+    \item \url{./homeworks/homework_00.py} пример оформления домашки
+    \item как сдавать домашки
+    \begin{itemize}
+        \item[] github private repo + add collaborator \textbf{alextanch}
+        \item[] branch + pull request
+        \item[] code review + approve
+        \item[] interview + merge and close pull request
+    \end{itemize}
+    \item форматирование кода
+    \begin{itemize}
+        \item[] \url{isort} \url{homeworks}
+	    \item[] \url{ruff} \url{check} \url{homeworks}
+	    \item[] \url{ruff} \url{format} \url{homeworks}
+    \end{itemize}
+    
+\end{itemize}
+\end{frame}
+
+\end{document}

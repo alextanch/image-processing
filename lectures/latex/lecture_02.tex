@@ -1,0 +1,626 @@
+\documentclass[
+    12pt, 
+    usepdftitle=false,
+    aspectratio=1610
+]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb
+}
+\usepackage[font=small,labelfont=bf]{caption}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\graphicspath{{./figs/02}}
+
+\title[Лекция 2]{
+    Пространственная и частотная фильтрация изображений
+}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Фильтрация изображений}
+    \begin{center}
+        \includegraphics[height=0.7\textheight]{filters.png}
+    \end{center}
+    $$
+        f\quad\rightarrow\quad\mbox{\textbf{фильтр}}\quad\rightarrow\quad g
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Фильтрация в пространственной и частотной области}
+    \begin{itemize}
+        \item фильтрация в пространственной области
+        \begin{center}
+            \includegraphics[height=0.3\textheight]{gradient4.pdf}
+        \end{center}
+        \item фильтрация в частотной области
+        \begin{center}
+            \includegraphics[height=0.3\textheight]{freq_filter1.png}
+            \includegraphics[height=0.3\textheight]{freq_filter2.png}
+            \includegraphics[height=0.3\textheight]{freq_filter3.png}
+            \includegraphics[height=0.3\textheight]{freq_filter4.png}
+        \end{center}
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Виды пространственной фильтрации}
+    \begin{itemize}
+        \item blur filtering
+        \begin{center}
+            \includegraphics[height=0.2\textheight]{blur.png}
+        \end{center}
+        \item sharp filtering
+        \begin{center}
+            \includegraphics[height=0.2\textheight]{sharp.png}
+        \end{center}
+        \item edge detection filtering
+        \begin{center}
+            \includegraphics[height=0.2\textheight]{edge.png}
+        \end{center}
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Виды фильтров в частотной области}
+    \begin{itemize}
+        \item фильтр низких частот (low-pass filter)
+        \begin{center}
+            \includegraphics[height=0.35\textheight]{lowpass.png}
+        \end{center}
+        \item фильтр высоких частот (high-pass filter)
+        \begin{center}
+            \includegraphics[height=0.35\textheight]{highpass.png}
+        \end{center}
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{$\blacksquare$ Image padding}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{paddings.png}
+    \end{center}
+    При фильтрации в пространственной области используют image padding.
+    \vspace{0.5cm}
+
+    \begin{itemize}
+        \item \textbf{zero padding}
+        \item \textbf{circular padding}
+        \item \textbf{reflect padding}
+        \item \textbf{replicate padding}
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Корреляция ядра с изображением}
+    \url{https://github.com/alextanch/image-processing/blob/main/data/correlation.gif}
+    \begin{center}
+        \includegraphics[height=0.3\textheight]{kernel.pdf}
+        \includegraphics[height=0.3\textheight]{correlation.pdf}
+    \end{center}
+    Корреляция ядра $w$ размера $n\times n$ с изображением $f$.
+    $$
+        (w\bullet f)(x,y)=\sum_{s=-k}^k\sum_{t=-k}^k w(s,t)f(x+s,y+t)
+        \quad\mbox{число операций}\quad
+        \mathcal{O}\left(H\cdot W\cdot n^2\right)
+    $$
+    $$
+        n=2k+1
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Свертка ядра с изображением}
+    \begin{center}
+        \includegraphics[height=0.3\textheight]{kernel.pdf}
+    % \end{center}
+    % \begin{center}
+        \includegraphics[height=0.3\textheight]{convolution.pdf}
+    \end{center}
+    Свертка ядра с изображением: 
+    $$
+        w\circ f = (w \mbox{ повернуть на 180 градусов})\bullet f
+    $$
+    $$
+        (w\circ f)(x,y)=\sum_{s=-k}^k\sum_{t=-k}^k w(s,t)f(x-s,y-t)
+        \quad\mbox{число операций}\quad
+        \mathcal{O}\left(H\cdot W\cdot n^2\right)
+    $$
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{$\blacksquare$ Свойства корреляции и свертки}
+    \begin{center}
+        \begin{tabular}{ |l|c|c| } 
+            \hline
+            \textbf{Свойства} & \textbf{Свертка} & \textbf{Корреляция} \\
+            \hline
+            коммутативность  & $w\circ f=f\circ w$ & --- \\ 
+            ассоциативность  & $w_2\circ (w_1\circ f) = (w_2\circ w_1)\circ f$ & --- \\ 
+            дистрибутивность & $w\circ(f+g)=w\circ f + w\circ f$ & $w\bullet(f+g)=w\bullet f + w\bullet g$ \\ 
+            \hline
+        \end{tabular}
+    \end{center}
+    \begin{itemize}
+        \item корреляция и свертка -- примеры линейных фильтров
+        \item если ядро $w$ симметрично при повороте на $180^\circ$,
+              то свертка совпадает с корреляцией
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Сепарабельные свертки}
+\begin{itemize}
+    \item ядро свертки $w$ называется \textbf{сепарабельным}, если
+    $$
+        w = u \cdot v^t
+    $$
+    \item пример сепарабельной свертки
+        $$
+            w = 
+            \begin{bmatrix*}[c]
+                1 & 2 & 1\\
+                2 & 4 & 2\\
+                1 & 2 & 1
+            \end{bmatrix*}=
+            \begin{bmatrix*}[c]
+                1 \\ 2\\ 1
+            \end{bmatrix*}\cdot
+            \begin{bmatrix*}[c]
+                1 & 2 & 1
+            \end{bmatrix*}
+            \qquad\Rightarrow\qquad
+            u =
+            \begin{bmatrix*}[r]
+                1 \\ 2\\ 1
+            \end{bmatrix*}\,,\quad
+            v =
+            \begin{bmatrix*}[r]
+                1 \\ 2\\ 1
+            \end{bmatrix*}
+        $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Сепарабельные свертки}
+\begin{itemize}
+    \item ядро $w$ -- сепарабельно, если $\mathrm{rank}(w)=1$ 
+    \item как найти $u$ и $v$ в произведении
+    $$
+        w = u \cdot v^t
+    $$
+    \begin{enumerate}
+        \item[(a)] найти ненулевой элемент $e\in w$
+        \item[(b)] пусть $c$, $r$ -- столбец и строка, содержащие элемент $e$, тогда
+        $$
+            u = c\,,\qquad
+            v = \frac{r^t}{e} 
+        $$
+    \end{enumerate}
+    \item пример
+        $$
+            w = 
+            \begin{bmatrix*}[r]
+                1 & 2 & 1\\
+                \mathbf{2} & 4 & 2\\
+                1 & 2 & 1
+            \end{bmatrix*}\,,\quad
+            u =
+            \begin{bmatrix*}[r]
+                1 \\ 2\\ 1
+            \end{bmatrix*}\,,\quad
+            v = \frac{1}{2}
+            \begin{bmatrix*}[r]
+                2 \\ 4 \\ 2
+            \end{bmatrix*}=
+            \begin{bmatrix*}[r]
+                1 \\ 2 \\ 1
+            \end{bmatrix*}
+        $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{$\blacksquare$ Вычислительная эффективность сепарабельных сверток}
+\begin{itemize}
+    \item из коммутативности и ассоциативности свертки
+    $$
+        w\circ f = \left(u \cdot v^t\right)\circ f=u\circ v \circ f
+    $$ 
+    \item вычислительная эффективность
+    $$
+        \frac{\mathcal{O}\left(H\cdot W\cdot n^2\right)}{2\cdot\mathcal{O}\left(H\cdot W\cdot n\right)}=\mathcal{O}(n)
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+% \frametitle{$\blacksquare$ Template matching by correlation}
+% \begin{figure}
+%     \centering
+%     \includegraphics[height=0.2\textheight]{cats.jpg}
+%     \includegraphics[height=0.05\textheight]{template.jpg}
+% \end{figure}
+% \begin{itemize}
+%     \item возьмем два вектора     
+%     \begin{align*} 
+%         w\quad &\mbox{-- яркости пикселей на template изображении} \\ 
+%         g(x,y)\quad &\mbox{-- яркости в окне с центром (x,y) на исходном изображении $f$}
+%     \end{align*}
+%     \item косинус угла между векторами
+%     $$
+%         \cos\theta=\frac{w^t\cdot g(x,y)}{\norm{w}\cdot \norm{g(x,y)}}=
+%         \frac{(w\bullet f)(x,y)}{\norm{w}\cdot \norm{g(x,y)}}
+%     $$
+%     \item template matching 
+%     $$
+%         x_\ast, y_\ast=\arg\max_{x,y}\cos\theta
+%     $$ 
+% \end{itemize}
+% \end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{$\blacksquare$ Box--фильтр}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{boxfilter.png}
+    \end{center}
+    
+    \begin{itemize}
+        \item box--фильтр размера $n\times n$
+        $$
+            g = w\circ f\,,\quad
+            w = \frac{1}{n^2}
+            \begin{bmatrix*}[r]
+                1 & 1 & \ldots & 1\\
+                1 & 1 & \ddots & 1\\
+                1 & 1 & \ldots & 1
+            \end{bmatrix*}
+        $$
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Гауссовский фильтр}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{gaussian1.pdf}
+    \end{center}
+    Сепарабельное ядро гауссовского фильтра размера $n\times n$
+    $$
+        w(s,t)=K\exp\left\{-\frac{s^2+t^2}{2\sigma^2}\right\}
+        \qquad n=2k+1\qquad k\approx 3\sigma
+    $$
+    Гауссовский фильтр уменьшает шум, но размывает границы.
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{$\blacksquare$ Сравнение box и гауссовской фильтрации}
+    \begin{center} 
+        \includegraphics[width=0.7\textwidth]{gaussian2.pdf}
+        \captionof*{figure}{Результат box и гауссовской фильтрации}
+    \end{center}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{$\blacksquare$ Медианная фильтрация}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{median_filter.png}
+    \end{center}
+    \begin{itemize}
+        \item нелинейный фильтр
+        \item устойчив к выбросам (salt-and-pepper noise)
+        \item не сильно размывает границы
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{median.pdf}
+    \end{center}
+\end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+%     \frametitle{Фильтр Лапласа}
+%     Оператор Лапласа
+%     $$
+%         \Delta f(x,y)=\frac{\partial^2 f}{\partial x^2}+\frac{\partial^2 f}{\partial y^2}
+%     $$
+%     \begin{center}
+%         \includegraphics[width=0.4\textwidth]{laplacian.pdf}
+%         \captionof*{figure}{5-точечный и 9-точечный  фильтр Лапласа}
+%     \end{center}
+%     Пятиточечная разностная схема оператора Лапласа
+%     $$
+%         \Delta f(x,y)\approx f(x+1,y)+f(x-1,y)+f(x,y+1)+f(x,y-1)-4f(x,y)
+%     $$
+% \end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+%     \frametitle{Вычисление частных производных изображения}
+%     Градиент функции
+%     $$
+%         \nabla f(x,y) = [f'_x(x,y), f'_y(x,y)]
+%     $$
+%     Разностные схемы для частных производных
+%     $$
+%         f'_x \approx (z_3+2z_6+z_9)-(z_1+2z_4+z_7)
+%     $$
+%     $$
+%         f'_y \approx (z_7+2z_8+z_9)-(z_1+2z_2+z_3)\,,\quad 
+%     $$
+%     \begin{figure}[t]%
+%         \centering
+%         \includegraphics[width=0.15\textwidth]{gradient2.pdf}
+%         \quad
+%         \includegraphics[width=0.3\textwidth]{gradient3.pdf}
+%     \end{figure}
+%     \begin{center}
+%         \includegraphics[width=0.15\textwidth]{gradient1.pdf}
+%     \end{center}
+% \end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{$\blacksquare$ Дискретный базис Фурье}
+\begin{itemize}
+    \item дискретный базис Фурье для изображения размера $H\times W$
+    $$
+        \varphi(x, y, u, v) = e^{-2\pi i(ux/W+vy/H)}
+    $$
+    \item координаты в пространственной области
+    $$
+        0\leqslant x< W\qquad
+        0\leqslant y< H
+    $$
+    \item координаты в частотной области
+    $$
+        0\leqslant u< W\qquad
+        0\leqslant v< H
+    $$
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.35\textheight]{basis.png}
+    \end{figure}
+    $$
+        \mathrm{Re}[\varphi]=\cos\left[2\pi(ux/W+vy/H)\right]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Дискретное преобразование Фурье (DFT)}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{dft.png}
+\end{figure}
+\begin{itemize}
+    \item дискретное преобразование Фурье изображения $f(x,y)$ размера $H\times W$
+    $$
+        F(u, v)=\sum_{x=0}^{W-1}\sum_{y=0}^{H-1}
+        f(x,y)\varphi(x,y,u,v)
+    $$
+    \item спектр Фурье
+    $$
+        |F(u, v)|
+    $$
+    \item фазовый спектр Фурье
+    $$
+        \arg F(u, v)
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Сдвиг низких частот в центр}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.32\textheight]{dft.png}
+    \end{figure}
+    Низкие частоты (крупные детали) -- по углам спектра. 
+    Высокие частоты (мелкие детали) -- в середине спектра.
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{fig4.png}
+        \includegraphics[height=0.3\textheight]{fftshift.png}
+        \includegraphics[height=0.3\textheight]{fig5.png}
+    \end{figure}
+    После сдвига: чем дальше от центра, тем выше частота.
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Быстрое преобразование Фурье (FFT)}
+$$
+    F(u, v)=\sum_{x=0}^{W-1}\sum_{y=0}^{H-1}f(x,y)\varphi(x,y,u,v)
+$$    
+$$
+    0\leqslant u,x < W\qquad 
+    0\leqslant v,y < H
+$$
+\begin{itemize}
+    \item вычислительная сложность (число сложений и умножений) DFT
+    $$
+        \mathcal{O}[(HW)^2]
+    $$ 
+    \item вычислительная сложность быстрого преобразования Фурье
+    $$
+        HW\cdot \mathcal{O}[\ln(HW)]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Примеры спектров Фурье}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.5\textheight]{DFT_examples_waves.png}
+    \end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{$\blacksquare$ Quiz}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.7\textheight]{FTgame.png}
+    \end{figure}
+    \begin{itemize}
+        \item<2-> 1-h, 2-f, 3-g, 4-c, 5-b, 6-e, 7-d, 8-a
+    \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Обратное дискретное преобразование Фурье (IDFT)}
+\begin{itemize}
+    \item дискретное преобразование Фурье
+    $$
+        F(u, v)=\sum_{x=0}^{W-1}\sum_{y=0}^{H-1}f(x,y)\varphi(x,y,u,v)
+    $$  
+    \item обратное дискретное преобразование Фурье
+    $$
+        f(x,y)=\frac{1}{HW}
+        \sum_{u=0}^{W-1}\sum_{v=0}^{H-1}F(u,v)\varphi^\ast(x,y,u,v)
+    $$
+    \item обозначения
+    $$
+        F = \mathcal{F}[f]\,,\qquad
+        f = \mathcal{F}^{-1}[F]
+    $$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Примеры обратного преобразования Фурье}
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.8\textheight]{dft_random_phaseandamplitude.png}
+    \end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{$\blacksquare$ Спектр Фурье при сдвиге и повороте изображения}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{fig6.png}
+    \includegraphics[height=0.5\textheight]{fig7.png}
+\end{figure}
+\begin{itemize}
+    \item при сдвиге изображения спектр Фурье не меняется
+    \item при повороте изображения на угол $\alpha$, спектр Фурье тоже повернется на угол $\alpha$
+    \item фазовый спектр меняется в обоих случаях
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+% \frametitle{Теорема о свертке}
+% \begin{itemize}
+%     \item преобразование Фурье свертки равно произведению преобразований Фурье
+%     $$
+%         \mathcal{F}[w\circ f]=\mathcal{F}[w]\cdot \mathcal{F}[f]
+%     $$
+%     \item преобразование Фурье произведения двух изображений равно свертке их преобразований Фурье
+%     $$
+%         \mathcal{F}[f\cdot g]=\mathcal{F}[f]\circ \mathcal{F}[g]
+%     $$
+% \end{itemize}
+% \end{frame}
+
+%---------------------------------------------------------------------
+% \begin{frame}
+% \frametitle{Вычисление свертки с помощью преобразования Фурье}
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.3\textwidth]{gradient3.pdf}
+%     \includegraphics[height=0.3\textheight]{fig9.pdf}
+% \end{figure}
+% \begin{itemize}
+%     \item теорема о свертке
+%     $$
+%         \mathcal{F}[w\circ f]=\mathcal{F}[w]\cdot \mathcal{F}[f]
+%     $$
+%     \item вычисление свертки с помощью преобразования Фурье
+%     $$
+%         w\circ f =\mathcal{F}^{-1}[\mathcal{F}[w]\cdot \mathcal{F}[f]]
+%     $$
+%     \item вычислительная эффективность
+%     $$
+%         \frac{\mathcal{O}[HWn]}
+%         {HW\cdot \mathcal{O}[\ln(HW)]}=
+%         \mathcal{O}\left[\frac{n}{\ln(HW)}\right]
+%     $$
+% \end{itemize}
+% \end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{$\blacksquare$ Фильтрация изображений в частотной области}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{fig11.pdf}
+    \includegraphics[height=0.5\textheight]{fig12.pdf}
+\end{figure}
+\begin{itemize}
+    \item фильтрация шума в частотной области
+    $$
+        M\,\,\mbox{-- маска в частотной области}\,,\quad F=\mathcal{F}[f]
+        \qquad\mapsto\qquad 
+        g =\mathcal{F}^{-1}[M\cdot F]
+    $$
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------------
+\end{document}
