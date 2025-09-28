@@ -609,15 +609,17 @@ $$
 \frametitle{$\blacksquare$ Фильтрация изображений в частотной области}
 \begin{figure}
     \centering
-    \includegraphics[height=0.5\textheight]{fig11.pdf}
-    \includegraphics[height=0.5\textheight]{fig12.pdf}
+    \includegraphics[height=0.3\textheight]{fig11.pdf}
+    \includegraphics[height=0.3\textheight]{fig12.pdf}
 \end{figure}
 \begin{itemize}
-    \item фильтрация шума в частотной области
+    \item $M$ -- маска в частотной области
+    \item фильтрация изображения в частотной области
     $$
-        M\,\,\mbox{-- маска в частотной области}\,,\quad F=\mathcal{F}[f]
+        f \qquad\mapsto\qquad
+        \mathcal{F}[f]=F=|F|\cdot e^{i\arg F}
         \qquad\mapsto\qquad 
-        g =\mathcal{F}^{-1}[M\cdot F]
+        g =\mathcal{F}^{-1}\left[M\cdot |F|\cdot e^{i\arg F}\right]
     $$
 \end{itemize}
 \end{frame}
