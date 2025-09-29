@@ -5,7 +5,7 @@
 | 1  |Цветовые и геометрические операции над изображениями|[lecture_01.pdf](lectures/lecture_01.pdf)| [notebook_01.ipynb](notebooks/notebook_01.ipynb)|
 | 2  |Пространственная и частотная фильтрация изображений|[lecture_02.pdf](lectures/lecture_02.pdf)| [notebook_02.ipynb](notebooks/notebook_02.ipynb)|
 | 3  |Методы улучшения качества изображений|[lecture_03.pdf](lectures/lecture_03.pdf)|[notebook_03.ipynb](notebooks/notebook_03.ipynb)|
-| 4  |Детекция границ и линий на изображениях|||
+| 4  |Детекция границ и линий на изображениях|[lecture_04.pdf](lectures/lecture_04.pdf)|[notebook_04.ipynb](notebooks/notebook_04.ipynb)|
 | 5  |Сегментация и морфологическая обработка изображений|||
 | 6  |Детекция и сопоставление ключевых точек на изображениях|||
 | 7  |Гомография. Сшивка изображений|||
