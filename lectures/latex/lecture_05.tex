@@ -1,0 +1,421 @@
+\documentclass[12pt, usepdftitle=false, aspectratio=1610]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb,
+    amsmath,
+    hyperref
+}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[absolute, overlay]{textpos}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\graphicspath{{./figs/05}}
+
+\title[Лекция 5]{Детекция и сопоставление ключевых точек на изображениях}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Детекция и сопоставление ключевых точек}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.6\textheight]{two_views.jpg}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Детекция и сопоставление ключевых точек}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.6\textheight]{matches.jpg}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Детекция и сопоставление ключевых точек}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.6\textheight]{scene3d.pdf}
+    \hspace{1cm}
+    \includegraphics[height=0.6\textheight]{two_cameras.pdf}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Детекция ключевых точек (keypoints detection)}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{two_views.png}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.3\textheight]{keypoints.png}
+\end{figure}
+\begin{itemize}
+    \item ``плоские'' точки и точки на границах не являются ключевыми
+    \item угловые точки -- хорошие кандидаты в ключевые точки
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сопоставление ключевых точек (keypoints matching)}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.45\textheight]{matches.jpg}
+\end{figure}
+\begin{itemize}
+    \item для ключевых точек найти дескрипторы, устойчивые при геометрических и цветовых аугментациях изображений
+    $$
+        \left\{x_i\,,y_i\,,\mathbf{d}_i\right\}\qquad
+        \left\{x'_j\,,y'_j\,,\mathbf{d}'_j\right\}\qquad
+        \mathbf{d}_i\,,\mathbf{d}'_j\in\mathbf{R}^D
+    $$
+    \item сопоставить ключевые точки по близости дескрипторов в пространстве $\mathbf{R}^D$
+    $$
+        \mathbf{d}_i\approx\mathbf{d}'_j
+        \quad\Rightarrow\quad
+        (x_i\,,y_i)\leftrightarrow (x'_j\,,y'_j)
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Детекторы ключевых точек и их дескрипторов}
+\begin{itemize}
+    \item Классические детекторы
+    \begin{itemize}
+        \item ORB (Oriented FAST and Rotated BRIEF)
+        \item SURF (Speeded-Up Robust Features)
+        \item \textbf{SIFT} (Scale Invariant Feature Transform)
+        
+        \href{https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf}
+        {D.G. Lowe <<Distinctive Image Features from Scale-Invariant Keypoints>>, 2004}
+    \end{itemize}
+    \item Нейросетевые детекторы
+    \begin{itemize}
+        \item D2-Net (\url{https://github.com/mihaidusmanu/d2-net})
+        \item LoFTR (\url{https://github.com/zju3dv/LoFTR})
+        \item \textbf{SuperPoint} 
+        
+        \href{https://arxiv.org/abs/1712.07629}
+        {D. DeTone etc. <<Self-Supervised Interest Point Detection and Description>>, 2017}
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{SIFT: построение пирамиды Гаусса}
+\begin{textblock}{8}(0.5, 3)
+    Требуется устойчивость относительно изменения масштаба изображения.
+    \vspace{0.5cm}
+
+    Разложим изображение в гауссовскую пирамиду разбитую на октавы.
+    $$
+        L_\sigma = G_\sigma \circ f
+    $$
+    $$
+        G_\sigma=K\cdot\exp\left\{-\frac{s^2+t^2}{2\sigma^2}\right\}
+    $$
+\end{textblock}
+\begin{textblock}{5}(8.5, 2)
+    \includegraphics[height=0.85\textheight]{pyramid.pdf}
+\end{textblock}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{SIFT: построение DoG пирамиды}
+\begin{figure}
+    \includegraphics[height=0.5\textheight]{log_pyramid.pdf}
+\end{figure}
+DoG (Difference of Gaussians) пирамида
+$$
+     D(x,y,\sigma) = L_{k\sigma}(x,y)-L_{\sigma}(x,y)  
+$$
+Можно показать, что
+$$
+    D(x,y,\sigma)\approx
+    \Delta \left(G_\sigma\circ f\right)=\mathrm{LoG}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{SIFT: локальные экстремумы в пирамиде DoG}
+\begin{figure}
+    \includegraphics[height=0.4\textheight]{extremum.pdf}
+\end{figure}
+кандидаты в ключевые точки -- локальные экстремумы функции трех переменных $D(x,y,\sigma)$
+в окрестности $3\times3$
+$$
+    \left\{x_\ast,y_\ast,\sigma_\ast\right\}=
+    \left\{\argmin_{x,y,\sigma} D(x,y,\sigma)\right\}
+    \cup
+    \left\{\argmax_{x,y,\sigma} D(x,y,\sigma)\right\}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{SIFT: построение ключевых точек}
+\begin{figure}
+    \includegraphics[height=0.35\textheight]{building.png}
+    \hspace{1cm}
+    \includegraphics[height=0.35\textheight]{sift_keypoints.pdf}
+\end{figure}
+\begin{itemize}
+    \item найденные экстремумы содержат граничные и угловые точки
+    \item вычислим собственные  числа матрицы Гессе в точках $\left\{x_\ast,y_\ast,\sigma_\ast\right\}$
+    $$
+        \mathbf{H}=
+        \begin{bmatrix}
+        D_{xx} & D_{xy} \\
+        D_{xy} & D_{yy}
+        \end{bmatrix}\,,
+        \qquad
+        \mathbf{H}\cdot\mathbf{v}_1=\lambda_1\cdot\mathbf{v}_1\,,
+        \quad
+        \mathbf{H}\cdot\mathbf{v}_2=\lambda_2\cdot\mathbf{v}_2
+    $$
+    \item ключевые точки находятся из условия 
+
+  $$
+    \frac{(\lambda_1+\lambda_2)^2}{\lambda_1\lambda_2} < 
+    \frac{(r+1)^2}{r}
+    \qquad
+    \left(r = 10\,,\quad \frac{(r+1)^2}{r}=12.1\right)
+  $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{SIFT: вычисление ориентаций ключевых точек}
+\begin{figure}
+    \includegraphics[height=0.3\textheight]{orientation1.pdf}
+    \hspace*{1cm}
+    \includegraphics[height=0.3\textheight]{orientation2.jpg}
+\end{figure}
+\begin{itemize}
+    \item для окрестности каждой особой точки в пирамиде Лапласа $L(x,y)=L_{\sigma_\ast}(x,y)$
+    вычислим  модуль и направление градиента
+    $$
+        m=\sqrt{(L'_x)^2+(L'_y)^2}\qquad
+        \alpha=\arctan\left(\frac{L'_x}{L'_y}\right)
+    $$
+    \item построим гистограмму направлений градиентов, вклад в гистограмму умножается
+    на $m$
+    \item в качестве ориентации ключевой точки возьмем пики на гистограмме
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{SIFT: построение дескрипторов ключевых точек}
+\begin{textblock}{8}(-0.1, 3)
+    \begin{itemize}
+        \item для устойчивости к повороту градиенты поворачиваются на угол ориентации ключевой точки
+        \item дескриптор - это вектор, состоящий из  $16\cdot8=128$  значений гистограмм
+        $$
+            \mathbf{d}\in\mathbf{R}^{128}
+        $$
+    \end{itemize}
+\end{textblock}
+\begin{textblock}{5}(7.8, 3)
+    \includegraphics[height=0.75\textheight]{sift_descriptor.pdf}
+\end{textblock}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{SIFT: устойчивость к цветовой аугментации изображения}
+\begin{itemize}
+\item дескриптор нормируется для устойчивости к  цветовой аугментации
+ $$
+    \mathbf{d}=\frac{\mathbf{d}}{\norm{\mathbf{d}}}
+$$
+\item в OpenCV реализации
+\vspace*{0.4cm}
+
+\begin{figure}[h!]
+    \centering
+    \begin{minted}{python}
+        d = np.clip(512 * d, 0, 255)
+    \end{minted}
+\end{figure}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{SuperPoint: архитектура нейронной сети}
+\begin{figure}
+    \includegraphics[height=0.6\textheight]{superpoint.pdf}
+\end{figure}
+$$
+    \mbox{\textbf{Grayscale Image}}
+    \mapsto
+    \mbox{\textbf{Superpoint Network}}
+    \mapsto
+    \left\{x_n, y_y, \mathbf{d}_n\right\}
+    \quad
+$$
+$$
+    \mathbf{d}_n\in\mathbf{R}^{256}\qquad
+    \norm{\mathbf{d}_n}=1
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{SuperPoint: обучение нейронной сети}
+\begin{figure}
+    \includegraphics[height=0.6\textheight]{superpoint_train.png}
+\end{figure}
+Устойчивость дескрипторов достигается с помощью цветовой и геометрической
+аугментации изображений во время обучения.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{SuperPoint: вычисление расстояний между дескрипторами}
+\begin{itemize}
+    \item норма SuperPoint дескрипторов равна единице
+    $$
+        \left\{\mathbf{d}_n\right\}_{n=1}^N
+        \quad
+        \left\{\mathbf{d}'_m\right\}_{m=1}^M
+        \qquad
+        \norm{\mathbf{d}_n}=\norm{\mathbf{d}'_m}=1
+    $$
+    \item расстояния можно вычислить с помощью скалярных произведений
+    $$
+        \norm{\mathbf{d}'_m-\mathbf{d}_n}^2=
+        \norm{\mathbf{d}'_m}^2+\norm{\mathbf{d}_n}^2-2\cdot(\mathbf{d}'_m\,,\mathbf{d}_n)=
+        2\cdot[1-(\mathbf{d}'_m\,,\mathbf{d}_n)]
+    $$
+    \item скалярные произведения вычисляются с помощью матричного умножения
+    $$
+        \boldsymbol{D}=
+        \begin{bmatrix*}[c]
+            \mathbf{d}_1 \\ \mathbf{d}_2 \\ \vdots \\ \mathbf{d}_N 
+        \end{bmatrix*}
+        \in\mathcal{M}(N\times256)
+        \qquad
+        \boldsymbol{D}'=
+        \begin{bmatrix*}[c]
+            \mathbf{d}'_1 \\ \mathbf{d}'_2 \\ \vdots \\ \mathbf{d}_M 
+        \end{bmatrix*}
+        \in\mathcal{M}(M\times256)
+    $$
+    $$
+        \left[\boldsymbol{D}'\cdot \boldsymbol{D}^T\right]_{mn}=
+        (\mathbf{d}'_m\,,\mathbf{d}_n)
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Ratio test matching}
+\begin{figure}
+    \includegraphics[height=0.4\textheight]{audi.pdf}
+    %\caption*{$(x, y, \mathbf{d})$ - на левом изображении $\quad(x', y', \mathbf{d}')$ - на правом изображении}
+\end{figure}
+\begin{itemize}
+    \item для каждого дескриптора $\mathbf{d}$ найдем два ближайших соседа $\mathbf{d}'_1$, $\mathbf{d}'_2$
+    \item зададим порог $0<T<1$
+    \item $(x,y)$, $(x'_1,y'_1)$ -- пара соответствующих точек, если
+    $$
+        \norm{\mathbf{d}-\mathbf{d}'_1} < T\cdot\norm{\mathbf{d}-\mathbf{d}'_2}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Cross check matching}
+\begin{figure}
+    \includegraphics[height=0.3\textheight]{cross_check.png}
+\end{figure}
+$(x,y)$, $(x',y')$ -- пара соответствующих точек, если
+\begin{itemize}
+    \item
+    $$
+        \mathbf{d}'\quad\mbox{ближайший сосед}\quad\mathbf{d}
+    $$
+    \item
+    $$
+        \mathbf{d}\quad\mbox{ближайший сосед}\quad\mathbf{d}'
+    $$
+    \item
+    $$
+        \norm{\mathbf{d}-\mathbf{d}'} < T
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{OpenCV Matching}
+\begin{itemize}
+    \item Brute-Force -- алгоритм поиска ближайших соседей полным перебором (точный, но не быстрый)
+    \vspace*{0.1cm}
+    \begin{minted}{python}
+        bf = cv2.BFMatcher(
+            cv2.NORM_L2, 
+            crossCheck=True
+        )
+    \end{minted}
+    \vspace*{0.2cm}
+    \item FLANN -- алгоритм поиска ближайших соседей c помощью нескольких kd-деревьев
+    (быстрый, но не точный)
+    \vspace*{0.1cm}
+    \begin{minted}{python}
+        flann = cv2.FlannBasedMatcher(
+            {"algorithm": 1, "trees": 5}
+        )
+    \end{minted}
+\end{itemize}
+\end{frame}
+
+\end{document}
