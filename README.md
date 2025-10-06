@@ -6,7 +6,7 @@
 | 2  |Пространственная и частотная фильтрация изображений|[lecture_02.pdf](lectures/lecture_02.pdf)| [notebook_02.ipynb](notebooks/notebook_02.ipynb)|
 | 3  |Методы улучшения качества изображений|[lecture_03.pdf](lectures/lecture_03.pdf)|[notebook_03.ipynb](notebooks/notebook_03.ipynb)|
 | 4  |Детекция границ и линий на изображениях|[lecture_04.pdf](lectures/lecture_04.pdf)|[notebook_04.ipynb](notebooks/notebook_04.ipynb)|
-| 5  |Детекция и сопоставление ключевых точек на изображениях|||
+| 5  |Детекция и сопоставление ключевых точек на изображениях|[lecture_notes_05.pdf](lectures/lecture_notes_05.pdf)|[notebook_05.ipynb](notebooks/notebook_05.ipynb)|
 | 6  |Сегментация и морфологическая обработка изображений|||
 | 7  |Гомография. Сшивка изображений|||
 | 8  |Проективная модель камеры. Калибровка камеры|||
