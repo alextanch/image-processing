@@ -1,0 +1,162 @@
+\documentclass[12pt, usepdftitle=false, aspectratio=1610]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb,
+    amsmath,
+    hyperref
+}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[absolute, overlay]{textpos}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\graphicspath{{./figs/06}}
+
+\title[Лекция 6]{Сегментация и морфологическая обработка изображений}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задачи сегментации и морфологической обработки}
+\begin{itemize}
+    \item \textbf{Сегментация изображений} -- присвоить пикселям метки классов
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{satellite.png}
+        \hspace{0.3cm}
+        \includegraphics[height=0.3\textheight]{semantic_road.png}
+    \end{figure}
+    \vspace*{0.5cm}
+    \item \textbf{Морфологическая обработка изображений} -- операции над бинарными изображениями
+    \begin{figure}
+        \centering
+        \includegraphics[height=0.3\textheight]{seg_morph.png}
+    \end{figure}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Примеры использования}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{road_seg.jpg}
+    \includegraphics[height=0.35\textheight]{sat_segm.png}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{med_seg.png}
+    \includegraphics[height=0.35\textheight]{med_seg1.png}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с помощью обучения с учителем}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{segm_types.pdf}
+\end{figure}
+\begin{itemize}
+    \item[(b)] \textbf{semantic segmentation} -- каждому пикселю присваивается метка класса
+    \item[(c)] \textbf{instance segmentation} -- не только классифицировать пиксели по классу, но и отличать друг от друга отдельные экземпляры объектов одного класса
+    \item[(d)] \textbf{panoptic segmentation} -- объединяет semantic и instance сегментацию
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с помощью кластеризации}
+Пиксели изображения кластеризуются по признакам (цвет, яркость, координаты, текстура и т.д.)
+
+\begin{itemize}
+    \item \textbf{пороговая сегментация}
+    \item \textbf{k-means сегментация}
+    \item \textbf{mean-shift сегментация}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Пороговая сегментация}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.3\textwidth]{seg_threshold1.pdf}
+    \includegraphics[width=0.3\textwidth]{seg_threshold2.pdf}
+    \includegraphics[width=0.3\textwidth]{seg_threshold3.pdf}
+\end{figure}
+
+Сегментация с порогами $T_1$ и $T_2$
+$$
+    g(x, y) =
+    \begin{cases}
+        0\,, & f(x,y) < T_1 \\        
+        128\,, & T_1 \leqslant f(x,y) \leqslant T_2 \\
+        255\,, & f(x,y) > T_2 
+    \end{cases}
+$$
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Метод Оцу вычисления порога бинарной сегментации}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{otsu.pdf}
+\end{figure}
+
+\begin{itemize}
+    \item для каждого порога $T=1,2,\ldots,255$, разобьем все пиксели на два класса
+    $$
+        C_1 = \left\{(x,y): f(x,y) < T\right\}\,,\quad
+        C_2 = \left\{(x,y): f(x,y) \geqslant T\right\}
+    $$
+    \item в методе Оцу порог подбирается так, что бы дисперсия значений пикселей в каждом классе была минимальна
+    $$
+        T_\ast=\argmin_{0 < T < 256} 
+        \left[\sigma_1^2  + \sigma_2^2\right]
+    $$
+    где $\sigma_1^2, \sigma_2^2$ -- дисперсии яркостей пикселей в классах $C_1$ и $C_2$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------
+\end{document}
+
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{}
+\end{frame}
