@@ -7,7 +7,7 @@
 | 3  |Методы улучшения качества изображений|[lecture_03.pdf](lectures/lecture_03.pdf)|[notebook_03.ipynb](notebooks/notebook_03.ipynb)|
 | 4  |Детекция границ и линий на изображениях|[lecture_04.pdf](lectures/lecture_04.pdf)|[notebook_04.ipynb](notebooks/notebook_04.ipynb)|
 | 5  |Детекция и сопоставление ключевых точек на изображениях|[lecture_notes_05.pdf](lectures/lecture_notes_05.pdf)|[notebook_05.ipynb](notebooks/notebook_05.ipynb)|
-| 6  |Сегментация и морфологическая обработка изображений|||
+| 6  |Сегментация изображений|[lecture_06.ipynb](lectures/lecture_06.ipynb)|[lecture_06.ipynb](lectures/lecture_06.ipynb)|
 | 7  |Гомография. Сшивка изображений|||
 | 8  |Проективная модель камеры. Калибровка камеры|||
 | 9  |Эпиполярная геометрия. Относительное положение камер|||
