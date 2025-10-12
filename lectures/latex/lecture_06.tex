@@ -1,0 +1,388 @@
+\documentclass[12pt, usepdftitle=false, aspectratio=1610]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb,
+    amsmath,
+    hyperref,
+    subfig
+}
+\usepackage[absolute, overlay]{textpos}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subcaption}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\graphicspath{{./figs/06}}
+
+\title[Лекция 6]{Сегментация изображений}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Задача сегментации изображений}
+    \begin{figure}
+        \captionsetup[subfigure]{labelformat=empty}
+        \centering
+        \subfloat{\includegraphics[height=0.3\textheight]{satellite.png}}
+        \qquad
+        \subfloat{\includegraphics[height=0.3\textheight]{semantic_road.png}}
+    \end{figure}
+    \begin{figure}
+        \captionsetup[subfigure]{labelformat=empty}
+        \centering
+        \subfloat{\includegraphics[height=0.3\textheight]{meanshift13.png}}
+        \qquad
+        \subfloat{\includegraphics[height=0.3\textheight]{meanshift14.png}}
+    \end{figure}
+    \textbf{Сегментация изображений} -- объединение пикселей по каким-либо признакам (цвет, координаты, метки классов и т.д.)
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Примеры использования}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{road_seg.jpg}
+    \includegraphics[height=0.35\textheight]{sat_segm.png}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.35\textheight]{med_seg.png}
+    \includegraphics[height=0.35\textheight]{med_seg1.png}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с помощью классификации}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{segm_types.pdf}
+\end{figure}
+Каждому пикселю изображения присваивается метка класса.
+\vspace{0.2cm}
+
+Виды сегментации:
+\vspace{0.2cm}
+\begin{itemize}
+    \item[(b)] \textbf{semantic segmentation} -- каждому пикселю присваивается метка класса
+    \item[(c)] \textbf{instance segmentation} -- не только классифицировать пиксели по классу, но и отличать друг от друга отдельные экземпляры объектов одного класса
+    \item[(d)] \textbf{panoptic segmentation} -- объединяет semantic и instance сегментацию
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с помощью кластеризации}
+\begin{figure}
+    \captionsetup[subfigure]{labelformat=empty}
+    \centering
+    \subfloat{\includegraphics[height=0.3\textheight]{meanshift13.png}}
+    \qquad
+    \subfloat{\includegraphics[height=0.3\textheight]{meanshift15.png}}
+    \caption*{Пример сегментации с помощью признаков $\boldsymbol{f}=\left(R\,,G\,,B\,,x\,,y\right)$}
+\end{figure}
+
+Пиксели изображения кластеризуются по признакам.
+\vspace{0.2cm}
+
+В качестве признаков можно использовать:
+\begin{itemize}
+    \item цветовые каналы (RGB, HSV, YCrCb и т.д.)
+    \vspace{0.2cm}
+    \item координаты пикселей $(x, y)$
+    \vspace{0.2cm}
+    \item признаки, выделенные нейронными сетями
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сегментация с помощью кластеризации}
+
+Способы сегментации
+\vspace{0.4cm}
+
+\begin{itemize}
+    \item Сегментация с помощью фундаментальных моделей
+    \begin{itemize}
+        \item SAM2  (Segment Anything 2, 11M images, 1B+ masks) \url{https://sam2.metademolab.com/demo}
+        \vspace{0.2cm}
+        \item DINO2 \url{https://dinov2.metademolab.com/demos}
+    \end{itemize}
+    \vspace{0.2cm}
+
+    \item Классические методы сегментации
+    \begin{itemize}
+        \item \textbf{пороговая сегментация}
+        \vspace{0.2cm}
+        \item \textbf{k-means сегментация}
+        \vspace{0.2cm}
+        \item \textbf{mean-shift сегментация}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Пороговая сегментация}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.3\textwidth]{seg_threshold1.pdf}
+    \includegraphics[width=0.3\textwidth]{seg_threshold2.pdf}
+    \includegraphics[width=0.3\textwidth]{seg_threshold3.pdf}
+\end{figure}
+
+Сегментация с порогами $T_1$ и $T_2$
+$$
+    g(x, y) =
+    \begin{cases}
+        0\,, & f(x,y) < T_1 \\        
+        128\,, & T_1 \leqslant f(x,y) \leqslant T_2 \\
+        255\,, & f(x,y) > T_2 
+    \end{cases}
+$$
+\end{frame}
+
+%---------------------------------------------------
+\begin{frame}
+\frametitle{Метод Оцу вычисления порога бинарной сегментации}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{otsu.pdf}
+\end{figure}
+
+\begin{itemize}
+    \item для каждого порога $T=1,2,\ldots,255$, разобьем все пиксели на два класса
+    $$
+        C_1 = \left\{(x,y): f(x,y) < T\right\}\,,\quad
+        C_2 = \left\{(x,y): f(x,y) \geqslant T\right\}
+    $$
+    \item в методе Оцу порог подбирается так, что бы дисперсия значений пикселей в каждом классе была минимальна
+    $$
+        T_\ast=\argmin_{0 < T < 256} 
+        \left[\sigma_1^2(T)  + \sigma_2^2(T)\right]
+    $$
+    где $\sigma_1^2, \sigma_2^2$ -- дисперсии яркостей пикселей в классах $C_1$ и $C_2$
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{Пример: 3-means кластеризация}
+\begin{wrapfigure}{r}{0.3\textwidth}
+    \vspace{-40pt}
+    \begin{center}
+        \includegraphics[height=0.85\textheight]{3means.png}
+    \end{center}
+\end{wrapfigure}
+
+\textbf{Задача:} разбить точки в \textbf{пространстве признаков} на $3$ кластера
+\vspace*{1cm}
+
+\textbf{Решение:}
+\vspace*{0.5cm}
+\begin{itemize}
+    \item[\textbf{1.}] случайно инициализировать центры кластеров 
+    \vspace*{0.2cm}
+    \item[\textbf{2.}] создать кластеры, отнеся каждую точку к ближайшему центру
+    \vspace*{0.2cm}
+    \item[\textbf{3.}] пересчитать центры кластеров как среднее значение точек в кластере
+    \vspace*{0.2cm}
+    \item[\textbf{4.}] повторять шаги 2-3 пока центры кластеров не перестанут меняться
+\end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+\frametitle{k-means кластеризация}
+
+\textbf{Дано:} $N$ точек в пространстве признаков $\boldsymbol{f}_n\in\mathbf{R}^d$ и число кластеров $k$
+\vspace*{0.5cm}
+
+\textbf{Задача:} найти $k$ кластеров
+\vspace*{0.5cm}
+
+\textbf{Решение:}
+\vspace*{0.2cm}
+\begin{itemize}
+    \item[\textbf{1.}] случайно инициализировать $k$ центров кластеров $\boldsymbol{c}_1,\ldots,\boldsymbol{c}_k\in\mathbf{R}^d$
+    \vspace*{0.2cm}
+    \item[\textbf{2.}] для каждой точки $\boldsymbol{f}_n$ найти ближайший центр кластера $\boldsymbol{c}_i$ и отнести точку к  кластеру $i$
+    \vspace*{0.2cm}
+    \item[\textbf{3.}] пересчитать центры кластеров как среднее значение точек в кластере
+    \vspace*{0.2cm}
+    \item[\textbf{4.}] повторять шаги 2-3 пока изменения во всех центрах кластеров не станут меньше $\varepsilon$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Свойства k-means кластеризации}
+\begin{itemize}
+    \item простой и быстрый алгоритм
+    \vspace*{0.2cm}
+    \item требует задания числа кластеров $k$
+    \vspace*{0.2cm}
+    \item  чувствителен к выбору начальных центров кластеров
+    \vspace*{0.2cm}
+    \item чувствителен к выбросам
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{k-means сегментация изображения}
+    \begin{figure}
+        \captionsetup[subfigure]{labelformat=empty}
+        \centering
+        \subfloat[Исходное изображение]{\includegraphics[height=0.3\textheight]{kmeans5.jpg}}
+        \qquad
+        \subfloat[$\boldsymbol{f}=\left(R\,,G\,,B\right)$]{\includegraphics[height=0.3\textheight]{kmeans8.jpg}}
+    \end{figure}
+    \begin{figure}
+        \captionsetup[subfigure]{labelformat=empty}
+        \centering
+        \subfloat[$k=16$, $\boldsymbol{f}=\left(R\,,G\,,B\right)$]{\includegraphics[height=0.3\textheight]{kmeans6.jpg}}
+        \qquad
+        \subfloat[$\boldsymbol{f}=\left(R\,,G\,,B\,,x\,,y\right)$]{\includegraphics[height=0.3\textheight]{kmeans7.jpg}}
+    \end{figure}
+\end{frame}
+
+
+%---------------------------------------------------------------------
+\begin{frame}
+    \frametitle{Mean-shift кластеризация}
+    \begin{figure}
+        \captionsetup[subfigure]{labelformat=empty}
+        \centering
+        \subfloat[Точки признаков]{\includegraphics[height=0.35\textheight]{meanshift1.pdf}}
+        \quad
+        \subfloat[Плотность распределения признаков]{\includegraphics[height=0.35\textheight]{meanshift3.pdf}}
+        \quad
+        \subfloat[Кластеры]{\includegraphics[height=0.35\textheight]{meanshift2.pdf}}
+    \end{figure}
+    \begin{itemize}
+        \item каждый холм представляет кластер
+        \item пики холмов -- центры кластеров
+        \item каждая точка взбирается по самому крутому холму 
+        \item точки, взобравшиеся на один холм, образуют кластер
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Как точки взбираются на холмы}
+\begin{figure}
+    \centering
+    \subfloat{\includegraphics[height=0.3\textheight]{meanshift4.png}}
+    \quad
+    \subfloat{\includegraphics[height=0.3\textheight]{meanshift5.png}}
+    \quad
+    \subfloat{\includegraphics[height=0.3\textheight]{meanshift6.png}}
+\end{figure}
+\begin{itemize}
+    \item каждая точка $\boldsymbol{f}_n$ сдвигается в сторону среднего значения точек в окрестности радиуса $R$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Как точки взбираются на холмы}
+\begin{figure}
+    \centering
+    \subfloat{\includegraphics[height=0.3\textheight]{meanshift7.png}}
+    \quad
+    \subfloat{\includegraphics[height=0.3\textheight]{meanshift8.png}}
+    \quad
+    \subfloat{\includegraphics[height=0.3\textheight]{meanshift9.png}}
+\end{figure}
+\begin{itemize}
+    \item каждая точка $\boldsymbol{f}_n$ сдвигается пока не перестанет меняться
+    \item точки, которые сойдутся в одну точку, образуют кластер
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Свойства mean-shift кластеризации}
+\begin{itemize}
+    \item простой алгоритм, но вычислительно дорогой 
+    \vspace*{0.2cm}
+    \item находит число кластеров автоматически
+    \vspace*{0.2cm}
+    \item  не требует инициализации центров кластеров
+    \vspace*{0.2cm}
+    \item нечувствителен к выбросам
+    \vspace*{0.2cm}
+    \item кластеризация зависит от радиуса окрестности $R$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Mean-shift vs k-means: кластеризация точек}
+    \begin{figure}
+        \captionsetup[subfigure]{labelformat=empty}
+        \centering
+        \subfloat[Точки на плоскости]{\includegraphics[height=0.45\textheight]{meanshift10.png}}
+        \qquad
+        \subfloat[k-means, $k=3$]{\includegraphics[height=0.45\textheight]{meanshift11.png}}
+        \qquad
+        \subfloat[Mean shift]{\includegraphics[height=0.45\textheight]{meanshift12.png}}
+    \end{figure}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \frametitle{Mean-shift vs k-means: сегментация изображения}
+    \begin{figure}
+        \captionsetup[subfigure]{labelformat=empty}
+        \centering
+        \subfloat[$\boldsymbol{f}=\left(R\,,G\,,B\,,x\,,y\right)$]{\includegraphics[height=0.3\textheight]{meanshift13.png}}
+        \qquad
+        \subfloat[k-means, $k=16$]{\includegraphics[height=0.3\textheight]{meanshift14.png}}
+        \qquad
+        \subfloat[Mean shift]{\includegraphics[height=0.3\textheight]{meanshift15.png}}
+    \end{figure}
+\end{frame}
+
+%---------------------------------------------------
+\end{document}
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{}
+\end{frame}
