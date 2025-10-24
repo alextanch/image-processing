@@ -1,0 +1,792 @@
+\documentclass[12pt, usepdftitle=false, aspectratio=1610]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+%\usefonttheme{structuresmallcapsserif}
+
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb,
+    amsmath,
+    amsfonts,
+    amssymb,
+    hyperref,
+    subfig,
+    tikz, tikz-3dplot, xcolor, physics, bm
+}
+\usepackage[absolute, overlay]{textpos}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subcaption}
+\usetikzlibrary{calc,arrows.meta,positioning,backgrounds}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\graphicspath{{./figs/07}}
+
+\title[Лекция 7]{Модель pinhole-камеры}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Содержание модуля}
+{\Large\bf Основы 3D компьютерного зрения.}
+\vspace{0.5cm}
+\begin{itemize}
+    \item Модель pinhole-камеры.
+    \item Основные задачи 3D CV для трехмерных сцен.
+    \item Двумерные преобразования изображений.
+    \item Основные задачи 3D CV для сцен на плоскости.
+    \item Эпиполярная геометрия.
+    \item Реконструкция трехмерных сцен.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Используемая литература}
+    {\large\bf Основная:}
+    \begin{itemize}
+        \item Simon J.D. Prince.
+        <<Computer Vision: Models, Learning, and Inference>> 
+        \url{https://udlbook.github.io/cvbook} \\
+        \vskip0.2cm
+        (Главы 14-16)
+    \end{itemize}
+    \vspace{0.5cm}
+    {\large\bf Для углубленного изучения:}
+    \begin{itemize}
+        \item Hartley R., Zisserman A. 
+        <<Multiple View Geometry in Computer Vision>>
+        \vskip0.2cm
+        \item Yi Ma, etc. 
+        <<An Invitation to 3-D Vision: From Images to Geometric Models>> 
+    \end{itemize}   
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Однородные координаты на плоскости}
+\begin{itemize}
+    \item Преобразование декартовых координат точек на плоскости в трехмерные точки 
+    с однородными координатами
+    $$
+        \mathbf{x} =
+        \begin{bmatrix}
+            x \\
+            y
+        \end{bmatrix}
+        \rightarrow
+        \lambda\cdot
+        \begin{bmatrix}
+            x \\
+            y \\
+            1
+        \end{bmatrix} =
+        \widetilde{\mathbf{x}}
+        \qquad
+        \lambda \neq 0
+    $$
+    
+    \item Это избыточное представление в том смысле, 
+    что  различные $\lambda$ соответствуют одной декартовой точке.
+    
+    \item При преобразовании декартовых координат в однородные, 
+    обычно выбирают $\lambda = 1$
+    $$
+        \mathbf{x} =
+        \begin{bmatrix}
+            x \\
+            y
+        \end{bmatrix}
+        \rightarrow
+        \begin{bmatrix}
+            x \\
+            y \\
+            1
+        \end{bmatrix} =
+        \widetilde{\mathbf{x}}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Однородные координаты на плоскости}
+\begin{itemize}
+    \item Обратное преобразование из однородных координат в декартовы:
+    $$
+        \widetilde{\mathbf{x}} =
+        \begin{bmatrix}
+            \tilde{x} \\
+            \tilde{y} \\
+            \tilde{z}
+        \end{bmatrix}
+        \rightarrow
+        \begin{bmatrix}
+            \tilde{x}/\tilde{z} \\
+            \tilde{y}/\tilde{z}
+        \end{bmatrix} =
+        \mathbf{x}
+        \qquad
+        \widetilde{z} \neq 0
+    $$
+    
+    \item Точки с $\widetilde{z} = 0$ называются точками на бесконечности.
+    \item Пример:
+    $$
+        \widetilde{\mathbf{x}} =
+        \begin{bmatrix}
+            2 \\
+            3 \\
+            1
+        \end{bmatrix} = 
+        \begin{bmatrix}
+            4 \\
+            6 \\
+            2
+        \end{bmatrix}
+        \rightarrow 
+        \begin{bmatrix}
+            4/2 \\
+            6/2
+        \end{bmatrix} =
+        \begin{bmatrix}
+            2 \\
+            3
+        \end{bmatrix} =
+        \mathbf{x}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Однородные координаты в пространстве}
+\begin{itemize}
+    \item Аналогично для трехмерного пространства: каждую точку в трехмерном пространстве 
+    $\mathbf{w}$ можно преобразовать в четырехмерную точку с однородными координатами 
+    $\widetilde{\mathbf{w}}$
+    $$
+        \mathbf{w} =
+        \begin{bmatrix}
+            u \\
+            v \\
+            w
+        \end{bmatrix}
+        \rightarrow
+        \lambda\cdot
+        \begin{bmatrix}
+            u \\
+            v \\
+            w \\
+            1
+        \end{bmatrix} = 
+        \widetilde{\mathbf{w}}
+        \qquad \lambda \neq 0
+    $$
+    \item И обратно из однородных координат в декартовы:
+    $$
+        \widetilde{\mathbf{w}}=
+        \begin{bmatrix}
+            \tilde{u} \\
+            \tilde{v} \\
+            \tilde{w} \\
+            \tilde{z}
+        \end{bmatrix}
+        \rightarrow
+        \begin{bmatrix}
+            \tilde{u}/\tilde{z} \\
+            \tilde{v}/\tilde{z} \\
+            \tilde{w}/\tilde{z} \\
+        \end{bmatrix}=
+        \mathbf{w}
+    $$
+    \item Точки с $\tilde{w} = 0$ называются точками на бесконечности.           
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразования трехмерных декартовых координат}
+
+\begin{center}
+\tdplotsetmaincoords{-60}{-35}
+\begin{tikzpicture}[
+        tdplot_main_coords,
+        scale=0.9,
+        >=Stealth,
+        scale=0.8,
+    ]   
+    \coordinate (O) at (0,0,0);
+
+    \draw [thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (O)     edge node [pos=1, anchor=north east] {$w_2$} % 2
+        +(0,1.5,0) edge node [pos=1, anchor=north east] {$v_2$} % 3
+        +(0,0,1.5) -- 
+        +(1.5,0,0) node [anchor=north west] {$u_2$} % 1
+    ;
+
+    \tdplotsetrotatedcoords{-10}{40}{30}
+    \coordinate (T) at (2.5,-2,-3);
+    \tdplotsetrotatedcoordsorigin{(T)}
+    
+    \draw [tdplot_rotated_coords, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (0,0,0) edge node [pos=1, anchor=north east] {$w_1$} % 2 -> z
+        +(0,1.5,0) edge node [pos=1, anchor=north east] {$v_1$} % 3 -> y
+        +(0,0,1.5) -- 
+        +(1.5,0,0) node [anchor=north west] {$u_1$} % 1 -> x
+    ;
+    \coordinate (P) at (-2,3,-2);
+    
+    \path [every node/.style={font=\footnotesize, inner sep=4pt}] 
+        (P) node [above right] {$\mathbf{w_2}=[u_2,v_2,w_2]$};
+
+    \path [every node/.style={font=\footnotesize, inner sep=4pt}] 
+        (P) node [below right] {$\mathbf{w_1}=[u_1,v_1,w_1]$};
+
+    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+    %     ($0.5*(O)+0.5*(T)$) node [below right] {$\mathbf{t}$};
+
+    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+    %     (O) node [below right] {$\mathbf{o}_2$};
+
+    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+    %     (T) node [right] {$\mathbf{o}_1$};
+
+    %\draw [thick, blue, dashed] (O.center) -- (T.center);
+    \draw [thick, black, fill=blue] (O) circle [radius=1.2pt];
+    \draw [thick, black, fill=blue] (T) circle [radius=1.2pt];
+    \draw [thick, black, fill=red] (P) circle [radius=2pt];
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}
+    \item Рассмотрим две системы координат, связанные между собой вращением и сдвигом.
+    \item Координаты точки $\mathbf{w}_1$ в первой системе координат связаны с координатами
+    точки $\mathbf{w}_2$ во второй системой координат следующим образом
+    $$
+        \mathbf{w}_2 = \mathbf{R}\cdot\mathbf{w}_1 + \mathbf{t}
+    $$
+    где $\mathbf{R}$ --- матрица вращения, а $\mathbf{t}$ --- вектор сдвига.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразования трехмерных декартовых координат}
+
+\begin{center}
+\tdplotsetmaincoords{-60}{-35}
+\begin{tikzpicture}[
+        tdplot_main_coords,
+        scale=0.9,
+        >=Stealth,
+        scale=0.8,
+    ]   
+    \coordinate (O) at (0,0,0);
+
+    \draw [thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (O)     edge node [pos=1, anchor=north east] {$w_2$} % 2
+        +(0,1.5,0) edge node [pos=1, anchor=north east] {$v_2$} % 3
+        +(0,0,1.5) -- 
+        +(1.5,0,0) node [anchor=north west] {$u_2$} % 1
+    ;
+
+    \tdplotsetrotatedcoords{-10}{40}{30}
+    \coordinate (T) at (2.5,-2,-3);
+    \tdplotsetrotatedcoordsorigin{(T)}
+    
+    \draw [tdplot_rotated_coords, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (0,0,0) edge node [pos=1, anchor=north east] {$w_1$} % 2 -> z
+        +(0,1.5,0) edge node [pos=1, anchor=north east] {$v_1$} % 3 -> y
+        +(0,0,1.5) -- 
+        +(1.5,0,0) node [anchor=north west] {$u_1$} % 1 -> x
+    ;
+    \coordinate (P) at (-2,3,-2);
+    
+    % \path [every node/.style={font=\footnotesize, inner sep=4pt}] 
+    %     (P) node [above right] {$\mathbf{w_2}=[u_2,v_2,w_2]$};
+
+    % \path [every node/.style={font=\footnotesize, inner sep=4pt}] 
+    %     (P) node [below right] {$\mathbf{w_1}=[u_1,v_1,w_1]$};
+
+    \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+        ($0.5*(O)+0.5*(T)$) node [below right] {$\mathbf{t}$};
+
+    \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+        (O) node [below right] {$\mathbf{o}_2$};
+
+    \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+        (T) node [right] {$\mathbf{o}_1$};
+
+    \draw [thick, blue, dashed] (O.center) -- (T.center);
+    \draw [thick, black, fill=blue] (O) circle [radius=1.2pt];
+    \draw [thick, black, fill=blue] (T) circle [radius=1.2pt];
+    % \draw [thick, black, fill=red] (P) circle [radius=2pt];
+\end{tikzpicture}
+\end{center}
+
+$$
+    \mathbf{w}_2 = \mathbf{R}\cdot\mathbf{w}_1 + \mathbf{t}
+$$
+Вектор сдвига $\mathbf{t}$ равен координатам начала системы координат
+первой системы координат во второй системе координат:
+$$
+    \mathbf{t} = \mathbf{o}_1
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразования трехмерных декартовых координат}
+
+\begin{center}
+\tdplotsetmaincoords{-60}{-35}
+\begin{tikzpicture}[
+        tdplot_main_coords,
+        scale=0.9,
+        >=Stealth,
+        scale=0.8,
+    ]   
+    \coordinate (O) at (0,0,0);
+
+    \draw [thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (O)     edge node [pos=1, anchor=north east] {$w_2$} % 2
+        +(0,1.5,0) edge node [pos=1, anchor=north east] {$v_2$} % 3
+        +(0,0,1.5) -- 
+        +(1.5,0,0) node [anchor=north west] {$u_2$} % 1
+    ;
+
+    \tdplotsetrotatedcoords{-10}{40}{30}
+    \coordinate (T) at (2.5,-2,-3);
+    \tdplotsetrotatedcoordsorigin{(T)}
+    
+    \draw [tdplot_rotated_coords, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (0,0,0) edge node [pos=1, anchor=north east] {$w_1$} % 2 -> z
+        +(0,2,0) edge node [pos=1, anchor=north east] {$v_1$} % 3 -> y
+        +(0,0,2) -- 
+        +(2,0,0) node [anchor=north west] {$u_1$} % 1 -> x
+    ;
+    \coordinate (P) at (-2,3,-2);
+    
+    % \path [every node/.style={font=\footnotesize, inner sep=4pt}] 
+    %     (P) node [above right] {$\mathbf{w_2}=[u_2,v_2,w_2]$};
+
+    % \path [every node/.style={font=\footnotesize, inner sep=4pt}] 
+    %     (P) node [below right] {$\mathbf{w_1}=[u_1,v_1,w_1]$};
+
+    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+    %     ($0.5*(O)+0.5*(T)$) node [below right] {$\mathbf{t}$};
+
+    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+    %     (O) node [below right] {$\mathbf{o}_2$};
+
+    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+    %     (T) node [right] {$\mathbf{o}_1$};
+
+    \draw [tdplot_rotated_coords, blue, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (0,0,0) edge node [pos=1, anchor=south west] {$\mathbf{e}_3$} % 2 -> z
+        +(0,1,0) edge node [pos=1, anchor=north east] {$\mathbf{e}_2$} % 3 -> y
+        +(0,0,1) -- 
+        +(1,0,0) node [anchor=north west] {$\mathbf{e}_1$} % 1 -> x
+    ;
+
+    %\draw [thick, blue, dashed] (O.center) -- (T.center);
+    \draw [thick, black, fill=blue] (O) circle [radius=1.2pt];
+    \draw [thick, black, fill=blue] (T) circle [radius=1.2pt];
+    % \draw [thick, black, fill=red] (P) circle [radius=2pt];
+\end{tikzpicture}
+\end{center}
+\begin{itemize}
+    \item Матрица вращения $\mathbf{R}$ является ортогональной с определителем равным единице:
+    $$
+        \mathbf{R}^\top = \mathbf{R}^{-1}
+        \qquad
+        \det(\mathbf{R}) = 1
+    $$
+    \item Столбцы матрицы вращения $\mathbf{R}$ --- координаты единичных векторов
+    осей первой системы координат во второй системе координат:
+    $$
+        \mathbf{R} = 
+        \begin{bmatrix}
+            \mathbf{e}_1 & \mathbf{e}_2 & \mathbf{e}_3
+        \end{bmatrix}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразования трехмерных декартовых координат}
+{\large\bf Пример.}
+\vspace{0.2cm}
+
+Найдем преобразование координат при повороте вокруг оси $w$ на угол $\varphi$ 
+и сдвиге начала отсчета в точку $[t_1,t_2,t_3]^\top$.
+\vspace{0.2cm}
+
+Матрица вращения вокруг оси $w$ на угол $\varphi$ и вектор сдвига равны:
+$$
+    \mathbf{R} =
+    \begin{bmatrix}
+        \cos\varphi & -\sin\varphi & 0 \\
+        \sin\varphi & \cos\varphi  & 0 \\     
+        0          & 0           & 1
+    \end{bmatrix}
+    \qquad
+    \mathbf{t} =
+    -\begin{bmatrix}
+        t_1 \\
+        t_2 \\
+        t_3
+    \end{bmatrix}
+$$
+
+Тогда преобразование координат будет иметь вид:
+$$
+    \begin{bmatrix}
+        u_2 \\      
+        v_2 \\
+        w_2
+    \end{bmatrix} =
+    \begin{bmatrix}
+        \cos\varphi & -\sin\varphi & 0 \\
+        \sin\varphi & \cos\varphi  & 0 \\     
+        0          & 0           & 1
+    \end{bmatrix}\cdot
+    \begin{bmatrix}
+        u_1 \\      
+        v_1 \\
+        w_1
+    \end{bmatrix} -
+    \begin{bmatrix}
+        t_1 \\      
+        t_2 \\  
+        t_3
+    \end{bmatrix}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразования однородных координат \\ при вращении и сдвиге}
+\begin{itemize}
+    \item Прямое и обратное преобразование декартовых координат при вращении и сдвиге:
+    \[
+        \mathbf{w}_2 = \mathbf{R}\cdot\mathbf{w}_1 + \mathbf{t}\,,
+        \qquad
+        \mathbf{w}_1 = \mathbf{R}^\top\cdot(\mathbf{w}_2 - \mathbf{t})
+    \]
+    \item Запишем эти преобразования в однородных координатах:
+    $$
+        \widetilde{\mathbf{w}}_2 =
+    \begin{bmatrix}
+        \mathbf{R} & \mathbf{t} \\
+        \mathbf{0}^\top & 1
+    \end{bmatrix}
+    \cdot
+    \widetilde{\mathbf{w}}_1\,,
+    \qquad
+    \widetilde{\mathbf{w}}_1  =
+    \begin{bmatrix}
+        \mathbf{R}^\top & -\mathbf{R}^\top\cdot\mathbf{t} \\
+        \mathbf{0}^\top & 1
+    \end{bmatrix}
+    \cdot
+    \widetilde{\mathbf{w}}_2\,,
+    $$
+    где однородные координаты точек определяются как:
+    \[
+        \widetilde{\mathbf{w}}_1 =
+        \begin{bmatrix}
+            \mathbf{w}_1 \\
+            1
+        \end{bmatrix}=
+        \begin{bmatrix}
+            u_1 \\ v_1 \\ w_1 \\ 1
+        \end{bmatrix}\,,
+        \qquad
+        \widetilde{\mathbf{w}}_2 =
+        \begin{bmatrix}
+            \mathbf{w}_2 \\
+            1
+        \end{bmatrix}=
+        \begin{bmatrix}
+            u_2 \\ v_2 \\ w_2 \\ 1
+        \end{bmatrix}
+    \] 
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Параметризация матрицы вращения}
+У матрицы вращения $\mathbf{R}$ девять коэффициентов, но  только три степени свободы.
+$$
+    \mathbf{R} =
+    \begin{bmatrix}
+    r_{11} & r_{12} & r_{13} \\
+    r_{21} & r_{22} & r_{23} \\
+    r_{31} & r_{32} & r_{33}
+    \end{bmatrix}
+$$  
+
+Существует следующие представления матрицы вращения с помощью трех параметров
+\begin{itemize}
+    \item с помощью углов Эйлера
+    \item с помощью кватернионов
+    \item с помощью вектора вращения
+\end{itemize}  
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Параметризация с помощью вектора вращения}
+\begin{center}
+\begin{tikzpicture}	[scale=0.4,>=Stealth]
+    \draw[very thick,-latex,blue] (0,0) -- (6,0) node [above] {$v_2$};
+    \draw[very thick,-latex,blue] (0,0) -- (0,6) node [left] {$w_2$};
+    \draw[very thick,-latex,blue] (0,0) -- (-3,-3) node [left] {$u_2$};
+
+    \draw[very thick,-latex] (0,0) -- (1.5,5.5) node [right] {$w_1$};
+    \draw[very thick,-latex] (0,0) -- (5.5,-1.5) node [below] {$v_1$};
+    \draw[very thick,-latex] (0,0) -- (-4,-1.5) node [above] {$u_1$};
+    
+    \draw[very thick,-latex, red] (0,0) -- (3,2) node [above] {$\boldsymbol{\omega}$};
+
+    \filldraw[black] (0,0) circle (3pt) ;
+\end{tikzpicture}
+\end{center}
+\begin{itemize}
+    \item Любое вращение в трехмерном пространстве можно задать с помощью оси вращения 
+    (единичного вектора $\mathbf{n}$) и угла вращения $\theta$ вокруг этой оси.
+    \item Вектор вращения $\boldsymbol{\omega} = \theta\cdot\mathbf{n}$ задает 
+    ось и угол вращения одновременно.
+    \item Это представление неоднозначно, так как
+    вращение на угол $\theta + 2\pi k$, $k \in \mathbb{Z}$, 
+    вокруг оси $\mathbf{n}$ эквивалентно вращению на угол $\theta$ вокруг оси $\mathbf{n}$.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Формулы Родрига}
+\begin{itemize}
+    \item Матрица вращения $\mathbf{R}$ может быть выражена через вектор вращения 
+    $\boldsymbol{\omega} = \theta\cdot\mathbf{n}$
+    с помощью формулы Родрига:
+    $$
+        \mathbf{R} = \mathbf{I} + \sin\theta\,[\mathbf{n}]_\times + (1-\cos\theta)\,[\mathbf{n}]_\times^2
+    $$
+    где $[\mathbf{n}]_\times$ --- кососимметрическая матрица, соответствующая вектору $\mathbf{n}$:
+    $$
+        [\mathbf{n}]_\times =
+        \begin{bmatrix}
+            0       & -n_3   & n_2 \\
+            n_3     & 0      & -n_1 \\
+            -n_2    & n_1    & 0
+        \end{bmatrix}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Формулы Родрига}
+Обратное преобразование из матрицы вращения 
+$$
+    \mathbf{R} =
+    \begin{bmatrix}
+    r_{11} & r_{12} & r_{13} \\
+    r_{21} & r_{22} & r_{23} \\
+    r_{31} & r_{32} & r_{33}
+    \end{bmatrix}
+$$  
+в вектор вращения $\boldsymbol{\omega} = \theta\cdot\mathbf{n}$:
+\begin{itemize}
+    \item Угол вращения $\theta$ вычисляется по формуле:
+    $$
+        \theta = \arccos\left(\frac{\mathrm{trace}(\mathbf{R}) - 1}{2}\right)
+    $$
+    \item Единичный вектор оси вращения $\mathbf{n}$ вычисляется по формуле:
+    $$
+        \mathbf{n} = \frac{1}{2\sin\theta}
+        \begin{bmatrix}
+            r_{32} - r_{23} \\
+            r_{13} - r_{31} \\
+            r_{21} - r_{12}
+        \end{bmatrix}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Формулы Родрига. Пример}
+\begin{itemize}
+    \item Найдем матрицу вращения вокруг оси $w$ на угол $\varphi = 90\degree$ 
+    и соответствующий вектор вращения.
+    \item Матрица вращения:
+    $$
+        \mathbf{R} =
+        \begin{bmatrix}
+            \cos 90\degree & -\sin 90\degree & 0 \\
+            \sin 90\degree & \cos 90\degree  & 0 \\     
+            0              & 0               & 1
+        \end{bmatrix} =
+        \begin{bmatrix}
+            0 & -1 & 0 \\
+            1 & 0  & 0 \\     
+            0 & 0  & 1
+        \end{bmatrix}
+    $$
+    \item Вычислим угол вращения $\theta$:
+    $$
+        \theta = \arccos\left(\frac{0 + 0 + 1 - 1}{2}\right) = \arccos(0) = \pi/2
+    $$
+    \item Вычислим единичный вектор оси вращения $\mathbf{n}$ и вектор вращения $\boldsymbol{\omega}$:
+    $$
+        \mathbf{n} = \frac{1}{2\sin(\pi/2)}\cdot
+        \begin{bmatrix}
+            0 - 0 \\
+            0 - 0 \\
+            1 - (-1)
+        \end{bmatrix} =
+        \begin{bmatrix}
+            0 \\
+            0 \\
+            1
+        \end{bmatrix}  
+        \quad\Rightarrow\quad
+        \boldsymbol{\omega} = \theta \cdot \mathbf{n} = 
+        \begin{bmatrix}
+            0 \\
+            0 \\
+            \pi/2
+        \end{bmatrix}     
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Формулы Родрига. Пример}
+\begin{itemize}
+    \item Обратно, пусть теперь дан вектор вращения $\boldsymbol{\omega}=\left[0, 0, \pi/2\right]^\top$
+    \item Найдем угол вращения $\theta$ и единичный вектор оси вращения $\mathbf{n}$:
+    $$
+        \theta = |\boldsymbol{\omega}| = \frac{\pi}{2}\,,
+        \qquad
+        \mathbf{n} = \frac{\boldsymbol{\omega}}{|\boldsymbol{\omega}|} =
+        \begin{bmatrix} 
+            0 \\ 0 \\ 1
+        \end{bmatrix}
+    $$
+    \item Теперь найдем кососимметрическую матрицу $[\mathbf{n}]_\times$:
+    $$
+        [\mathbf{n}]_\times =
+        \begin{bmatrix}
+            0       & -n_3   & n_2 \\
+            n_3     & 0      & -n_1 \\
+            -n_2    & n_1    & 0
+        \end{bmatrix} =
+        \begin{bmatrix}
+            0       & -1   & 0 \\
+            1       & 0    & 0 \\
+            0       & 0    & 0
+        \end{bmatrix}
+    $$
+    \item Подставляя полученные значения в формулу Родрига, находим матрицу вращения:
+    $$
+        \mathbf{R} = \mathbf{I} + \sin\frac{\pi}{2}\,[\mathbf{n}]_\times + \left(1-\cos\frac{\pi}{2}\right)\,[\mathbf{n}]_\times^2 =
+        \begin{bmatrix}
+            0 & -1 & 0 \\
+            1 & 0  & 0 \\     
+            0 & 0  & 1
+        \end{bmatrix}
+    $$
+    
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Pinhole-камера}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{obscure.jpg}
+    \hspace{0.5cm}
+    \includegraphics[width=0.31\textwidth]{pinhole.jpg}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Pinhole-камера} (камера-обскура) --- простейшая модель камеры, 
+    в которой изображение формируется на плоскости проекции 
+    через маленькое отверстие.
+    \item Свет от точек сцены проходит через отверстие и проецируется на плоскость проекции, 
+    образуя перевернутое изображение сцены.
+    \item Наша цель -- построить математическую модель pinhole-камеры, 
+    которая лежит в основе большинства методов компьютерного 3D зрения.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Pinhole-камера: виртуальное изображение}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{inverse_imaging.pdf}
+\end{figure}
+\begin{itemize}
+    \item Немного неудобно, что изображение перевёрнуто. 
+    \item Поэтому вместо этого мы рассматриваем виртуальное изображение, которое получилось бы, если бы
+плоскость изображения располагалась перед отверстием. 
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Pinhole-камера: терминология}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{pinhole_camera.pdf}
+\end{figure}
+\begin{itemize}
+    \item \textbf{optical center} -- точка, в которой находится отверстие камеры
+    \item \textbf{camera coordinate system} -- система координат, с центром в optical center
+    \item \textbf{optical axis} -- ось $w$ системы координат камеры
+    \item \textbf{image plane} -- плоскость на которой формируется изображение
+    \item \textbf{principal point} -- точка пересечения оптической оси с image plane
+    \item \textbf{focal length} -- расстояние от оптического центра до image plane
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\end{document}
