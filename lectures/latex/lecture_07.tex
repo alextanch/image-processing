@@ -284,10 +284,10 @@
 \end{center}
 
 \begin{itemize}
-    \item Координаты точки $\mathbf{w}_2$ во второй системе координат связаны с координатами
-    точки $\mathbf{w}_1$ в первой системе координат следующим образом
+    \item Координаты точки $\mathbf{w}_1$ в первой системе координат связаны с координатами
+    точки $\mathbf{w}_2$ во второй системе следующим образом
     $$
-        \mathbf{w}_2 = \mathbf{R}\cdot\mathbf{w}_1 + \mathbf{t}
+        \mathbf{w}_1 = \mathbf{R}\cdot\mathbf{w}_2 + \mathbf{t}
     $$
     \item где
         \begin{align*}
@@ -353,13 +353,13 @@
 \end{center}
 
 $$
-    \mathbf{w}_2 = \mathbf{R}\cdot\mathbf{w}_1 + \mathbf{t}
+    \mathbf{w}_1 = \mathbf{R}\cdot\mathbf{w}_2 + \mathbf{t}
 $$
 Вектор сдвига $\mathbf{t}$ равен вектору, соединяющему начала отсчетов двух систем координат:
 $$
-    \mathbf{t} = \mathbf{o}_1 - \mathbf{o}_2
+    \mathbf{t} = \mathbf{o}_2 - \mathbf{o}_1
 $$
-во второй системе координат.
+в первой системе координат.
 \end{frame}
 
 %------------------------------------------------------------
@@ -370,19 +370,24 @@ $$
 \tdplotsetmaincoords{-60}{-35}
 \begin{tikzpicture}[
         tdplot_main_coords,
-        scale=0.9,
         >=Stealth,
-        scale=0.8,
+        scale=0.7,
     ]   
     \coordinate (O) at (0,0,0);
 
     \draw [thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
         (O)     edge node [pos=1, anchor=north east] {$w_2$} % 2
-        +(0,1.5,0) edge node [pos=1, anchor=north east] {$v_2$} % 3
-        +(0,0,1.5) -- 
-        +(1.5,0,0) node [anchor=north west] {$u_2$} % 1
+        +(0,2,0) edge node [pos=1, anchor=north east] {$v_2$} % 3
+        +(0,0,2) -- 
+        +(2,0,0) node [anchor=north west] {$u_2$} % 1
     ;
 
+    \draw [blue, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (0,0,0) edge node [pos=1, anchor=south west] {$\mathbf{e}_3$} % 2 -> z
+        +(0,1,0) edge node [pos=1, anchor=north east] {$\mathbf{e}_2$} % 3 -> y
+        +(0,0,1) -- 
+        +(1,0,0) node [anchor=north west] {$\mathbf{e}_1$} % 1 -> x
+    ;
     \tdplotsetrotatedcoords{-10}{40}{30}
     \coordinate (T) at (2.5,-2,-3);
     \tdplotsetrotatedcoordsorigin{(T)}
@@ -394,36 +399,24 @@ $$
         +(2,0,0) node [anchor=north west] {$u_1$} % 1 -> x
     ;
     \coordinate (P) at (-2,3,-2);
-    
-    % \path [every node/.style={font=\footnotesize, inner sep=4pt}] 
-    %     (P) node [above right] {$\mathbf{w_2}=[u_2,v_2,w_2]$};
 
-    % \path [every node/.style={font=\footnotesize, inner sep=4pt}] 
-    %     (P) node [below right] {$\mathbf{w_1}=[u_1,v_1,w_1]$};
-
-    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
-    %     ($0.5*(O)+0.5*(T)$) node [below right] {$\mathbf{t}$};
-
-    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
-    %     (O) node [below right] {$\mathbf{o}_2$};
-
-    % \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
-    %     (T) node [right] {$\mathbf{o}_1$};
-
-    \draw [tdplot_rotated_coords, blue, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
-        (0,0,0) edge node [pos=1, anchor=south west] {$\mathbf{e}_3$} % 2 -> z
-        +(0,1,0) edge node [pos=1, anchor=north east] {$\mathbf{e}_2$} % 3 -> y
-        +(0,0,1) -- 
-        +(1,0,0) node [anchor=north west] {$\mathbf{e}_1$} % 1 -> x
-    ;
+    % \draw [tdplot_rotated_coords, blue, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+    %     (0,0,0) edge node [pos=1, anchor=south west] {$\mathbf{e}_3$} % 2 -> z
+    %     +(0,1,0) edge node [pos=1, anchor=north east] {$\mathbf{e}_2$} % 3 -> y
+    %     +(0,0,1) -- 
+    %     +(1,0,0) node [anchor=north west] {$\mathbf{e}_1$} % 1 -> x
+    % ;
 
     %\draw [thick, blue, dashed] (O.center) -- (T.center);
-    \draw [thick, black, fill=blue] (O) circle [radius=1.2pt];
-    \draw [thick, black, fill=blue] (T) circle [radius=1.2pt];
+    %\draw [thick, black, fill=blue] (O) circle [radius=1.2pt];
+    %\draw [thick, black, fill=blue] (T) circle [radius=1.2pt];
     % \draw [thick, black, fill=red] (P) circle [radius=2pt];
 \end{tikzpicture}
 \end{center}
-Столбцы матрицы вращения $\mathbf{R}$ --- это координаты осей первой системы координат во второй системе координат:
+$$
+    \mathbf{w}_1 = \mathbf{R}\cdot\mathbf{w}_2 + \mathbf{t}
+$$
+Столбцы матрицы вращения $\mathbf{R}$ --- это координаты ортов второй системы координат в первой системе координат:
 $$
     \mathbf{R} =
     \begin{bmatrix}
@@ -442,7 +435,7 @@ $$
 \frametitle{Преобразования однородных координат }
     Преобразование декартовых координат при вращении и сдвиге:
     $$
-        \mathbf{w}_2 = \mathbf{R}\cdot\mathbf{w}_1 + \mathbf{t}
+        \mathbf{w}_1 = \mathbf{R}\cdot\mathbf{w}_2 + \mathbf{t}
     $$
     в однородных координатах
     $$
@@ -466,13 +459,13 @@ $$
     $$
     записывается следующим образом:
     $$
-        \widetilde{\mathbf{w}}_2 =
+        \widetilde{\mathbf{w}}_1 =
         \begin{bmatrix}
             \mathbf{R} & \mathbf{t} \\
             \mathbf{0} & 1
         \end{bmatrix}
         \cdot
-        \widetilde{\mathbf{w}}_1
+        \widetilde{\mathbf{w}}_2
     $$
 \end{frame}
 
@@ -481,17 +474,21 @@ $$
 \frametitle{Пример преобразования однородных координат}
     При вращении и сдвиге однородные координаты преобразуются следующим образом:
     $$
-        \widetilde{\mathbf{w}}_2 = 
-        \begin{bmatrix}
-            0 & 0 & -1 & 6\\
-            1 & 0 & 0 & 0\\
-            0 & -1 & 0 & 5\\
-            0 & 0 & 0 & 1
-        \end{bmatrix}
+        \mathbf{w}_1 = 
+        \begin{bmatrix*}[r]
+            0 & 0 & -1 \\
+            1 & 0 & 0 \\
+            0 & -1 & 0 
+        \end{bmatrix*}
         \cdot
-        \widetilde{\mathbf{w}}_1    
+        \mathbf{w}_2  +
+        \begin{bmatrix}
+            6 \\
+            0 \\
+            5   
+        \end{bmatrix}
     $$
-    Найти, как преобразуются декартовы координаты точек и
+    Выразить координаты $\mathbf{w}_2$ через $\mathbf{w}_1$ и
     нарисовать системы координат.
 \end{frame}
 
@@ -561,11 +558,11 @@ $$
     где $[\mathbf{n}]_\times$ --- кососимметрическая матрица, соответствующая вектору $\mathbf{n}$:
     $$
         [\mathbf{n}]_\times =
-        \begin{bmatrix}
+        \begin{bmatrix*}[c]
             0       & -n_3   & n_2 \\
             n_3     & 0      & -n_1 \\
             -n_2    & n_1    & 0
-        \end{bmatrix}
+        \end{bmatrix*}
     $$
 \end{itemize}
 \end{frame}
