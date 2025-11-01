@@ -50,6 +50,32 @@
 
 %------------------------------------------------------------
 \begin{frame}
+\frametitle{Трехмерное компьютерное зрение}
+{\Large\bf Основные приложения 3D CV:}
+\vspace{0.5cm}
+\begin{itemize}
+    \item \textbf{SLAM (Simultaneous Localization and Mapping)} --- одновременное построение карты и локализация на ней.
+    \vspace{0.2cm}
+    
+    \href{https://www.youtube.com/watch?v=GI90GYOCYuE}{{SLAM demo}}
+    \vspace{0.2cm}
+
+    \item \textbf{3D reconstruction} --- реконструкция трехмерной сцены по набору изображений.
+    \vspace{0.2cm}
+
+    \href{https://www.youtube.com/shorts/0yVtPQULpd8}{{3D reconstruction demo}}
+
+    \item \textbf{Depth estimation} --- оценка глубины сцены по изображениям
+    \vspace{0.2cm}
+
+    \href{https://www.youtube.com/watch?v=172xfa95pQ8}{{Depth estimation demo}}
+
+\end{itemize}
+\end{frame}
+
+
+%------------------------------------------------------------
+\begin{frame}
 \frametitle{Содержание модуля}
 {\Large\bf Основы 3D компьютерного зрения.}
 \vspace{0.5cm}
@@ -1284,8 +1310,10 @@ $t$ -- произвольный параметр.
     \includegraphics[width=0.6\textwidth]{undistortion.png}
 \end{figure}
 \begin{itemize}
-        \item Коэффициенты радиальной и тангенциальной дисторсий $(k_1,k_2,k_3,p_1,p_2)$ находятся из условия:
-        проекции прямых в пространстве должны быть прямыми на изображении
+        \item Коэффициенты радиальной и тангенциальной дисторсий $(k_1,k_2,k_3,p_1,p_2)$ 
+        а также внутренние параметры камеры $\mathbf{K}$
+        можно найти с помощью процедуры \textbf{калибровки камеры}.
+        \itemsep0.3cm
         \item Зная коэффициенты дисторсии, можно найти \textbf{undistort rectify map} $(m_x, m_y)$
         и скорректировать дисторсию:
         $$
