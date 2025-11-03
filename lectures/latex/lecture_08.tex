@@ -1,0 +1,268 @@
+\documentclass[12pt, usepdftitle=false, aspectratio=1610]{beamer}
+
+\usetheme{Madrid}
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb,
+    amsmath,
+    hyperref,
+    tikz, tikz-3dplot, xcolor, physics, bm
+}
+\usepackage[absolute, overlay]{textpos}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subcaption}
+\usetikzlibrary{calc,arrows.meta,positioning,backgrounds}
+
+%\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\graphicspath{{./figs/08}}
+
+\title[Лекция 8]{Основные задачи 3D CV для трехмерных сцен}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+\titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Многомерное гауссово распределение}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.35\textheight]{MVarGaussIntro.pdf}
+\end{figure}
+\begin{itemize}
+    \item Многомерное гауссово распределение --- это обобщение одномерного гауссового распределения на случай нескольких переменных.
+    \item Оно описывается вектором средних значений $\boldsymbol{\mu}$ и матрицей ковариаций $\boldsymbol{\Sigma}$.
+    \item Формула многомерного гауссовского распределения:
+    $$
+        Pr(\mathbf{x}\,|\,\boldsymbol{\mu}, \boldsymbol{\Sigma}) =
+        \mathrm{Norm}_{\mathbf{x}}[\boldsymbol{\mu}, \boldsymbol{\Sigma}] =
+        \frac{1}{(2\pi)^{d/2} |\boldsymbol{\Sigma}|^{1/2}} 
+        \exp\left[-\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu})\right]
+    $$
+    где $\mathbf{x}$ --- $d$-мерный вектор признаков.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод максимального правдоподобия}
+\begin{itemize}
+    \item \textbf{Дано:}
+    \begin{itemize}
+        \item Набор наблюдений $\{\mathbf{x}_1, \mathbf{x}_2, \ldots, \mathbf{x}_n\}$
+        \item Распределение вероятностей $Pr(\mathbf{x} | \boldsymbol{\theta})$ с параметрами $\boldsymbol{\theta}$
+    \end{itemize}
+    \vskip0.5cm
+
+    \item \textbf{Найти:} параметры $\boldsymbol{\theta}^*$, которые делают наблюдения наиболее вероятными.
+    \vskip0.5cm
+
+    \item \textbf{Maximum Likelihood Estimation (MLE):}
+    \begin{itemize}
+        \item Находим функцию правдоподобия:
+        $$
+            L(\boldsymbol{\theta}) =  \prod_{i=1}^{n} Pr(\mathbf{x}_i | \boldsymbol{\theta})
+        $$
+        \item ищем параметры $\boldsymbol{\theta}^*$, которые максимизируют функцию правдоподобия:
+        $$
+            \boldsymbol{\theta}^* = \argmax_{\boldsymbol{\theta}} L(\boldsymbol{\theta})=
+            \argmin_{\boldsymbol{\theta}}\left[-\ln L(\boldsymbol{\theta})\right]
+        $$
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача нелинейной оптимизации}
+\begin{itemize}
+    \item Нелинейная оптимизация --- это процесс поиска минимума (или максимума) нелинейной функции:
+    $$
+        \boldsymbol{\theta}^* = 
+        \argmin_{\boldsymbol{\theta}} f(\boldsymbol{\theta})
+    $$
+    \item В задачах компьютерного зрения часто возникает необходимость минимизировать нелинейные функции вида:
+    $$
+        f(\boldsymbol{\theta})=
+        \norm{\mathbf{z}(\boldsymbol{\theta})}^2
+    $$
+    где
+    $$
+        \mathbf{z}(\boldsymbol{\theta}) =
+        \begin{bmatrix}
+            z_1(\boldsymbol{\theta}) \\
+            z_2(\boldsymbol{\theta}) \\
+            \vdots \\
+            z_n(\boldsymbol{\theta})
+        \end{bmatrix}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод наименьших квадратов (Least Squares, LS)}
+\begin{itemize}
+    \item Если функция $\mathbf{z}(\boldsymbol{\theta})$ линейна по параметрам $\boldsymbol{\theta}$:
+    $$
+        \mathbf{z}(\boldsymbol{\theta}) =
+        \mathbf{A}\cdot\boldsymbol{\theta} - \mathbf{b}
+    $$
+    где $\mathbf{A}$ --- известная матрица, а $\mathbf{b}$ --- известный вектор, то задача оптимизации сводится к следующей форме:
+    $$
+        \boldsymbol{\theta}^\ast = 
+        \argmin_{\boldsymbol{\theta}}\norm{\mathbf{z}(\boldsymbol{\theta})}^2 = 
+        \argmin_{\boldsymbol{\theta}} \|\mathbf{A}\cdot\boldsymbol{\theta} - \mathbf{b}\|^2
+    $$
+    \item И решение задачи может быть получено с помощью метода наименьших квадратов:
+    $$
+        \boldsymbol{\theta}^\ast = (\mathbf{A}^\top \mathbf{A})^{-1} \mathbf{A}^\top \mathbf{b}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Методы нелинейной оптимизации}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.35\textheight]{localMin.pdf}
+\end{figure}
+\begin{itemize}
+    \item В случае нелинейной функции $\mathbf{z}(\boldsymbol{\theta})$ аналитическое решение задачи оптимизации невозможно.
+    \item В таких случаях используются численные методы оптимизации, которые итеративно улучшают оценку параметров $\boldsymbol{\theta}$.
+    \item Находиться локальный минимум функции, который может не совпадать с глобальным минимумом.
+    \item Локальный минимум зависит от начальной оценки параметров $\boldsymbol{\theta}^{[0]}$.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Методы нелинейной оптимизации}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.3\textheight]{optimization.pdf}
+\end{figure}
+\begin{itemize}
+    \item Метод градиентного спуска:
+    $$
+        \boldsymbol{\theta}^{[t+1]} = 
+        \boldsymbol{\theta}^{[t]} - 
+        \lambda \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
+        \quad t = 0, 1, 2, \ldots
+    $$
+    \item Метод Ньютона:
+    $$
+        \boldsymbol{\theta}^{[t+1]} = 
+        \boldsymbol{\theta}^{[t]} - 
+        \lambda \left(\frac{\partial^2 f}{\partial \boldsymbol{\theta}^2}\right)^{-1}
+        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
+    $$
+    \item Метод Ньютона сходится быстрее, но требует обращения гессиана.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Методы нелинейной оптимизации}
+\begin{itemize}
+    \item В методе Гаусса-Ньютона гессиан приближается якобианом:
+    $$
+        \frac{\partial^2 f}{\partial \boldsymbol{\theta}^2} \approx 
+        2 \mathbf{J}^\top \mathbf{J}
+        \qquad\text{где}\quad
+        \mathbf{J} = \frac{\partial \mathbf{z}}{\partial \boldsymbol{\theta}}
+    $$
+    \item Метод Гаусса-Ньютона:
+    $$
+        \boldsymbol{\theta}^{[t+1]} = 
+        \boldsymbol{\theta}^{[t]} - 
+        \lambda \left(\mathbf{J}^\top \mathbf{J}\right)^{-1}
+        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
+    $$
+    \item Метод Левенберга-Марквардта комбинирует градиентный спуск и метод Гаусса-Ньютона:
+    $$
+        \boldsymbol{\theta}^{[t+1]} = 
+        \boldsymbol{\theta}^{[t]} - 
+        \lambda \left(\mathbf{J}^\top \mathbf{J} + \mu \mathbf{I}\right)^{-1}
+        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сингулярное разложение матрицы (SVD)}
+Сингулярное разложение матрицы --- это метод факторизации матрицы, который позволяет разложить произвольную матрицу на произведение трех матриц:
+$$
+    \mathbf{A} = \mathbf{U} \mathbf{L} \mathbf{V}^\top
+    \quad \text{-- матрица} \quad m \times n 
+$$
+где:
+\begin{itemize}
+    \item $\mathbf{U}$ --- ортогональная $m\times m$ матрица ($\mathbf{U}^{-1} = \mathbf{U}^\top $)
+    \item $\mathbf{L}$ --- диагональная $m\times n$ матрица, содержащая сингулярные числа
+    \item $\mathbf{V}$ --- ортогональная $n\times n$ матрица ($\mathbf{V}^{-1} = \mathbf{V}^\top $)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Пример SVD разложения}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.3\textheight]{Analyze1SVD.pdf}
+\end{figure}
+$$
+    \mathbf{A} = \mathbf{U} \mathbf{L} \mathbf{V}^\top 
+$$
+$$
+    \mathbf{A} = 
+    \begin{bmatrix}
+        -0.147 & 0.357 \\
+        -0.668 & 0.811
+    \end{bmatrix} =
+    \begin{bmatrix}
+        0.189 & 0.981 \\
+        0.981 & -0.189
+    \end{bmatrix}
+    \begin{bmatrix}
+        1.068 & 0 \\
+        0 & 0.335
+    \end{bmatrix}
+    \begin{bmatrix}
+        -0.587 & 0.8091 \\
+        0.8091 & 0.587
+    \end{bmatrix}^\top  
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\end{document}
