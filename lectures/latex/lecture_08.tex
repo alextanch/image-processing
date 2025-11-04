@@ -81,7 +81,7 @@
     \end{itemize}
     \vskip0.5cm
 
-    \item \textbf{Найти:} параметры $\boldsymbol{\theta}^*$, которые делают наблюдения наиболее вероятными.
+    \item \textbf{Найти:} параметры $\widehat{\boldsymbol{\theta}}$, которые делают наблюдения наиболее вероятными.
     \vskip0.5cm
 
     \item \textbf{Maximum Likelihood Estimation (MLE):}
@@ -90,9 +90,9 @@
         $$
             L(\boldsymbol{\theta}) =  \prod_{i=1}^{n} Pr(\mathbf{x}_i | \boldsymbol{\theta})
         $$
-        \item ищем параметры $\boldsymbol{\theta}^*$, которые максимизируют функцию правдоподобия:
+        \item ищем параметры $\widehat{\boldsymbol{\theta}}$, которые максимизируют функцию правдоподобия:
         $$
-            \boldsymbol{\theta}^* = \argmax_{\boldsymbol{\theta}} L(\boldsymbol{\theta})=
+            \widehat{\boldsymbol{\theta}} = \argmax_{\boldsymbol{\theta}} L(\boldsymbol{\theta})=
             \argmin_{\boldsymbol{\theta}}\left[-\ln L(\boldsymbol{\theta})\right]
         $$
     \end{itemize}
@@ -105,13 +105,14 @@
 \begin{itemize}
     \item Нелинейная оптимизация --- это процесс поиска минимума (или максимума) нелинейной функции:
     $$
-        \boldsymbol{\theta}^* = 
+        \widehat{\boldsymbol{\theta}} = 
         \argmin_{\boldsymbol{\theta}} f(\boldsymbol{\theta})
     $$
     \item В задачах компьютерного зрения часто возникает необходимость минимизировать нелинейные функции вида:
     $$
         f(\boldsymbol{\theta})=
-        \norm{\mathbf{z}(\boldsymbol{\theta})}^2
+        \norm{\mathbf{z}(\boldsymbol{\theta})}^2=
+        \sum_{i=1}^{n} z_i^2(\boldsymbol{\theta})
     $$
     где
     $$
@@ -137,13 +138,13 @@
     $$
     где $\mathbf{A}$ --- известная матрица, а $\mathbf{b}$ --- известный вектор, то задача оптимизации сводится к следующей форме:
     $$
-        \boldsymbol{\theta}^\ast = 
+        \widehat{\boldsymbol{\theta}} = 
         \argmin_{\boldsymbol{\theta}}\norm{\mathbf{z}(\boldsymbol{\theta})}^2 = 
         \argmin_{\boldsymbol{\theta}} \|\mathbf{A}\cdot\boldsymbol{\theta} - \mathbf{b}\|^2
     $$
     \item И решение задачи может быть получено с помощью метода наименьших квадратов:
     $$
-        \boldsymbol{\theta}^\ast = (\mathbf{A}^\top \mathbf{A})^{-1} \mathbf{A}^\top \mathbf{b}
+        \widehat{\boldsymbol{\theta}} = (\mathbf{A}^\top \mathbf{A})^{-1} \mathbf{A}^\top \mathbf{b}
     $$
 \end{itemize}
 \end{frame}
@@ -262,6 +263,226 @@ $$
         0.8091 & 0.587
     \end{bmatrix}^\top  
 $$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Модель pinhole-камеры}
+\begin{center}
+\tdplotsetmaincoords{-60}{-35}
+\begin{tikzpicture}[
+        tdplot_main_coords,
+        scale=0.6,
+        >=Stealth,
+        scale=1,
+        description/.style={draw=gray!70, thick, line cap=round, every node/.style={align=center, font=\footnotesize\sffamily, anchor=north}},
+    ]   
+    \coordinate (o) at (0,0,0);
+
+    \draw [thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (o)      edge node [pos=1, anchor=north east] {$w_c$} % 2 -> z
+        +(0,1,0) edge node [pos=1, anchor=north east] {$v_c$} % 3 -> y
+        +(0,0,1) -- 
+        +(1,0,0) node [anchor=north west] {$u_c$} % 1 -> x
+    ;
+
+    \path [draw=gray!70, fill=gray!20, opacity=0.8] 
+        (-1.5, 4, 1.75) coordinate (a) -- 
+        ++(0, 0, -3.5) coordinate (b) -- 
+        ++(3, 0, 0) coordinate (c) -- 
+        ++(0, 0, 3.5) coordinate (d) -- cycle 
+    ;
+    
+    \draw [thick, green!50!black, <->, shorten >=-15pt, shorten <=-15pt] 
+        (a) node [below=15pt, anchor=north, font=\footnotesize] {$y$} -- 
+        (b) -- 
+        (c) node [above right=17pt, anchor=north west, font=\footnotesize] {$x$}
+    ;
+    
+    \draw [thick, black, fill=black] (b) circle [radius=1.2pt];
+    
+    \coordinate (q) at (0, 4, 0);
+    
+    \draw [thick, black, fill=black] (q) circle [radius=1.2pt];
+
+    \coordinate (p) at (1,4,-0.5);
+    \coordinate (s) at ($1.8*(p)$);
+
+    \draw [thick, fill=red] (p) circle [radius=1.2pt];
+    \draw [thick, fill=red] (s) circle [radius=1.2pt];
+
+    \draw [thick, red] (o.center) -- (p.center);
+    \scoped[on background layer]{
+        \draw [red] (p.center) -- (s.center);
+    }
+
+    \draw [thick, gray] (o.center) -- (q.center);
+    \scoped[on background layer]{
+        \draw [thick, gray] (q.center) -- (0, 5, 0);
+    }
+
+    \draw [thick, red] (o.center) -- (p.center);
+    \draw [thick, black, fill=black] (o) circle [radius=1.2pt];
+
+    \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+        (o) node [below right] {$\mathbf{c}$};
+    
+    \path [every node/.style={font=\scriptsize, inner sep=2pt}] 
+        (s) node [above right] {$\mathbf{w}=[u,v,w]$};
+
+    \path [every node/.style={font=\scriptsize, inner sep=2pt}] 
+        (p) node [above right] {$\mathbf{x}=[x,y]$};
+
+    \tdplotsetrotatedcoords{10}{40}{30}
+    \coordinate (Shift) at (5,-2,-3);
+    \tdplotsetrotatedcoordsorigin{(Shift)}
+    
+    \draw [thick, black, fill=black] (Shift) circle [radius=1.2pt];
+    
+    \draw [tdplot_rotated_coords, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (0,0,0) edge node [pos=1, anchor=north east] {$w$} % 2 -> z
+        +(0,1,0) edge node [pos=1, anchor=north east] {$v$} % 3 -> y
+        +(0,0,1) -- 
+        +(1,0,0) node [anchor=north west] {$u$} % 1 -> x
+    ;
+\end{tikzpicture}
+\end{center}
+$$
+    \lambda
+    \begin{bmatrix}
+        x \\ y \\ 1
+    \end{bmatrix} =
+    \mathbf{P} \cdot
+    \begin{bmatrix}
+        u \\ v \\ w \\ 1
+    \end{bmatrix} =
+    \mathbf{K}\,\, [\mathbf{R}\,\, \mathbf{t}] \cdot
+    \begin{bmatrix}
+        u \\ v \\ w \\ 1
+    \end{bmatrix} =
+    \begin{bmatrix}
+        f_x & s & c_x \\
+        0 & f_y & c_y \\
+        0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        r_{11} & r_{12} & r_{13}  & t_u\\
+        r_{21} & r_{22} & r_{23}  & t_v\\
+        r_{31} & r_{32} & r_{33}  & t_w
+    \end{bmatrix}
+    \cdot
+    \begin{bmatrix}
+        u \\ v \\ w \\ 1
+    \end{bmatrix}
+$$
+\vspace{0.2cm}
+
+$$
+    \mathbf{x} = 
+    \mathbf{pinhole}\left[
+        \mathbf{w}\,,\mathbf{K}\,, \mathbf{R}\,, \mathbf{t}
+    \right]
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Генеративная модель pinhole-камеры}
+\begin{itemize}
+    \item Учтем, что при вычислении координат пикселей $\mathbf{x}$ всегда есть некоторая ошибка измерения.
+    \item Будем считать, что эта ошибка имеет нормальное распределение с нулевым средним $\boldsymbol{\mu}=\mathbf{0}$ и ковариационной матрицей $\boldsymbol{\Sigma}=\sigma^2 \mathbf{I}$:
+    $$
+        Pr(\mathbf{x}\,|\,\mathbf{w}, \mathbf{K}, \mathbf{R}, \mathbf{t}) =
+        \mathrm{Norm}_{\mathbf{x}}\left[
+            \mathbf{pinhole}(\mathbf{w}, \mathbf{K}, \mathbf{R}, \mathbf{t}),
+            \sigma^2 \mathbf{I}
+        \right]
+    $$
+    \item Это \textbf{генеративная модель pinhole-камеры}: она позволяет вычислить вероятность наблюдения пикселя $\mathbf{x}$ при заданных параметрах камеры и координатах точки в пространстве $\mathbf{w}$.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 1: Оценка внешних параметров камеры}
+\begin{itemize}
+    \item Известны трехмерные координаты точек сцены $\{\mathbf{w}_i\}_{i=1}^{I}$ 
+          и их проекции на изображение $\{\mathbf{x}_i\}_{i=1}^{I}$. 
+          Известны также внутренние параметры камеры $\mathbf{K}$.
+    \item Требуется оценить внешние параметры камеры: матрицу поворота $\mathbf{R}$ и вектор сдвига $\mathbf{t}$.
+    \item Эта задача решается с помощью метода максимального правдоподобия:
+    $$
+        \widehat{\mathbf{R}}\,,\,\, \widehat{\mathbf{t}} =
+        \argmin_{\mathbf{R}\,,\,\mathbf{t}} 
+        \left(- \sum_{i=1}^{I} 
+        \ln \left[ Pr(\mathbf{x}_i\,|\,\mathbf{w}_i, \mathbf{K}, \mathbf{R}, \mathbf{t})\right]
+        \right)
+    $$
+    \item Эта задача называется еще \textbf{PnP задачей} (Perspective-n-Point problem).
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 2: Оценка внутренних параметров камеры}
+\begin{itemize}
+    \item Известны трехмерные координаты точек сцены $\{\mathbf{w}_i\}_{i=1}^{I}$ 
+          и их проекции на изображение $\{\mathbf{x}_i\}_{i=1}^{I}$. 
+    \item Требуется оценить внутренние параметры камеры -- матрицу $\mathbf{K}$.
+    \item Задача решается с помощью метода максимального правдоподобия:
+    $$
+        \widehat{\mathbf{K}} =
+        \argmin_{\mathbf{K}} 
+        \left[
+        \argmin_{\mathbf{R}\,,\,\mathbf{t}}
+        \left( 
+        - \sum_{i=1}^{I} 
+        \ln \left[ Pr(\mathbf{x}_i\,|\,\mathbf{w}_i, \mathbf{K}, \mathbf{R}, \mathbf{t})\right]
+        \right)
+        \right]
+    $$
+    \item Эта задача называется \textbf{задачей калибровки камеры}.  
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 2: Оценка внутренних параметров камеры}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{calibration_target.pdf}
+\end{figure}
+\begin{itemize}
+    \item Для калибровки камеры часто используют специальные шаблоны 
+          для которых известны трехмерные координаты точек $\mathbf{w}_i$.
+    \item Проекции этих точек на изображение $\mathbf{x}_i$ находятся 
+          с помощью детекторов ключевых точек.
+    \item Сейчас калибровка камер часто выполняется с помощью плоских шаблонов,
+    например шахматной доски. Калибровка на этих шаблонах будет рассмотрена в следующих лекциях.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 3: Оценка координат точек сцены}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.3\textheight]{triangulation.pdf}
+\end{figure}
+\begin{itemize}
+    \item Требуется оценить трехмерные координаты точки сцены $\mathbf{w}$,
+          если даны ее проекции $\{\mathbf{x}_j\}_{j=1}^{J}$ в $J\geq 2$ камерах с известными внутренними и внешними параметрами.
+    \item Задача также решается с помощью метода максимального правдоподобия:
+    $$
+        \widehat{\mathbf{w}} =
+        \argmin_{\mathbf{w}} 
+        \left(- \sum_{j=1}^{J} 
+        \ln \left[ Pr(\mathbf{x}_j\,|\,\mathbf{w}, \mathbf{K}_j, \mathbf{R}_j, \mathbf{t}_j)\right]
+        \right)
+    $$
+    \item Эта задача называется \textbf{задачей триангуляции}.
+    \item Если точек $\mathbf{w}$ много, то получим разреженную 3D модель сцены.
+\end{itemize}
 \end{frame}
 
 %------------------------------------------------------------
