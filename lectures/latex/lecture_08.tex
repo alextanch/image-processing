@@ -29,6 +29,8 @@
 \usepackage{subcaption}
 \usetikzlibrary{calc,arrows.meta,positioning,backgrounds}
 
+\setcounter{MaxMatrixCols}{12}
+
 %\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
 
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -366,9 +368,9 @@ $$
         0 & 0 & 1
     \end{bmatrix}
     \begin{bmatrix}
-        r_{11} & r_{12} & r_{13}  & t_u\\
-        r_{21} & r_{22} & r_{23}  & t_v\\
-        r_{31} & r_{32} & r_{33}  & t_w
+        r_{11} & r_{12} & r_{13}  & t_1\\
+        r_{21} & r_{22} & r_{23}  & t_2\\
+        r_{31} & r_{32} & r_{33}  & t_3
     \end{bmatrix}
     \cdot
     \begin{bmatrix}
@@ -424,7 +426,336 @@ $$
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{Задача 2: Оценка внутренних параметров камеры}
+\frametitle{Задача 1: Оценка внешних параметров камеры}
+\begin{itemize}
+    \item PnP задача является задачей нелинейной оптимизации
+    $$
+        \widehat{\mathbf{R}}\,,\,\, \widehat{\mathbf{t}} =
+        \argmin_{\mathbf{R}\,,\,\mathbf{t}} 
+        \left(- \sum_{i=1}^{I} 
+        \ln \left[ Pr(\mathbf{x}_i\,|\,\mathbf{w}_i, \mathbf{K}, \mathbf{R}, \mathbf{t})\right]
+        \right)
+    $$
+    \item Для решения PnP задачи можно использовать методы нелинейной оптимизации.
+    \item Для успешной работы методов нелинейной оптимизации требуется хорошая начальная оценка внешних параметров камеры.
+\end{itemize}
+\end{frame}
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 1: Оценка внешних параметров камеры}
+\begin{itemize}
+    \item Построим начальную оценку внешних параметров камеры с помощью метода DLT (Direct Linear Transform).
+    \item Начнем с уравнения камеры в однородных координатах:
+    $$
+        \lambda
+        \begin{bmatrix}
+            x_i \\ y_i \\ 1
+        \end{bmatrix} =
+        \begin{bmatrix}
+            f_x & s & c_x \\
+            0 & f_y & c_y \\
+            0 & 0 & 1
+        \end{bmatrix}
+        \begin{bmatrix}
+            r_{11} & r_{12} & r_{13}  & t_1\\
+            r_{21} & r_{22} & r_{23}  & t_2\\
+            r_{31} & r_{32} & r_{33}  & t_3
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            u_i \\ v_i \\ w_i \\ 1
+        \end{bmatrix}
+        \quad i = 1, 2, \ldots, I
+    $$
+    \item Умножим обе части равенства на $\mathbf{K}^{-1}$
+    $$
+        \lambda_i
+        \begin{bmatrix}
+            x_i' \\ y_i' \\ 1
+        \end{bmatrix} =
+        \begin{bmatrix}
+            r_{11} & r_{12} & r_{13}  & t_1\\
+            r_{21} & r_{22} & r_{23}  & t_2\\
+            r_{31} & r_{32} & r_{33}  & t_3
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            u_i \\ v_i \\ w_i \\ 1
+        \end{bmatrix}
+        \quad
+        \text{где} \quad
+        \begin{bmatrix}
+            x_i' \\ y_i' \\ 1
+        \end{bmatrix} =
+        \mathbf{K}^{-1}
+        \begin{bmatrix}
+            x_i \\ y_i \\ 1
+        \end{bmatrix}
+    $$
+    \item $(x_i'\,,y_i')$ --- называются \textbf{нормализованными координатами} точки на изображении.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 1: Оценка внешних параметров камеры}
+$$
+    \lambda_i
+    \begin{bmatrix}
+        x_i' \\ y_i' \\ 1
+    \end{bmatrix} =
+    \begin{bmatrix}
+        r_{11} & r_{12} & r_{13}  & t_1\\
+        r_{21} & r_{22} & r_{23}  & t_2\\
+        r_{31} & r_{32} & r_{33}  & t_3
+    \end{bmatrix}
+    \cdot
+    \begin{bmatrix}
+        u_i \\ v_i \\ w_i \\ 1
+    \end{bmatrix}
+$$
+\begin{itemize}
+    \item Третье уравнение дает выражение для $\lambda_i$:
+    $$
+        \lambda_i =
+        r_{31} u_i + r_{32} v_i + r_{33} w_i + t_3
+    $$
+    \item Подставим это выражение в первые два уравнения:
+    \begin{equation}    \label{lda1}
+        \begin{bmatrix}
+            (r_{31}u_i+r_{32}v_i+r_{33}w_i+t_3)x_i' \\
+            (r_{31}u_i+r_{32}v_i+r_{33}w_i+t_3)y_i'    
+        \end{bmatrix} = 
+        \begin{bmatrix}
+            r_{11} & r_{12} & r_{13}  & t_1\\
+            r_{21} & r_{22} & r_{23}  & t_2
+        \end{bmatrix}
+        \begin{bmatrix}
+            u_i \\ v_i \\ w_i \\ 1
+        \end{bmatrix}
+    \end{equation}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 1: Оценка внешних параметров камеры}
+Уравнение (\ref{lda1}) можно переписать в виде:
+$$
+    \begin{bmatrix}
+        u_i & v_i & w_i & 1 & 0 & 0 & 0 & 0 & -x_i' u_i & -x_i' v_i & -x_i' w_i & -x_i' \\
+        0 & 0 & 0 & 0 & u_i & v_i & w_i & 1 & -y_i' u_i & -y_i' v_i & -y_i' w_i & -y_i'
+    \end{bmatrix}
+    \begin{bmatrix}
+        r_{11} \\ r_{12} \\ r_{13} \\ t_1 \\
+        r_{21} \\ r_{22} \\ r_{23} \\ t_2 \\
+        r_{31} \\ r_{32} \\ r_{33} \\ t_3
+    \end{bmatrix} = 
+    \mathbf{0}
+$$
+Каждая точка дает два уравнения. 
+Соберем уравнения от всех $I$ точек в одну систему $\mathbf{A} \cdot \boldsymbol{\theta} = \mathbf{0}$.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 1: Оценка внешних параметров камеры}
+\begin{itemize}
+    \item Чтобы найти ненулевой вектор $\boldsymbol{\theta}$, минимизирующий норму левой части уравнения
+    $$
+        \mathbf{A} \cdot \boldsymbol{\theta} = \mathbf{0}
+    $$
+    \item Решим следующую оптимизационную задачу:
+    $$
+        \widehat{\boldsymbol{\theta}} =
+        \argmin_{\boldsymbol{\theta}} \|\mathbf{A} \cdot \boldsymbol{\theta}\|^2
+        \quad \text{при условии} \quad \|\boldsymbol{\theta}\| = 1
+    $$
+    \item Эта задача решается с помощью SVD разложения матрицы $\mathbf{A}$:
+    $$
+        \mathbf{A} = \mathbf{U} \mathbf{L} \mathbf{V}^\top
+    $$
+    \item $\widehat{\boldsymbol{\theta}}$ --- это последний столбец матрицы $\mathbf{V}$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 1: Оценка внешних параметров камеры}
+\begin{itemize}
+    \item Извлечем из вектора $\widehat{\boldsymbol{\theta}}$ оценки элементов матрицы поворота и вектора сдвига:
+$$
+    \mathbf{R} =
+    \begin{bmatrix}
+        r_{11} & r_{12} & r_{13} \\
+        r_{21} & r_{22} & r_{23} \\
+        r_{31} & r_{32} & r_{33}
+    \end{bmatrix}
+    \quad
+    \mathbf{t} =
+    \begin{bmatrix}
+        t_1 \\ t_2 \\ t_3
+    \end{bmatrix}
+$$
+\item Матрица $\mathbf{R}$ может быть не ортогональной.
+Чтобы получить корректную оценку матрицы поворота, выполним SVD разложение:
+$$
+    \mathbf{R} =
+    \mathbf{U} \mathbf{L} \mathbf{V}^\top
+$$
+\item Вычислим окончательную оценку матрицы поворота:
+$$
+    \widehat{\mathbf{R}} =
+    \mathbf{U} \mathbf{V}^\top
+$$
+\item Окончательная оценка для вектора сдвига получается следующим образом: 
+$$
+    \widehat{\mathbf{t}} =
+    \left(\sum_{m=1}^3\sum_{n=1}^3 \frac{\widehat{r}_{mn}}{r_{mn}}\right) \cdot \mathbf{t} 
+$$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 2: Реконструкция 3D точек сцены}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.3\textheight]{triangulation.pdf}
+\end{figure}
+\begin{itemize}
+    \item Требуется оценить трехмерные координаты точки сцены $\mathbf{w}$,
+          если даны ее проекции $\{\mathbf{x}_j\}_{j=1}^{J}$ в $J\geq 2$ камерах с известными внутренними и внешними параметрами.
+    \item Задача также решается с помощью метода максимального правдоподобия:
+    $$
+        \widehat{\mathbf{w}} =
+        \argmin_{\mathbf{w}} 
+        \left(- \sum_{j=1}^{J} 
+        \ln \left[ Pr(\mathbf{x}_j\,|\,\mathbf{w}, \mathbf{K}_j, \mathbf{R}_j, \mathbf{t}_j)\right]
+        \right)
+    $$
+    \item Эта задача называется \textbf{задачей триангуляции}.
+    \item Если точек $\mathbf{w}$ много, то получим разреженную 3D модель сцены.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 2: Реконструкция 3D точек сцены}
+\begin{itemize}
+    \item Задача триангуляции является задачей нелинейной оптимизации
+    $$
+        \widehat{\mathbf{w}} =
+        \argmin_{\mathbf{w}} 
+        \left(- \sum_{j=1}^{J} 
+        \ln \left[ Pr(\mathbf{x}_j\,|\,\mathbf{w}, \mathbf{K}_j, \mathbf{R}_j, \mathbf{t}_j)\right]
+        \right)
+    $$
+    \item Найдем начальную оценку точки $\mathbf{w}$ с помощью метода DLT (Direct Linear Transform).
+    \item Построим уравнение камеры в однородных координатах для каждой камеры:
+    $$
+        \lambda_j
+        \begin{bmatrix}
+            x_j \\ y_j \\ 1
+        \end{bmatrix} =
+        \begin{bmatrix}
+            f_{x}^j & s^j & c_{x}^j \\
+            0 & f_{y}^j & c_{y}^j \\
+            0 & 0 & 1
+        \end{bmatrix}
+        \begin{bmatrix}
+            r_{11}^j & r_{12}^j & r_{13}^j  & t_1^j\\
+            r_{21}^j & r_{22}^j & r_{23}^j  & t_2^j\\
+            r_{31}^j & r_{32}^j & r_{33}^j  & t_3^j
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            u \\ v \\ w \\ 1
+        \end{bmatrix}
+        \quad j = 1, 2, \ldots, J
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 2: Реконструкция 3D точек сцены}
+\begin{itemize}
+    \item Умножим обе части равенства на $\mathbf{K}_j^{-1}$:
+    $$
+        \lambda_j
+        \begin{bmatrix}
+            x_j' \\ y_j' \\ 1
+        \end{bmatrix} =
+        \begin{bmatrix}
+            r_{11}^j & r_{12}^j & r_{13}^j  & t_1^j\\
+            r_{21}^j & r_{22}^j & r_{23}^j  & t_2^j\\
+            r_{31}^j & r_{32}^j & r_{33}^j  & t_3^j
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            u \\ v \\ w \\ 1
+        \end{bmatrix}
+        \quad
+        \text{где} \quad
+        \begin{bmatrix}
+            x_j' \\ y_j' \\ 1
+        \end{bmatrix} =
+        \mathbf{K}_j^{-1}
+        \begin{bmatrix}
+            x_j \\ y_j \\ 1
+        \end{bmatrix}
+    $$
+    \item Последнее уравнение дает:
+    $$
+        \lambda_j =
+        r_{31}^j u + r_{32}^j v + r_{33}^j w + t_3^j
+    $$
+    \item Подставим это выражение в первые два уравнения и получим систему двух линейных неоднородных уравнений для трех неизвестных $u, v, w$:
+    $$
+        \begin{bmatrix}
+            r_{31}^j x_j' - r_{11}^j & r_{32}^j x_j' - r_{12}^j & r_{33}^j x_j' - r_{13}^j \\
+            r_{31}^j y_j' - r_{21}^j & r_{32}^j y_j' - r_{22}^j & r_{33}^j y_j' - r_{23}^j
+        \end{bmatrix}
+        \begin{bmatrix}
+            u \\ v \\ w
+        \end{bmatrix} = 
+        \begin{bmatrix}
+            t_1^j - t_3^j x_j'\\ 
+            t_2^j - t_3^j y_j'
+        \end{bmatrix}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 2: Реконструкция 3D точек сцены}
+\begin{itemize}
+    \item Каждая камера дает две строки в системе уравнений для трех неизвестных $u, v, w$.
+    \item Соберем уравнения от всех $J$ камер в одну систему $\mathbf{A} \cdot \mathbf{w} = \mathbf{b}$.
+    \item Чтобы найти вектор $\mathbf{w}$, минимизирующий норму разности левой и правой частей уравнения
+    $$
+        \mathbf{A} \cdot \mathbf{w} = \mathbf{b}
+    $$
+    \item Решим следующую оптимизационную задачу:
+    $$
+        \widehat{\mathbf{w}} =
+        \argmin_{\mathbf{w}} \|\mathbf{A} \cdot \mathbf{w} - \mathbf{b}\|^2
+    $$
+    \item Эта задача решается с помощью метода наименьших квадратов:
+    $$
+        \widehat{\mathbf{w}} = 
+        (\mathbf{A}^\top \mathbf{A})^{-1} \mathbf{A}^\top \mathbf{b}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 3: Оценка внутренних параметров камеры}
 \begin{itemize}
     \item Известны трехмерные координаты точек сцены $\{\mathbf{w}_i\}_{i=1}^{I}$ 
           и их проекции на изображение $\{\mathbf{x}_i\}_{i=1}^{I}$. 
@@ -447,7 +778,7 @@ $$
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{Задача 2: Оценка внутренних параметров камеры}
+\frametitle{Задача 3: Оценка внутренних параметров камеры}
 \begin{figure}[h]
     \centering
     \includegraphics[height=0.4\textheight]{calibration_target.pdf}
@@ -462,28 +793,6 @@ $$
 \end{itemize}
 \end{frame}
 
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Задача 3: Оценка координат точек сцены}
-\begin{figure}[h]
-    \centering
-    \includegraphics[height=0.3\textheight]{triangulation.pdf}
-\end{figure}
-\begin{itemize}
-    \item Требуется оценить трехмерные координаты точки сцены $\mathbf{w}$,
-          если даны ее проекции $\{\mathbf{x}_j\}_{j=1}^{J}$ в $J\geq 2$ камерах с известными внутренними и внешними параметрами.
-    \item Задача также решается с помощью метода максимального правдоподобия:
-    $$
-        \widehat{\mathbf{w}} =
-        \argmin_{\mathbf{w}} 
-        \left(- \sum_{j=1}^{J} 
-        \ln \left[ Pr(\mathbf{x}_j\,|\,\mathbf{w}, \mathbf{K}_j, \mathbf{R}_j, \mathbf{t}_j)\right]
-        \right)
-    $$
-    \item Эта задача называется \textbf{задачей триангуляции}.
-    \item Если точек $\mathbf{w}$ много, то получим разреженную 3D модель сцены.
-\end{itemize}
-\end{frame}
 
 %------------------------------------------------------------
 \end{document}
