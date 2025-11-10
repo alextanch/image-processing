@@ -8,11 +8,7 @@
 | 4  |Детекция границ и линий на изображениях|[lecture_04.pdf](lectures/lecture_04.pdf)|[notebook_04.ipynb](notebooks/notebook_04.ipynb)|
 | 5  |Детекция и сопоставление ключевых точек на изображениях|[lecture_notes_05.pdf](lectures/lecture_notes_05.pdf)|[notebook_05.ipynb](notebooks/notebook_05.ipynb)|
 | 6  |Сегментация изображений|[lecture_06.ipynb](lectures/lecture_06.ipynb)|[lecture_06.ipynb](lectures/lecture_06.ipynb)|
-| 7  |Гомография. Сшивка изображений|||
-| 8  |Проективная модель камеры. Калибровка камеры|||
-| 9  |Эпиполярная геометрия. Относительное положение камер|||
-| 10 |Реконструкция 3D сцены|||
-| 11 |Методы понижения размерности многомерных данных. Классификация изображений|||
+| 7  |Модель pinhole-камеры|[lecture_07.pdf](lectures/lecture_07.pdf)|[notebook_07.ipynb](notebooks/notebook_07.ipynb)|
 
 
 ### Установка Python окружения
