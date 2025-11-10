@@ -56,6 +56,8 @@
 \frametitle{Многомерное гауссово распределение}
 \begin{figure}[h]
     \centering
+    \includegraphics[height=0.35\textheight]{Gauss1D.pdf}
+    \hspace{1cm}
     \includegraphics[height=0.35\textheight]{MVarGaussIntro.pdf}
 \end{figure}
 \begin{itemize}
@@ -63,12 +65,12 @@
     \item Оно описывается вектором средних значений $\boldsymbol{\mu}$ и матрицей ковариаций $\boldsymbol{\Sigma}$.
     \item Формула многомерного гауссовского распределения:
     $$
-        Pr(\mathbf{x}\,|\,\boldsymbol{\mu}, \boldsymbol{\Sigma}) =
+        Pr(\mathbf{x}\,|\,\boldsymbol{\theta}) =
         \mathrm{Norm}_{\mathbf{x}}[\boldsymbol{\mu}, \boldsymbol{\Sigma}] =
         \frac{1}{(2\pi)^{d/2} |\boldsymbol{\Sigma}|^{1/2}} 
         \exp\left[-\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu})\right]
     $$
-    где $\mathbf{x}$ --- $d$-мерный вектор признаков.
+    где $\mathbf{x}$ --- $d$-мерный вектор признаков, $\boldsymbol{\theta} = \{\boldsymbol{\mu}, \boldsymbol{\Sigma}\}$ --- параметры распределения.
 \end{itemize}
 \end{frame}
 

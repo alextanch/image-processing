@@ -1032,7 +1032,7 @@ $$
     \widetilde{\mathbf{w}}_c =
     \begin{bmatrix}
         \mathbf{R} & \mathbf{t} \\
-        \mathbf{0}^\top & 1
+        \mathbf{0} & 1
     \end{bmatrix}
     \cdot
     \widetilde{\mathbf{w}}
@@ -1067,7 +1067,7 @@ $$
     \widetilde{\mathbf{w}}_c =
     \begin{bmatrix}
         \mathbf{R} & \mathbf{t} \\
-        \mathbf{0}^\top & 1
+        \mathbf{0} & 1
     \end{bmatrix}
     \cdot
     \widetilde{\mathbf{w}}
@@ -1084,7 +1084,7 @@ $$
     \left[\mathbf{K}\,\,\mathbf{0}\right] \cdot
     \begin{bmatrix}
         \mathbf{R} & \mathbf{t} \\
-        \mathbf{0}^\top & 1
+        \mathbf{0} & 1
     \end{bmatrix} \cdot
     \widetilde{\mathbf{w}}      
 \]
@@ -1320,4 +1320,24 @@ $t$ -- произвольный параметр.
 \end{frame}
 
 %------------------------------------------------------------
+\begin{frame}
+\frametitle{Теоретические вопросы}
+\begin{itemize}
+    \item Однородные координаты в 2D и 3D.
+
+    \item Замена системы координат с помощью матрицы вращения и вектора сдвига
+ (формулы замены в декартовых и однородных координатах).
+
+    \item Параметризация матрицы вращения с помощью вектора вращения. Формулы Родрига.
+
+    \item Модель pinhole-камеры. Внутренние и внешние параметры камеры.
+
+    \item Матрица камеры. Проекция 3D точек на изображение с помощью матрицы камеры и обратная проекция точек изображения в 3D пространство.
+
+    \item Модель радиальной и тангенциальной дисторсии камеры.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
 \end{document}
+
