@@ -600,21 +600,18 @@ $$
     \end{bmatrix}
 $$  
 в вектор вращения $\boldsymbol{\omega} = \theta\cdot\mathbf{n}$:
-\begin{itemize}
-    \item Угол вращения $\theta$ вычисляется по формуле:
     $$
-        \theta = \arccos\left(\frac{\mathrm{trace}(\mathbf{R}) - 1}{2}\right)
+        |\boldsymbol{\omega}| = \arccos\left(\frac{\mathrm{trace}(\mathbf{R}) - 1}{2}\right)
     $$
-    \item Единичный вектор оси вращения $\mathbf{n}$ вычисляется по формуле:
     $$
-        \mathbf{n} = \frac{1}{2\sin\theta}
+        \boldsymbol{\omega} = 
+        \frac{|\boldsymbol{\omega}|}{2\sin|\boldsymbol{\omega}|}
         \begin{bmatrix}
             r_{32} - r_{23} \\
             r_{13} - r_{31} \\
             r_{21} - r_{12}
         \end{bmatrix}
     $$
-\end{itemize}
 \end{frame}
 
 %------------------------------------------------------------
