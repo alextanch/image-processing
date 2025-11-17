@@ -600,21 +600,18 @@ $$
     \end{bmatrix}
 $$  
 в вектор вращения $\boldsymbol{\omega} = \theta\cdot\mathbf{n}$:
-\begin{itemize}
-    \item Угол вращения $\theta$ вычисляется по формуле:
     $$
-        \theta = \arccos\left(\frac{\mathrm{trace}(\mathbf{R}) - 1}{2}\right)
+        |\boldsymbol{\omega}| = \arccos\left(\frac{\mathrm{trace}(\mathbf{R}) - 1}{2}\right)
     $$
-    \item Единичный вектор оси вращения $\mathbf{n}$ вычисляется по формуле:
     $$
-        \mathbf{n} = \frac{1}{2\sin\theta}
+        \boldsymbol{\omega} = 
+        \frac{|\boldsymbol{\omega}|}{2\sin|\boldsymbol{\omega}|}
         \begin{bmatrix}
             r_{32} - r_{23} \\
             r_{13} - r_{31} \\
             r_{21} - r_{12}
         \end{bmatrix}
     $$
-\end{itemize}
 \end{frame}
 
 %------------------------------------------------------------
@@ -768,7 +765,7 @@ $$
     %\includegraphics[width=0.4\textwidth]{focal_params.pdf}
 \end{figure}
 \begin{itemize}
-    \item Из правдоподобия треугольников:
+    \item Из подобия треугольников:
     \begin{align*}
         \frac{x-p_x}{f} = \frac{u}{w}
         \qquad&\Rightarrow\qquad
@@ -1324,16 +1321,21 @@ $t$ -- произвольный параметр.
 \frametitle{Теоретические вопросы}
 \begin{itemize}
     \item Однородные координаты в 2D и 3D.
-
+    \vspace{0.3cm}
+    
     \item Замена системы координат с помощью матрицы вращения и вектора сдвига
  (формулы замены в декартовых и однородных координатах).
+    \vspace{0.3cm}
 
     \item Параметризация матрицы вращения с помощью вектора вращения. Формулы Родрига.
-
+    \vspace{0.3cm}
+    
     \item Модель pinhole-камеры. Внутренние и внешние параметры камеры.
-
+    \vspace{0.3cm}
+    
     \item Матрица камеры. Проекция 3D точек на изображение с помощью матрицы камеры и обратная проекция точек изображения в 3D пространство.
-
+    \vspace{0.3cm}
+    
     \item Модель радиальной и тангенциальной дисторсии камеры.
 \end{itemize}
 \end{frame}

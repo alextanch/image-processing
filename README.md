@@ -9,6 +9,7 @@
 | 5  |Детекция и сопоставление ключевых точек на изображениях|[lecture_notes_05.pdf](lectures/lecture_notes_05.pdf)|[notebook_05.ipynb](notebooks/notebook_05.ipynb)|
 | 6  |Сегментация изображений|[lecture_06.ipynb](lectures/lecture_06.ipynb)|[lecture_06.ipynb](lectures/lecture_06.ipynb)|
 | 7  |Модель pinhole-камеры|[lecture_07.pdf](lectures/lecture_07.pdf)|[notebook_07.ipynb](notebooks/notebook_07.ipynb)|
+| 8  |Основные задачи 3D CV для трехмерных сцен|[lecture_08.pdf](lectures/lecture_07.pdf)|[notebook_08.ipynb](notebooks/notebook_08.ipynb)|
 
 
 ### Установка Python окружения

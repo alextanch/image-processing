@@ -22,6 +22,7 @@
     gensymb,
     amsmath,
     hyperref,
+    wrapfig,
     tikz, tikz-3dplot, xcolor, physics, bm
 }
 \usepackage[absolute, overlay]{textpos}
@@ -53,16 +54,54 @@
 
 %------------------------------------------------------------
 \begin{frame}
+\frametitle{Три основные задачи 3D CV для трехмерных сцен}
+
+$$
+    \lambda \cdot \widetilde{\mathbf{x}} =
+    \mathbf{K}\,\, [\mathbf{R}\,\, \mathbf{t}] \cdot
+    \widetilde{\mathbf{w}}
+$$
+\begin{itemize}
+    \item Оценка внешних параметров камеры:
+    $$
+        \left\{\mathbf{w}_i\right\}\,,\quad
+        \left\{\mathbf{x}_i\right\}\,,\quad
+        \mathbf{K}
+        \qquad\rightarrow\qquad
+        \mathbf{R}\,,\, \mathbf{t}
+    $$
+    \item Реконструкция 3D точек сцены:
+    $$
+        \left\{\mathbf{x}_j\right\}\,,\quad
+        \left\{\mathbf{R}_j\,,\, \mathbf{t}_j\right\}\,,\quad
+        \mathbf{K}_j
+        \qquad\rightarrow\qquad
+        \mathbf{w}
+    $$
+    \item Оценка внутренних параметров камеры:
+    $$
+        \left\{\mathbf{w}_i\right\}\,,\quad
+        \left\{\mathbf{x}_i\right\}\quad
+        \qquad\rightarrow\qquad
+        \mathbf{K}\,,\quad
+        \left(\mathbf{R}\,,\, \mathbf{t}\right)
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
 \frametitle{Многомерное гауссово распределение}
 \begin{figure}[h]
-    \centering
-    \includegraphics[height=0.35\textheight]{Gauss1D.pdf}
-    \hspace{1cm}
+    %\centering
+    %\includegraphics[height=0.35\textheight]{Gauss1D.pdf}
+    %\hspace{1cm}
     \includegraphics[height=0.35\textheight]{MVarGaussIntro.pdf}
 \end{figure}
 \begin{itemize}
-    \item Многомерное гауссово распределение --- это обобщение одномерного гауссового распределения на случай нескольких переменных.
-    \item Оно описывается вектором средних значений $\boldsymbol{\mu}$ и матрицей ковариаций $\boldsymbol{\Sigma}$.
+    %\item Многомерное гауссово распределение --- это обобщение одномерного гауссового распределения на случай нескольких переменных.
+    \item Многомерное гауссово распределение описывается вектором средних значений 
+    $\boldsymbol{\mu}\in \mathbb{R}^d$ и матрицей ковариаций $\boldsymbol{\Sigma}\in \mathbb{R}^{d \times d}$.
     \item Формула многомерного гауссовского распределения:
     $$
         Pr(\mathbf{x}\,|\,\boldsymbol{\theta}) =
@@ -72,201 +111,6 @@
     $$
     где $\mathbf{x}$ --- $d$-мерный вектор признаков, $\boldsymbol{\theta} = \{\boldsymbol{\mu}, \boldsymbol{\Sigma}\}$ --- параметры распределения.
 \end{itemize}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Метод максимального правдоподобия}
-\begin{itemize}
-    \item \textbf{Дано:}
-    \begin{itemize}
-        \item Набор наблюдений $\{\mathbf{x}_1, \mathbf{x}_2, \ldots, \mathbf{x}_n\}$
-        \item Распределение вероятностей $Pr(\mathbf{x} | \boldsymbol{\theta})$ с параметрами $\boldsymbol{\theta}$
-    \end{itemize}
-    \vskip0.5cm
-
-    \item \textbf{Найти:} параметры $\widehat{\boldsymbol{\theta}}$, которые делают наблюдения наиболее вероятными.
-    \vskip0.5cm
-
-    \item \textbf{Maximum Likelihood Estimation (MLE):}
-    \begin{itemize}
-        \item Находим функцию правдоподобия:
-        $$
-            L(\boldsymbol{\theta}) =  \prod_{i=1}^{n} Pr(\mathbf{x}_i | \boldsymbol{\theta})
-        $$
-        \item ищем параметры $\widehat{\boldsymbol{\theta}}$, которые максимизируют функцию правдоподобия:
-        $$
-            \widehat{\boldsymbol{\theta}} = \argmax_{\boldsymbol{\theta}} L(\boldsymbol{\theta})=
-            \argmin_{\boldsymbol{\theta}}\left[-\ln L(\boldsymbol{\theta})\right]
-        $$
-    \end{itemize}
-\end{itemize}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Задача нелинейной оптимизации}
-\begin{itemize}
-    \item Нелинейная оптимизация --- это процесс поиска минимума (или максимума) нелинейной функции:
-    $$
-        \widehat{\boldsymbol{\theta}} = 
-        \argmin_{\boldsymbol{\theta}} f(\boldsymbol{\theta})
-    $$
-    \item В задачах компьютерного зрения часто возникает необходимость минимизировать нелинейные функции вида:
-    $$
-        f(\boldsymbol{\theta})=
-        \norm{\mathbf{z}(\boldsymbol{\theta})}^2=
-        \sum_{i=1}^{n} z_i^2(\boldsymbol{\theta})
-    $$
-    где
-    $$
-        \mathbf{z}(\boldsymbol{\theta}) =
-        \begin{bmatrix}
-            z_1(\boldsymbol{\theta}) \\
-            z_2(\boldsymbol{\theta}) \\
-            \vdots \\
-            z_n(\boldsymbol{\theta})
-        \end{bmatrix}
-    $$
-\end{itemize}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Метод наименьших квадратов (Least Squares, LS)}
-\begin{itemize}
-    \item Если функция $\mathbf{z}(\boldsymbol{\theta})$ линейна по параметрам $\boldsymbol{\theta}$:
-    $$
-        \mathbf{z}(\boldsymbol{\theta}) =
-        \mathbf{A}\cdot\boldsymbol{\theta} - \mathbf{b}
-    $$
-    где $\mathbf{A}$ --- известная матрица, а $\mathbf{b}$ --- известный вектор, то задача оптимизации сводится к следующей форме:
-    $$
-        \widehat{\boldsymbol{\theta}} = 
-        \argmin_{\boldsymbol{\theta}}\norm{\mathbf{z}(\boldsymbol{\theta})}^2 = 
-        \argmin_{\boldsymbol{\theta}} \|\mathbf{A}\cdot\boldsymbol{\theta} - \mathbf{b}\|^2
-    $$
-    \item И решение задачи может быть получено с помощью метода наименьших квадратов:
-    $$
-        \widehat{\boldsymbol{\theta}} = (\mathbf{A}^\top \mathbf{A})^{-1} \mathbf{A}^\top \mathbf{b}
-    $$
-\end{itemize}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Методы нелинейной оптимизации}
-\begin{figure}[h]
-    \centering
-    \includegraphics[height=0.35\textheight]{localMin.pdf}
-\end{figure}
-\begin{itemize}
-    \item В случае нелинейной функции $\mathbf{z}(\boldsymbol{\theta})$ аналитическое решение задачи оптимизации невозможно.
-    \item В таких случаях используются численные методы оптимизации, которые итеративно улучшают оценку параметров $\boldsymbol{\theta}$.
-    \item Находиться локальный минимум функции, который может не совпадать с глобальным минимумом.
-    \item Локальный минимум зависит от начальной оценки параметров $\boldsymbol{\theta}^{[0]}$.
-\end{itemize}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Методы нелинейной оптимизации}
-\begin{figure}[h]
-    \centering
-    \includegraphics[height=0.3\textheight]{optimization.pdf}
-\end{figure}
-\begin{itemize}
-    \item Метод градиентного спуска:
-    $$
-        \boldsymbol{\theta}^{[t+1]} = 
-        \boldsymbol{\theta}^{[t]} - 
-        \lambda \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
-        \quad t = 0, 1, 2, \ldots
-    $$
-    \item Метод Ньютона:
-    $$
-        \boldsymbol{\theta}^{[t+1]} = 
-        \boldsymbol{\theta}^{[t]} - 
-        \lambda \left(\frac{\partial^2 f}{\partial \boldsymbol{\theta}^2}\right)^{-1}
-        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
-    $$
-    \item Метод Ньютона сходится быстрее, но требует обращения гессиана.
-\end{itemize}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Методы нелинейной оптимизации}
-\begin{itemize}
-    \item В методе Гаусса-Ньютона гессиан приближается якобианом:
-    $$
-        \frac{\partial^2 f}{\partial \boldsymbol{\theta}^2} \approx 
-        2 \mathbf{J}^\top \mathbf{J}
-        \qquad\text{где}\quad
-        \mathbf{J} = \frac{\partial \mathbf{z}}{\partial \boldsymbol{\theta}}
-    $$
-    \item Метод Гаусса-Ньютона:
-    $$
-        \boldsymbol{\theta}^{[t+1]} = 
-        \boldsymbol{\theta}^{[t]} - 
-        \lambda \left(\mathbf{J}^\top \mathbf{J}\right)^{-1}
-        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
-    $$
-    \item Метод Левенберга-Марквардта комбинирует градиентный спуск и метод Гаусса-Ньютона:
-    $$
-        \boldsymbol{\theta}^{[t+1]} = 
-        \boldsymbol{\theta}^{[t]} - 
-        \lambda \left(\mathbf{J}^\top \mathbf{J} + \mu \mathbf{I}\right)^{-1}
-        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
-    $$
-\end{itemize}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Сингулярное разложение матрицы (SVD)}
-Сингулярное разложение матрицы --- это метод факторизации матрицы, который позволяет разложить произвольную матрицу на произведение трех матриц:
-$$
-    \mathbf{A} = \mathbf{U} \mathbf{L} \mathbf{V}^\top
-    \quad \text{-- матрица} \quad m \times n 
-$$
-где:
-\begin{itemize}
-    \item $\mathbf{U}$ --- ортогональная $m\times m$ матрица ($\mathbf{U}^{-1} = \mathbf{U}^\top $)
-    \item $\mathbf{L}$ --- диагональная $m\times n$ матрица, содержащая сингулярные числа
-    \item $\mathbf{V}$ --- ортогональная $n\times n$ матрица ($\mathbf{V}^{-1} = \mathbf{V}^\top $)
-\end{itemize}
-\end{frame}
-
-%------------------------------------------------------------
-\begin{frame}
-\frametitle{Пример SVD разложения}
-\begin{figure}[h]
-    \centering
-    \includegraphics[height=0.3\textheight]{Analyze1SVD.pdf}
-\end{figure}
-$$
-    \mathbf{A} = \mathbf{U} \mathbf{L} \mathbf{V}^\top 
-$$
-$$
-    \mathbf{A} = 
-    \begin{bmatrix}
-        -0.147 & 0.357 \\
-        -0.668 & 0.811
-    \end{bmatrix} =
-    \begin{bmatrix}
-        0.189 & 0.981 \\
-        0.981 & -0.189
-    \end{bmatrix}
-    \begin{bmatrix}
-        1.068 & 0 \\
-        0 & 0.335
-    \end{bmatrix}
-    \begin{bmatrix}
-        -0.587 & 0.8091 \\
-        0.8091 & 0.587
-    \end{bmatrix}^\top  
-$$
 \end{frame}
 
 %------------------------------------------------------------
@@ -392,11 +236,22 @@ $$
 %------------------------------------------------------------
 \begin{frame}
 \frametitle{Генеративная модель pinhole-камеры}
+$$
+    \mathbf{x} = 
+    \mathbf{pinhole}\left[
+        \mathbf{w}\,,\mathbf{K}\,, \mathbf{R}\,, \mathbf{t}
+    \right]
+$$
 \begin{itemize}
     \item Учтем, что при вычислении координат пикселей $\mathbf{x}$ всегда есть некоторая ошибка измерения.
     \item Будем считать, что эта ошибка имеет нормальное распределение с нулевым средним $\boldsymbol{\mu}=\mathbf{0}$ и ковариационной матрицей $\boldsymbol{\Sigma}=\sigma^2 \mathbf{I}$:
     $$
         Pr(\mathbf{x}\,|\,\mathbf{w}, \mathbf{K}, \mathbf{R}, \mathbf{t}) =
+        \mathbf{x}+\mathrm{Norm}_{\mathbf{x}}\left[\mathbf{0}, \sigma^2 \mathbf{I}\right]=
+        \mathrm{Norm}_{\mathbf{x}}\left[\mathbf{x}, \sigma^2 \mathbf{I}\right]
+    $$
+    $$
+        Pr(\mathbf{x}\,|\,\mathbf{w}, \mathbf{K}, \mathbf{R}, \mathbf{t}) = 
         \mathrm{Norm}_{\mathbf{x}}\left[
             \mathbf{pinhole}(\mathbf{w}, \mathbf{K}, \mathbf{R}, \mathbf{t}),
             \sigma^2 \mathbf{I}
@@ -408,12 +263,305 @@ $$
 
 %------------------------------------------------------------
 \begin{frame}
-\frametitle{Задача 1: Оценка внешних параметров камеры}
+\frametitle{Задача оценки параметров распределения}
+\begin{figure}[h]
+    \includegraphics[height=0.3\textheight]{MLE.jpg}
+\end{figure}
 \begin{itemize}
-    \item Известны трехмерные координаты точек сцены $\{\mathbf{w}_i\}_{i=1}^{I}$ 
-          и их проекции на изображение $\{\mathbf{x}_i\}_{i=1}^{I}$. 
-          Известны также внутренние параметры камеры $\mathbf{K}$.
-    \item Требуется оценить внешние параметры камеры: матрицу поворота $\mathbf{R}$ и вектор сдвига $\mathbf{t}$.
+    \item \textbf{Заданы:}
+    \begin{itemize}
+        \item Набор наблюдений $\{\mathbf{x}_1, \mathbf{x}_2, \ldots, \mathbf{x}_n\}$
+        \item Распределение вероятностей $Pr(\mathbf{x} | \boldsymbol{\theta})$ с параметрами $\boldsymbol{\theta}$
+    \end{itemize}
+    \vskip0.5cm
+
+    \item \textbf{Требуется найти:} параметры $\widehat{\boldsymbol{\theta}}$, которые делают наблюдения наиболее вероятными.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод максимального правдоподобия}
+\textbf{Maximum Likelihood Estimation (MLE):}
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Находим функцию правдоподобия:
+    $$
+        L(\boldsymbol{\theta}) =  \prod_{i=1}^{n} Pr(\mathbf{x}_i | \boldsymbol{\theta})
+    $$
+    \item Находим параметры $\widehat{\boldsymbol{\theta}}$, которые максимизируют функцию правдоподобия:
+    $$
+        \widehat{\boldsymbol{\theta}} = \argmax_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+    $$
+    $$
+        \widehat{\boldsymbol{\theta}} =
+        \argmin_{\boldsymbol{\theta}}f(\boldsymbol{\theta})
+    $$
+    где
+    $$
+        f(\boldsymbol{\theta}) = -\ln L(\boldsymbol{\theta})
+        = - \sum_{i=1}^{n} \ln \left[ Pr(\mathbf{x}_i | \boldsymbol{\theta})\right]
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача нелинейной оптимизации}
+\begin{itemize}
+    \item Нелинейная оптимизация --- это процесс поиска минимума нелинейной функции:
+    $$
+        \widehat{\boldsymbol{\theta}} = 
+        \argmin_{\boldsymbol{\theta}} f(\boldsymbol{\theta})
+    $$
+    \item В трех основных задачах 3D CV для трехмерных сцен функция $f(\boldsymbol{\theta})$ имеет следующий вид:
+    $$
+        f(\boldsymbol{\theta})=
+        \norm{\mathbf{z}(\boldsymbol{\theta})}^2=
+        \sum_{i=1}^{n} z_i^2(\boldsymbol{\theta})
+        \quad
+        \mbox{--- \textbf{квадратичная функция}}
+    $$
+    где
+    $$
+        \mathbf{z}(\boldsymbol{\theta}) =
+        \begin{bmatrix}
+            z_1(\boldsymbol{\theta}) \\
+            z_2(\boldsymbol{\theta}) \\
+            \vdots \\
+            z_n(\boldsymbol{\theta})
+        \end{bmatrix}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Метод наименьших квадратов (Least Squares, LS)}
+\begin{itemize}
+    \item Если функция $\mathbf{z}(\boldsymbol{\theta})$ линейна по параметрам $\boldsymbol{\theta}$:
+    $$
+        \mathbf{z}(\boldsymbol{\theta}) =
+        \mathbf{A}\cdot\boldsymbol{\theta} - \mathbf{b}
+    $$
+    где $\mathbf{A}$ --- известная матрица, а $\mathbf{b}$ --- известный вектор, то задача оптимизации сводится к следующей форме:
+    $$
+        \widehat{\boldsymbol{\theta}} = 
+        \argmin_{\boldsymbol{\theta}}\norm{\mathbf{z}(\boldsymbol{\theta})}^2 = 
+        \argmin_{\boldsymbol{\theta}} \|\mathbf{A}\cdot\boldsymbol{\theta} - \mathbf{b}\|^2
+    $$
+    \item И решение задачи может быть получено с помощью метода наименьших квадратов:
+    $$
+        \widehat{\boldsymbol{\theta}} = (\mathbf{A}^\top \mathbf{A})^{-1} \mathbf{A}^\top \mathbf{b}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Методы нелинейной оптимизации}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.35\textheight]{localMin.pdf}
+\end{figure}
+\begin{itemize}
+    \item В случае нелинейной функции $\mathbf{z}(\boldsymbol{\theta})$ аналитическое решение задачи оптимизации невозможно.
+    \item В таких случаях используются численные методы оптимизации, которые итеративно улучшают оценку параметров $\boldsymbol{\theta}$.
+    \item Находиться локальный минимум функции, который может не совпадать с глобальным минимумом.
+    \item Локальный минимум зависит от начальной оценки параметров $\boldsymbol{\theta}^{[0]}$.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Методы нелинейной оптимизации}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.3\textheight]{optimization.pdf}
+\end{figure}
+\begin{itemize}
+    \item Метод градиентного спуска:
+    $$
+        \boldsymbol{\theta}^{[t+1]} = 
+        \boldsymbol{\theta}^{[t]} - 
+        \lambda \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
+        \quad t = 0, 1, 2, \ldots
+    $$
+    \item Метод Ньютона:
+    $$
+        \boldsymbol{\theta}^{[t+1]} = 
+        \boldsymbol{\theta}^{[t]} - 
+        \lambda \left(\frac{\partial^2 f}{\partial \boldsymbol{\theta}^2}\right)^{-1}
+        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
+    $$
+    \item Метод Ньютона сходится быстрее, но требует обращения гессиана.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Методы нелинейной оптимизации}
+\begin{itemize}
+    \item В методе Гаусса-Ньютона гессиан приближается якобианом:
+    $$
+        \frac{\partial^2 f}{\partial \boldsymbol{\theta}^2} \approx 
+        2 \mathbf{J}^\top \mathbf{J}
+        \qquad\text{где}\quad
+        \mathbf{J} = \frac{\partial \mathbf{z}}{\partial \boldsymbol{\theta}}
+    $$
+    $$
+        \boldsymbol{\theta}^{[t+1]} = 
+        \boldsymbol{\theta}^{[t]} - 
+        \lambda \left(\mathbf{J}^\top \mathbf{J}\right)^{-1}
+        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
+    $$
+    \item Метод Левенберга-Марквардта комбинирует градиентный спуск и метод Гаусса-Ньютона:
+    $$
+        \boldsymbol{\theta}^{[t+1]} = 
+        \boldsymbol{\theta}^{[t]} - 
+        \lambda \left(\mathbf{J}^\top \mathbf{J} + \mu \mathbf{I}\right)^{-1}
+        \frac{\partial f}{\partial \boldsymbol{\theta}}\Bigg|_{\boldsymbol{\theta}^{[t]}}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Сингулярное разложение матрицы (SVD)}
+Сингулярное разложение матрицы --- это метод факторизации матрицы, который позволяет разложить произвольную матрицу на произведение трех матриц:
+$$
+    \mathbf{A} = \mathbf{U} \mathbf{L} \mathbf{V}^\top
+    \quad \text{-- матрица} \quad m \times n 
+$$
+где:
+\begin{itemize}
+    \item $\mathbf{U}$ --- ортогональная $m\times m$ матрица ($\mathbf{U}^{-1} = \mathbf{U}^\top $)
+    \item $\mathbf{L}$ --- диагональная $m\times n$ матрица, содержащая сингулярные числа
+    \item $\mathbf{V}$ --- ортогональная $n\times n$ матрица ($\mathbf{V}^{-1} = \mathbf{V}^\top $)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Пример SVD разложения}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.3\textheight]{Analyze1SVD.pdf}
+\end{figure}
+$$
+    \mathbf{A} = \mathbf{U} \mathbf{L} \mathbf{V}^\top 
+$$
+$$
+    \mathbf{A} = 
+    \begin{bmatrix}
+        -0.147 & 0.357 \\
+        -0.668 & 0.811
+    \end{bmatrix} =
+    \begin{bmatrix}
+        0.189 & 0.981 \\
+        0.981 & -0.189
+    \end{bmatrix}
+    \begin{bmatrix}
+        1.068 & 0 \\
+        0 & 0.335
+    \end{bmatrix}
+    \begin{bmatrix}
+        -0.587 & 0.8091 \\
+        0.8091 & 0.587
+    \end{bmatrix}^\top  
+$$
+\end{frame}
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Задача 1: Оценка внешних параметров камеры}
+\begin{center}
+\tdplotsetmaincoords{-60}{-35}
+\begin{tikzpicture}[
+        tdplot_main_coords,
+        scale=0.5,
+        >=Stealth,
+        scale=1,
+        description/.style={draw=gray!70, thick, line cap=round, every node/.style={align=center, font=\footnotesize\sffamily, anchor=north}},
+    ]   
+    \coordinate (o) at (0,0,0);
+
+    \draw [thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (o)      edge node [pos=1, anchor=north east] {$w_c$} % 2 -> z
+        +(0,1,0) edge node [pos=1, anchor=north east] {$v_c$} % 3 -> y
+        +(0,0,1) -- 
+        +(1,0,0) node [anchor=north west] {$u_c$} % 1 -> x
+    ;
+
+    \path [draw=gray!70, fill=gray!20, opacity=0.8] 
+        (-1.5, 4, 1.75) coordinate (a) -- 
+        ++(0, 0, -3.5) coordinate (b) -- 
+        ++(3, 0, 0) coordinate (c) -- 
+        ++(0, 0, 3.5) coordinate (d) -- cycle 
+    ;
+    
+    \draw [thick, green!50!black, <->, shorten >=-15pt, shorten <=-15pt] 
+        (a) node [below=15pt, anchor=north, font=\footnotesize] {$y$} -- 
+        (b) -- 
+        (c) node [above right=17pt, anchor=north west, font=\footnotesize] {$x$}
+    ;
+    
+    \draw [thick, black, fill=black] (b) circle [radius=1.2pt];
+    
+    \coordinate (q) at (0, 4, 0);
+    
+    \draw [thick, black, fill=black] (q) circle [radius=1.2pt];
+
+    \coordinate (p) at (1,4,-0.5);
+    \coordinate (s) at ($1.8*(p)$);
+
+    \draw [thick, fill=red] (p) circle [radius=1.2pt];
+    \draw [thick, fill=red] (s) circle [radius=1.2pt];
+
+    \draw [thick, red] (o.center) -- (p.center);
+    \scoped[on background layer]{
+        \draw [red] (p.center) -- (s.center);
+    }
+
+    \draw [thick, gray] (o.center) -- (q.center);
+    \scoped[on background layer]{
+        \draw [thick, gray] (q.center) -- (0, 5, 0);
+    }
+
+    \draw [thick, red] (o.center) -- (p.center);
+    \draw [thick, black, fill=black] (o) circle [radius=1.2pt];
+
+    \path [every node/.style={font=\footnotesize, inner sep=2pt}] 
+        (o) node [below right] {$\mathbf{c}$};
+    
+    \path [every node/.style={font=\scriptsize, inner sep=2pt}] 
+        (s) node [above right] {$\mathbf{w}=[u,v,w]$};
+
+    \path [every node/.style={font=\scriptsize, inner sep=2pt}] 
+        (p) node [above right] {$\mathbf{x}=[x,y]$};
+
+    \tdplotsetrotatedcoords{10}{40}{30}
+    \coordinate (Shift) at (5,-2,-3);
+    \tdplotsetrotatedcoordsorigin{(Shift)}
+    
+    \draw [thick, black, fill=black] (Shift) circle [radius=1.2pt];
+    
+    \draw [tdplot_rotated_coords, thick, ->, every node/.style={font=\footnotesize, inner sep=1pt}] 
+        (0,0,0) edge node [pos=1, anchor=north east] {$w$} % 2 -> z
+        +(0,1,0) edge node [pos=1, anchor=north east] {$v$} % 3 -> y
+        +(0,0,1) -- 
+        +(1,0,0) node [anchor=north west] {$u$} % 1 -> x
+    ;
+\end{tikzpicture}
+\end{center}
+\begin{itemize}
+    \item \textbf{PnP problem} (Perspective-n-Point):
+          заданы координаты точек сцены $\{\mathbf{w}_i\}_{i=1}^{I}$,
+          их проекции на изображение $\{\mathbf{x}_i\}_{i=1}^{I}$ и
+          внутренние параметры камеры $\mathbf{K}$.
+    \item Требуется оценить внешние параметры камеры: $\mathbf{R}$ и  $\mathbf{t}$.
     \item Эта задача решается с помощью метода максимального правдоподобия:
     $$
         \widehat{\mathbf{R}}\,,\,\, \widehat{\mathbf{t}} =
@@ -422,7 +570,6 @@ $$
         \ln \left[ Pr(\mathbf{x}_i\,|\,\mathbf{w}_i, \mathbf{K}, \mathbf{R}, \mathbf{t})\right]
         \right)
     $$
-    \item Эта задача называется еще \textbf{PnP задачей} (Perspective-n-Point problem).
 \end{itemize}
 \end{frame}
 
@@ -525,7 +672,7 @@ $$
         r_{31} u_i + r_{32} v_i + r_{33} w_i + t_3
     $$
     \item Подставим это выражение в первые два уравнения:
-    \begin{equation}    \label{lda1}
+    $$
         \begin{bmatrix}
             (r_{31}u_i+r_{32}v_i+r_{33}w_i+t_3)x_i' \\
             (r_{31}u_i+r_{32}v_i+r_{33}w_i+t_3)y_i'    
@@ -537,28 +684,50 @@ $$
         \begin{bmatrix}
             u_i \\ v_i \\ w_i \\ 1
         \end{bmatrix}
-    \end{equation}
+    $$
 \end{itemize}
 \end{frame}
 
 %------------------------------------------------------------
 \begin{frame}
 \frametitle{Задача 1: Оценка внешних параметров камеры}
-Уравнение (\ref{lda1}) можно переписать в виде:
+Уравнение 
+$$
+    \begin{bmatrix}
+        (r_{31}u_i+r_{32}v_i+r_{33}w_i+t_3)x_i' \\
+        (r_{31}u_i+r_{32}v_i+r_{33}w_i+t_3)y_i'    
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        r_{11} & r_{12} & r_{13}  & t_1\\
+        r_{21} & r_{22} & r_{23}  & t_2
+    \end{bmatrix}
+    \begin{bmatrix}
+        u_i \\ v_i \\ w_i \\ 1
+    \end{bmatrix}
+$$
+можно переписать в виде:
 $$
     \begin{bmatrix}
         u_i & v_i & w_i & 1 & 0 & 0 & 0 & 0 & -x_i' u_i & -x_i' v_i & -x_i' w_i & -x_i' \\
         0 & 0 & 0 & 0 & u_i & v_i & w_i & 1 & -y_i' u_i & -y_i' v_i & -y_i' w_i & -y_i'
     \end{bmatrix}
-    \begin{bmatrix}
-        r_{11} \\ r_{12} \\ r_{13} \\ t_1 \\
-        r_{21} \\ r_{22} \\ r_{23} \\ t_2 \\
-        r_{31} \\ r_{32} \\ r_{33} \\ t_3
-    \end{bmatrix} = 
+    \boldsymbol{\theta} = 
     \mathbf{0}
 $$
+где
+$$
+    \boldsymbol{\theta} =
+    \begin{bmatrix}
+        r_{11} & r_{12} & r_{13}  & t_1 &
+        r_{21} & r_{22} & r_{23}  & t_2 &
+        r_{31} & r_{32} & r_{33}  & t_3
+    \end{bmatrix}^\top
+$$    
 Каждая точка дает два уравнения. 
-Соберем уравнения от всех $I$ точек в одну систему $\mathbf{A} \cdot \boldsymbol{\theta} = \mathbf{0}$.
+Соберем уравнения от всех $I$ точек в одну систему 
+$$
+    \mathbf{A} \cdot \boldsymbol{\theta} = \mathbf{0}
+$$
 \end{frame}
 
 %------------------------------------------------------------
@@ -572,7 +741,7 @@ $$
     \item Решим следующую оптимизационную задачу:
     $$
         \widehat{\boldsymbol{\theta}} =
-        \argmin_{\boldsymbol{\theta}} \|\mathbf{A} \cdot \boldsymbol{\theta}\|^2
+        \argmin_{\boldsymbol{\theta}} \|\mathbf{A} \cdot \boldsymbol{\theta}\|
         \quad \text{при условии} \quad \|\boldsymbol{\theta}\| = 1
     $$
     \item Эта задача решается с помощью SVD разложения матрицы $\mathbf{A}$:
@@ -587,36 +756,43 @@ $$
 \begin{frame}
 \frametitle{Задача 1: Оценка внешних параметров камеры}
 \begin{itemize}
-    \item Извлечем из вектора $\widehat{\boldsymbol{\theta}}$ оценки элементов матрицы поворота и вектора сдвига:
-$$
-    \mathbf{R} =
+    \item Извлечем из вектора 
+    $$
+    \widehat{\boldsymbol{\theta}} =
     \begin{bmatrix}
-        r_{11} & r_{12} & r_{13} \\
-        r_{21} & r_{22} & r_{23} \\
-        r_{31} & r_{32} & r_{33}
-    \end{bmatrix}
-    \quad
-    \mathbf{t} =
-    \begin{bmatrix}
-        t_1 \\ t_2 \\ t_3
-    \end{bmatrix}
-$$
-\item Матрица $\mathbf{R}$ может быть не ортогональной.
-Чтобы получить корректную оценку матрицы поворота, выполним SVD разложение:
-$$
-    \mathbf{R} =
-    \mathbf{U} \mathbf{L} \mathbf{V}^\top
-$$
-\item Вычислим окончательную оценку матрицы поворота:
-$$
-    \widehat{\mathbf{R}} =
-    \mathbf{U} \mathbf{V}^\top
-$$
-\item Окончательная оценка для вектора сдвига получается следующим образом: 
-$$
-    \widehat{\mathbf{t}} =
-    \left(\sum_{m=1}^3\sum_{n=1}^3 \frac{\widehat{r}_{mn}}{r_{mn}}\right) \cdot \mathbf{t} 
-$$
+        r_{11} & r_{12} & r_{13}  & t_1 &
+        r_{21} & r_{22} & r_{23}  & t_2 &
+        r_{31} & r_{32} & r_{33}  & t_3
+    \end{bmatrix}^\top
+    $$
+    оценки элементов матрицы поворота и вектора сдвига:
+    $$
+        \mathbf{R} = 
+        \begin{bmatrix}
+            {r}_{11} & {r}_{12} & {r}_{13} \\
+            {r}_{21} & {r}_{22} & {r}_{23} \\
+            {r}_{31} & {r}_{32} & {r}_{33}
+        \end{bmatrix}
+        \qquad
+        \mathbf{t} =
+        \begin{bmatrix}
+            t_1 \\ t_2 \\ t_3
+        \end{bmatrix}
+    $$
+    \item Матрица $\mathbf{R}$ может быть не ортогональной.
+    Чтобы получить корректную оценку матрицы поворота и сдвига, выполним следующие шаги:
+    $$
+        \mathbf{R} =
+        \mathbf{U} \mathbf{L} \mathbf{V}^\top
+        \quad\rightarrow\quad
+        \mathbf{R} = \mathbf{U} \mathbf{V}^\top\,,\quad
+        \mathbf{t} = \frac{\mathbf{t}}{\mathbf{L}_{11}}
+    $$
+    если $\det(\mathbf{R}) < 0$, то
+    $$
+        \mathbf{R} = -\mathbf{R}\,,\quad
+        \mathbf{t} = -\mathbf{t}
+    $$
 \end{itemize}
 \end{frame}
 
@@ -736,7 +912,23 @@ $$
 \begin{frame}
 \frametitle{Задача 2: Реконструкция 3D точек сцены}
 \begin{itemize}
-    \item Каждая камера дает две строки в системе уравнений для трех неизвестных $u, v, w$.
+    \item Каждая камера дает две строки в системе уравнений 
+    $$
+        \begin{bmatrix}
+            r_{31}^j x_j' - r_{11}^j & r_{32}^j x_j' - r_{12}^j & r_{33}^j x_j' - r_{13}^j \\
+            r_{31}^j y_j' - r_{21}^j & r_{32}^j y_j' - r_{22}^j & r_{33}^j y_j' - r_{23}^j
+        \end{bmatrix}
+        \mathbf{w} = 
+        \begin{bmatrix}
+            t_1^j - t_3^j x_j'\\ 
+            t_2^j - t_3^j y_j'
+        \end{bmatrix}\qquad
+        \text{где} \quad
+        \mathbf{w} =
+        \begin{bmatrix}
+            u \\ v \\ w
+        \end{bmatrix}
+    $$
     \item Соберем уравнения от всех $J$ камер в одну систему $\mathbf{A} \cdot \mathbf{w} = \mathbf{b}$.
     \item Чтобы найти вектор $\mathbf{w}$, минимизирующий норму разности левой и правой частей уравнения
     $$
@@ -774,7 +966,8 @@ $$
         \right)
         \right]
     $$
-    \item Эта задача называется \textbf{задачей калибровки камеры}.  
+    \item Эта задача называется \textbf{задачей калибровки камеры}. 
+    \item При калибровке камеры также могут оцениваться коэффициенты радиальной и тангенциальной дисторсий $(k_1, k_2, k_3, p_1, p_2)$. 
 \end{itemize}
 \end{frame}
 
@@ -795,6 +988,32 @@ $$
 \end{itemize}
 \end{frame}
 
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Теоретические вопросы}
+\begin{itemize}
+    \item Генеративная модель pinhole-камеры.
+    \vspace{0.3cm}
+
+    \item Метод максимального правдоподобия для оценки параметров распределения наблюдаемых данных.
+    \vspace{0.3cm}
+
+    \item Методы нелинейной оптимизации для квадратичных функций.
+     (градиентный спуск, метод Ньютона, Гаусса-Ньютона, Левенберга-Марквардта)
+    \vspace{0.3cm}
+    
+    \item Оценка внешних параметров камеры (PnP problem). 
+    Оценка внешних параметров камеры с помощью метода DLT.
+    \vspace{0.3cm}
+    
+    \item Реконструкция 3D точек сцены (triangulation problem).
+    Реконструкция 3D-точек с помощью метода DLT.
+    \vspace{0.3cm}
+    
+    \item Оценка внутренних параметров камеры (camera calibration problem).
+\end{itemize}
+\end{frame}
 
 %------------------------------------------------------------
 \end{document}
