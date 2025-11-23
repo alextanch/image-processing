@@ -1,21 +1,22 @@
 [project]
 name = "image-processing"
-version = "0.0.1"
-description = "Image Processing Course"
+version = "0.1.0"
+description = "Add your description here"
 readme = "README.md"
-
-[tool.ruff]
-target-version = "py310"
-line-length = 80
-indent-width = 4    
-output-format = "full"
-show-fixes = true
-exclude = [
-  "lectures"
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=7.1.0",
+    "isort>=7.0.0",
+    "jupyterlab>=4.5.0",
+    "matplotlib>=3.10.7",
+    "mediapy>=1.2.4",
+    "numpy>=2.3.5",
+    "omegaconf>=2.3.0",
+    "opencv-python>=4.11.0.86",
+    "pandas>=2.3.3",
+    "plotly>=6.5.0",
+    "rootutils>=1.0.7",
+    "ruff>=0.14.6",
+    "scikit-learn>=1.7.2",
+    "scipy>=1.16.3",
 ]
-
-[tool.ruff.lint]
-extend-select = ["I"]
-ignore = ["E402"]
-preview = true
-explicit-preview-rules = true
