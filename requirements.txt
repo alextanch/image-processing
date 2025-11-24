@@ -11,3 +11,4 @@ mediapy
 omegaconf
 isort
 ruff
+rootutils

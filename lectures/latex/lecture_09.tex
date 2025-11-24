@@ -1,0 +1,591 @@
+\documentclass[12pt, usepdftitle=false, aspectratio=1610]{beamer}
+
+\usetheme{Madrid}
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    minted,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb,
+    amsmath,
+    hyperref,
+    wrapfig,
+    tikz, tikz-3dplot, xcolor, physics, bm
+} 
+\usepackage[absolute, overlay]{textpos}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subcaption}
+\usetikzlibrary{calc,arrows.meta,positioning,backgrounds}
+
+\setcounter{MaxMatrixCols}{12}
+
+%\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\graphicspath{{./figs/09}}
+
+\title[Лекция 9]{Проективные преобразования изображений}
+
+\author{Александр Танченко!}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+\titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Проективные преобразования изображений}
+\begin{figure}[h]
+    \includegraphics[height=0.4\textheight]{homography.jpg}
+\end{figure}
+\begin{itemize}
+    \item Для каких точек на изображении $\mathbf{x}=(x\,, y)^\top$ 
+          и соответствующих им точек на другом изображении $\mathbf{x}'=(x'\,, y')^\top$
+          выполняется соотношение:
+    \[
+        \lambda\cdot
+        \begin{bmatrix}
+            x' \\ y' \\ 1
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            h_{11} & h_{12} & h_{13} \\
+            h_{21} & h_{22} & h_{23} \\
+            h_{31} & h_{32} & h_{33}
+        \end{bmatrix}
+        \begin{bmatrix}
+            x \\ y \\ 1
+        \end{bmatrix}
+    \]
+    \item Такие преобразования называются \textbf{проективными преобразованиями} или \textbf{гомографиями}.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Ортогональная проекция плоской сцены}
+\begin{figure}[h]
+    \includegraphics[height=0.3\textheight]{sim_transform.pdf}
+\end{figure}
+\begin{itemize}
+    \item Рассмотрим случай, когда сцена является плоской, и оптическая ось камеры перпендикулярна плоскости сцены.
+    \item Выберем начало мировой системы координат на плоскости сцены, а за ось $w$ возьмем оптическую ось камеры.
+    \item Внешние параметры камеры:
+    \[
+        \mathbf{R} =
+        \begin{bmatrix}
+            \cos\theta & -\sin\theta & 0 \\
+            \sin\theta & \cos\theta & 0 \\
+            0 & 0 & 1
+        \end{bmatrix},\quad
+        \mathbf{t} =
+        \begin{bmatrix}
+            t_1 \\ t_2 \\ d
+        \end{bmatrix}
+    \]
+    $d$ -- расстояние от оптического центра камеры до плоскости сцены.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Ортогональная проекция плоской сцены}
+Из модели камеры, при $f_x=f_y=f$ и $s=0$, получаем:
+\[
+    \lambda\cdot
+    \begin{bmatrix}
+        x \\ y \\ 1
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        f & 0 & 0 \\
+        0 & f & 0 \\
+        0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        \cos\theta & -\sin\theta & 0 & t_1 \\
+        \sin\theta & \cos\theta & 0 & t_2 \\
+        0 & 0 & 1 & d
+    \end{bmatrix}
+    \begin{bmatrix}
+        u \\ v \\ 0 \\ 1
+    \end{bmatrix}
+\]
+отсюда следует:
+\[
+    \begin{bmatrix}
+        x \\ y \\ 1
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \rho\cos\theta & -\rho\sin\theta & t_x \\
+        \rho\sin\theta & \rho\cos\theta & t_y \\
+        0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        u \\ v \\ 1
+    \end{bmatrix}
+\]
+где 
+$$
+    \rho = \frac{f}{d},\quad
+    t_x = \frac{f\cdot t_1}{d},\quad
+    t_y = \frac{f\cdot t_2}{d}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразование подобия (similarity transformation)}
+\begin{figure}[h]
+    \includegraphics[height=0.25\textheight]{sim.png}
+\end{figure}
+\begin{itemize}
+    \item Таким образом, ортогональная проекция плоской сцены может быть описана преобразованием:
+    \[
+        \begin{bmatrix}
+            x \\ y \\ 1
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            \rho\cos\theta & -\rho\sin\theta & t_x \\
+            \rho\sin\theta & \rho\cos\theta & t_y \\
+            0 & 0 & 1
+        \end{bmatrix}
+        \begin{bmatrix}
+            u \\ v \\ 1
+        \end{bmatrix}
+    \]
+    или короче:
+    \[
+        \mathbf{x} = \mathbf{Sim}\left[\mathbf{w}\right]
+    \]
+    \item Такое преобразование называется \textbf{преобразованием подобия}.
+    \item Преобразование подобия сохраняет углы между прямыми и зависит от 4 параметров.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Аффинные преобразования изображений}
+\begin{figure}[h]
+    \includegraphics[height=0.3\textheight]{aff1.jpg}
+    \hspace{1cm}
+    \includegraphics[height=0.3\textheight]{aff2.jpg}
+\end{figure}
+\begin{itemize}
+    \item Если угол наклона плоскости сцены небольшой, то связь между координатами точек на изображении и координатами точек на плоскости сцены можно аппроксимировать \textbf{аффинным преобразованием}:
+    \[
+        \begin{bmatrix}
+            x \\ y \\ 1
+        \end{bmatrix}
+        =   
+        \begin{bmatrix}
+            a_{11} & a_{12} & t_x \\
+            a_{21} & a_{22} & t_y \\
+            0 & 0 & 1
+        \end{bmatrix}
+        \begin{bmatrix}
+            u \\ v \\ 1
+        \end{bmatrix}\,,
+        \qquad
+        \mathbf{x} = \mathbf{Aff}\left[\mathbf{w}\right]
+    \]
+    \item Аффинные преобразования сохраняют параллельность прямых и зависит от 6 параметров.
+\end{itemize}
+\end{frame}
+
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Проективные преобразования изображений}
+\begin{figure}[h]
+    \includegraphics[height=0.3\textheight]{hom1.jpg}
+    \hspace{1cm}
+    \includegraphics[height=0.3\textheight]{hom2.jpg}
+\end{figure}
+\begin{itemize}
+    \item В общем случае связь между координатами точек на изображении 
+          и координатами точек на плоскости сцены описывается \textbf{проективным преобразованием (гомографией)}:
+        \[
+            \lambda\cdot
+            \begin{bmatrix}
+                x \\ y \\ 1
+            \end{bmatrix}
+            =   
+            \begin{bmatrix}
+                h_{11} & h_{12} & h_{13} \\
+                h_{21} & h_{22} & h_{23} \\
+                h_{31} & h_{32} & h_{33}
+            \end{bmatrix}
+            \begin{bmatrix}
+                u \\ v \\ 1
+            \end{bmatrix}\,,
+            \qquad
+            \mathbf{x} = \mathbf{Hom}\left[\mathbf{w}\right]
+        \]
+    \item Гомография отображает прямые в прямые и зависит от 8 параметров.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Виды проективных преобразований}
+\begin{figure}[h]
+    \includegraphics[height=0.25\textheight]{transforms.pdf}
+\end{figure}
+\begin{itemize}
+    \item Преобразование подобия является частным случаем аффинного преобразования.
+    \[
+        \mathbf{x} = \mathbf{Sim}\left[\mathbf{w}\right]\,,
+        \qquad
+        \mathrm{dof}\left(\mathbf{Sim}\right) = 4  
+    \]
+    \item Аффинное преобразование является частным случаем проективного преобразования.
+    \[
+        \mathbf{x} = \mathbf{Aff}\left[\mathbf{w}\right]\,,
+        \qquad
+        \mathrm{dof}\left(\mathbf{Aff}\right) = 6  
+    \]
+    \item Проективное преобразование является наиболее общим из рассмотренных преобразований.
+    \[
+        \mathbf{x} = \mathbf{Hom}\left[\mathbf{w}\right]\,,
+        \qquad
+        \mathrm{dof}\left(\mathbf{Hom}\right) = 8  
+    \]
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Преобразование между изображениями плоской сцены}
+\begin{figure}[h]
+    \includegraphics[height=0.4\textheight]{composition.pdf}
+    \hspace{1cm}
+    \includegraphics[height=0.4\textheight]{satellite1.jpg}
+    \includegraphics[height=0.3\textheight]{satellite2.jpg}
+\end{figure}
+Преобразование между двумя изображениями плоской сцены такое же как и преобразование между изображением и самой плоскостью сцены.
+    \[
+        \mathbf{x} = \mathbf{T_1}[\mathbf{w}]\,,\quad
+        \mathbf{x}' = \mathbf{T_2}[\mathbf{w}]\,,
+        \qquad
+        \Rightarrow
+        \quad
+        \mathbf{x}' = \mathbf{T_2}\left[\mathbf{T_1^{-1}}[\mathbf{x}]\right]= \mathbf{T_3}[\mathbf{x}]
+    \]
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Гомография между изображениями при повороте камеры}
+\begin{figure}[h]
+    \includegraphics[height=0.4\textheight]{rotation.pdf}
+    \hspace{1cm}
+    \includegraphics[height=0.3\textheight]{hom1.pdf}
+    \includegraphics[height=0.3\textheight]{hom2.pdf}
+\end{figure}
+Если камера поворачивается вокруг своего оптического центра и сцена не плоская, 
+то связь между координатами точек на двух изображениях также описывается гомографией:
+    \[
+        \mathbf{x}' = \mathbf{Hom}[\mathbf{x}]   
+    \]
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Оценка параметров преобразования изображений}
+\begin{figure}[h]
+    \includegraphics[height=0.25\textheight]{learn_transform1.pdf}
+    \includegraphics[height=0.25\textheight]{learn_transform2.pdf}
+\end{figure}
+Если известны соответствующие точки на двух изображениях $\left\{\mathbf{x}_i\right\}$,
+$\left\{\mathbf{x}'_i\right\}$ и координаты этих точек связаны преобразованием $\mathbf{x}'_i=\mathbf{T}[\mathbf{x}_i\,,\boldsymbol{\theta}]$, 
+то параметры этого преобразования можно оценить методом максимального правдоподобия:
+\[
+    \hat{\boldsymbol{\theta}} = \argmin_{\boldsymbol{\theta}} \left(-\sum_{i} 
+    \log\left[\mathrm{Norm}_{\mathbf{x}'_i}\left[\mathbf{T}[\mathbf{x}_i\,, \boldsymbol{\theta}]\,,\sigma^2\mathbf{I}\right]\right]
+    \right)
+\]
+Подставляя формулу нормального распределения, получаем задачу наименьших квадратов:
+\[
+    \hat{\boldsymbol{\theta}} = \argmin_{\boldsymbol{\theta}} \sum_{i} 
+    \norm{\mathbf{x}'_i - \mathbf{T}[\mathbf{x}_i\,, \boldsymbol{\theta}]}^2
+\]
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Оценка параметров преобразования подобия}
+\begin{itemize}
+    \item Для преобразования подобия
+    \[
+        \mathbf{T}[\mathbf{x}]=\mathbf{Sim}[\mathbf{x}]=
+        \rho\cdot\boldsymbol{\Omega}\mathbf{x} + \boldsymbol{\tau}=
+        \rho\cdot\begin{bmatrix}
+            \cos\theta & -\sin\theta \\
+            \sin\theta &  \cos\theta
+        \end{bmatrix}\mathbf{x} +
+        \begin{bmatrix}
+            t_x \\ t_y
+        \end{bmatrix}
+    \]
+    \item Получим следующую задачу наименьших квадратов:
+    \[
+        \widehat{\boldsymbol{\Omega}}\,, \hat{\rho}\,, \hat{\boldsymbol{\tau}} =
+        \argmin_{\boldsymbol{\Omega}\,, \rho\,, \boldsymbol{\tau}} 
+        \sum_{i=1}^{N} 
+        \norm{\mathbf{x}'_i - \left(\rho\cdot\boldsymbol{\Omega}\mathbf{x}_i + \boldsymbol{\tau}\right)}^2
+    \]
+    \item Число параметров: $ \mathrm{dof}(\mathbf{Sim}) = 4 $, 
+    поэтому необходимо минимум две соответствующие точки ($N \geq 2$).
+    \item Эту задачу можно решить аналитически.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Оценка параметров преобразования подобия}
+Пусть
+\[
+    \boldsymbol{\mu} = \frac{1}{N}\sum_{i=1}^{N}\mathbf{x}_i\,,\quad
+    \boldsymbol{\mu}' = \frac{1}{N}\sum_{i=1}^{N}\mathbf{x}'_i
+\]
+$$
+    \mathbf{A}=[\mathbf{x}_1 - \boldsymbol{\mu}\,, \mathbf{x}_2 - \boldsymbol{\mu}\,, \ldots\,, \mathbf{x}_N - \boldsymbol{\mu}] \,,\quad
+    \mathbf{B}=[\mathbf{x}'_1 - \boldsymbol{\mu}'\,, \mathbf{x}'_2 - \boldsymbol{\mu}'\,, \ldots\,, \mathbf{x}'_N - \boldsymbol{\mu}']
+$$
+SVD-разложение матрицы $\mathbf{B}\mathbf{A}^T$:
+\[
+    \mathbf{B}\mathbf{A}^\top = \mathbf{U}\mathbf{L}\mathbf{V}^\top
+\]
+Тогда
+\[
+    \widehat{\boldsymbol{\Omega}}=\mathbf{V}\mathbf{U}^T
+\]
+\[
+    \widehat{\rho}=
+    \frac{\sum_{i=1}^N(\mathbf{x}'_i-\boldsymbol{\mu}')^\top\widehat{\boldsymbol{\Omega}}(\mathbf{x}_i-\boldsymbol{\mu})}
+    {\sum_{i=1}^N\norm{\mathbf{x}_i-\boldsymbol{\mu}}^2}
+\]
+\[
+    \widehat{\boldsymbol{\tau}} = \boldsymbol{\mu}' - \widehat{\rho}\cdot\widehat{\boldsymbol{\Omega}}\boldsymbol{\mu}
+\]
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Оценка параметров проективного преобразования}
+\begin{itemize}
+    \item Для проективного преобразования $\mathbf{x}'_i=\mathbf{Hom}[\mathbf{x}_i]$
+    \[
+        \lambda_i\cdot
+        \begin{bmatrix}
+            x'_i \\ y'_i \\ 1
+        \end{bmatrix}
+        = \mathbf{H}\cdot\mathbf{x}_i =
+        \begin{bmatrix}
+            h_{11} & h_{12} & h_{13} \\
+            h_{21} & h_{22} & h_{23} \\
+            h_{31} & h_{32} & h_{33}
+        \end{bmatrix}
+        \begin{bmatrix}
+            x_i \\ y_i \\ 1
+        \end{bmatrix}
+    \]
+    \item Отсюда
+    \begin{align*}
+        x'_i &= \frac{h_{11}x_i + h_{12}y_i + h_{13}}{h_{31}x_i + h_{32}y_i + h_{33}} \\
+        y'_i &= \frac{h_{21}x_i + h_{22}y_i + h_{23}}{h_{31}x_i + h_{32}y_i + h_{33}}
+    \end{align*}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Оценка параметров проективного преобразования}
+\begin{itemize}
+    \item Подставляя эти выражения в задачу наименьших квадратов, получаем:
+    \[
+        \widehat{\mathbf{H}} =
+        \argmin_{\mathbf{H}} \sum_{i=1}^{N}
+        \mathrm{dist}^2(\mathbf{x}'_i\,, \mathbf{x}_i)
+    \]
+    где
+    \[
+        \mathrm{dist}^2(\mathbf{x}'_i\,, \mathbf{x}_i) =
+        \left(x'_i-\frac{h_{11}x_i + h_{12}y_i + h_{13}}{h_{31}x_i + h_{32}y_i + h_{33}}\right)^2 +
+        \left(y'_i-\frac{h_{21}x_i + h_{22}y_i + h_{23}}{h_{31}x_i + h_{32}y_i + h_{33}}\right)^2
+    \]
+    --- \textbf{ошибка репроекции}.
+    \item Число параметров: $ \mathrm{dof}(\mathbf{Hom}) = 8 $, 
+    поэтому необходимо минимум четыре соответствующие точки ($N \geq 4$).
+    \item Эту задачу нелинейной оптимизации можно решить численными методами,
+    например методом Левенберга-Марквардта. 
+    \item Построим начальное приближение решения методом DLT.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Оценка параметров проективного преобразования}
+\[
+        \lambda_i\cdot
+        \begin{bmatrix}
+            x'_i \\ y'_i \\ 1
+        \end{bmatrix} =
+        \begin{bmatrix}
+            h_{11} & h_{12} & h_{13} \\
+            h_{21} & h_{22} & h_{23} \\
+            h_{31} & h_{32} & h_{33}
+        \end{bmatrix}\cdot
+        \begin{bmatrix}
+            x_i \\ y_i \\ 1
+        \end{bmatrix}
+\]
+\begin{itemize}
+    \item Умножим эту формулу векторно на 
+    $\begin{bmatrix}
+        x'_i \\ y'_i \\ 1
+    \end{bmatrix}$:
+    \[
+        \mathbf{0} =
+        \begin{bmatrix}
+            x'_i \\ y'_i \\ 1
+        \end{bmatrix} \times
+        \begin{bmatrix}
+            h_{11} & h_{12} & h_{13} \\
+            h_{21} & h_{22} & h_{23} \\
+            h_{31} & h_{32} & h_{33}
+        \end{bmatrix}\cdot
+        \begin{bmatrix}
+            x_i \\ y_i \\ 1
+        \end{bmatrix}
+    \]
+    \item Два из этих трех уравнений линейно независимы:
+    \[
+        \begin{bmatrix}
+            0 & 0 & 0 & -x_i & -y_i & -1 & y'_i x_i & y'_i y_i & y'_i \\
+            x_i & y_i & 1 & 0 & 0 & 0 & -x'_i x_i & -x'_i y_i & -x'_i
+        \end{bmatrix}
+        \cdot\boldsymbol{\theta}=\mathbf{0}
+    \]
+    где
+    \[
+        \boldsymbol{\theta} =
+        [h_{11}\,, h_{12}\,, h_{13}\,, h_{21}\,, h_{22}\,, h_{23}\,, h_{31}\,, h_{32}\,, h_{33}]^\top
+    \]
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Оценка параметров проективного преобразования}
+\begin{itemize}
+    \item Для $N$ соответствующих точек получаем систему уравнений:
+    \[
+        \mathbf{A}\cdot\boldsymbol{\theta}=\mathbf{0}
+    \]
+    где матрица $\mathbf{A}$ размера $2N\times 9$ составляется из блоков:
+    \[
+        \begin{bmatrix}
+            0 & 0 & 0 & -x_i & -y_i & -1 & y'_i x_i & y'_i y_i & y'_i \\
+            x_i & y_i & 1 & 0 & 0 & 0 & -x'_i x_i & -x'_i y_i & -x'_i
+        \end{bmatrix}
+    \]
+    \item Оценка для $\boldsymbol{\theta}$ находится как решение задачи:
+    \[
+        \widehat{\boldsymbol{\theta}} = \argmin_{\boldsymbol{\theta}} \norm{\mathbf{A}\cdot\boldsymbol{\theta}}^2
+    \quad \text{при условии} \quad \norm{\boldsymbol{\theta}}=1
+    \]
+    \item Такое решение находится как правый столбец матрицы $\mathbf{V}$ в SVD-разложении
+    \[
+        \mathbf{A} = \mathbf{U}\mathbf{L}\mathbf{V}^\top
+    \]
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Алгоритм RANSAC (RANdom SAmple Consensus)}
+\begin{figure}[h]
+    \includegraphics[height=0.5\textheight]{ransac1.jpg}
+\end{figure}
+\begin{itemize}
+    \item Пары соответствующих точек состоят из inliers и outliers.
+    \item Перед оценкой параметров гомографии необходимо отфильтровать outliers.
+    \item C помощью RANSAC можно отфильтровать outliers и оценить параметры гомографии только на inliers.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Алгоритм RANSAC для оценки гомографии}
+\begin{itemize}
+    \item[1.] \textbf{robust estimation}: повторить $N$ раз
+    \begin{itemize}
+        \item[(a)] выбрать 4 случайных соответствующих точек $\mathbf{x}_i\leftrightarrow\mathbf{x}'_i$
+                   и вычислить $\mathbf{H}$ методом DLT
+        \item[(b)] разделить точки на inliers и outliers по порогу $T$ и ошибке репроекции:
+                   $$
+                    \mathrm{dist}^2(\mathbf{x}'_i\,, \mathbf{x}_i)<T
+                   $$
+    \end{itemize} 
+    \item[2.] выбрать $\mathbf{H}$ c наибольшим числом inliers в качестве начальной оценки алгоритма Левенберга-Марквардта
+    \item[3.] \textbf{optimal estimation}:  методом Левенберга-Марквардта
+          вычислить финальную гомографию $\mathbf{H}$ только на inliers
+\end{itemize}
+Число итераций $N$ и порог $T$ выбираются адаптивно.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Пример алгоритма RANSAC для оценки гомографии}
+\begin{figure}[h]
+    \includegraphics[height=0.5\textheight]{ransac1.jpg}
+    \includegraphics[height=0.5\textheight]{ransac2.jpg}
+\end{figure}
+\begin{itemize}
+    \item (a), (b) -- исходные изображения
+    \item (c), (d) -- найденные соответствия ключевых точек
+    \item (e), (f) -- inliers, найденные RANSAC 
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\frametitle{Построение панорамного изображения}
+\begin{figure}[h]
+    \includegraphics[height=0.5\textheight]{panorama.jpg}
+\end{figure}
+\begin{itemize}
+    \item Три изображения сцены, для которых камера поворачивается вокруг своего оптического центра.
+    \item Для каждого изображения построены пять соответствующих ключевых точек.
+    \item Панорама строится при помощи гомографий, преобразующих первое и третье изображения в систему координат второго изображения.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\end{document}
+
