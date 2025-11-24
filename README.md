@@ -10,6 +10,7 @@
 | 6  |Сегментация изображений|[lecture_06.ipynb](lectures/lecture_06.ipynb)|[lecture_06.ipynb](lectures/lecture_06.ipynb)|
 | 7  |Модель pinhole-камеры|[lecture_07.pdf](lectures/lecture_07.pdf)|[notebook_07.ipynb](notebooks/notebook_07.ipynb)|
 | 8  |Основные задачи 3D CV для трехмерных сцен|[lecture_08.pdf](lectures/lecture_07.pdf)|[notebook_08.ipynb](notebooks/notebook_08.ipynb)|
+| 9  |Проективные преобразования изображений||[notebook_09.ipynb](notebooks/notebook_09.ipynb)|
 
 
 ### Установка Python окружения
