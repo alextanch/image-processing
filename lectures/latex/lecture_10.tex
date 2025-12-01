@@ -1,0 +1,427 @@
+\documentclass[12pt, usepdftitle=false, aspectratio=1610]{beamer}
+
+\usetheme{Madrid}
+
+\usefonttheme[]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[T2A]{fontenc}			
+\usepackage[utf8]{inputenc}			
+\usepackage[english,russian]{babel}
+
+\usepackage{
+    mathtext,
+    cmap,
+    multirow,
+    textcomp,
+    graphicx,
+    wrapfig,
+    subfig,
+    mathtools,
+    gensymb,
+    amsmath,
+    hyperref,
+    verbatim
+}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[absolute, overlay]{textpos}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert} 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\graphicspath{{./figs/10}}
+
+\title[Лекция 10]{
+    PnP задача для сцен на плоскости. \\
+    Калибровка камеры.
+}
+
+\author{Александр Танченко}
+\institute{}
+\date{2025}
+
+\begin{document}
+
+%------------------------------------------------------------
+\begin{frame}
+\titlepage
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{scene3d.jpg}
+\end{figure}
+Для трехмерных сцен, преобразование из всемирной системы координат в систему координат изображения
+задается pinhole моделью камеры:
+$$
+    \lambda\cdot
+    \begin{bmatrix}
+        x \\ y \\ 1 
+    \end{bmatrix} =
+    \mathbf{P} \cdot
+    \begin{bmatrix}
+        X \\ Y \\ Z \\ 1 
+    \end{bmatrix}
+$$
+где матрица камеры
+$$
+    \mathbf{P} =
+        \mathbf{K} \cdot
+        \begin{bmatrix}
+            \mathbf{R} \mid \mathbf{t}
+        \end{bmatrix}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{homography.pdf}
+\end{figure}
+\begin{itemize}
+    \item Прямым на одном изображении соответствуют прямые на другом.
+    
+    \item Значит координаты соответствующих точек на изображениях связаны гомографией.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{scene2d.jpg}
+\end{figure}
+\begin{itemize}
+    \item Для сцен на плоскости, прямые на плоскости сцены проектируются в прямые на плоскости изображения.
+    \item Значит преобразование координат между плоскостью сцены и плоскостью изображения задается гомографией.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \begin{figure}[h]
+    \centering
+    \includegraphics[height=0.35\textheight]{plane.pdf}
+\end{figure}
+\hspace{1cm}
+
+Гомографию можно найти, взяв $Z=0$ в модели камеры:
+$$
+    \lambda\cdot
+    \begin{bmatrix}
+        x \\ y \\ 1 
+    \end{bmatrix} =
+    \mathbf{P} \cdot
+    \begin{bmatrix}
+        X \\ Y \\ 0 \\ 1 
+    \end{bmatrix}
+    \qquad\Rightarrow\qquad
+    \lambda\cdot
+    \begin{bmatrix}
+        x \\ y \\ 1 
+    \end{bmatrix} =
+    \mathbf{H} \cdot
+    \begin{bmatrix}
+        X \\ Y \\ 1 
+    \end{bmatrix}
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{pnp.jpg}
+\end{figure}
+
+Основные задачи 3D CV для сцен на плоскости остаются такими же как и для трехмерных сцен.
+\vspace{0.5cm}
+
+\textbf{PnP problem: оценка внешних параметров камеры} 
+\vspace{0.5cm}
+
+  По точкам на плоской сцене $(X_i, Y_i)$ и их проекциям на изображение камеры $(x_i,y_i)$ 
+  требуется оценить внешние параметры камеры $\mathbf{R}$, $\mathbf{t}$, 
+  при этом внутренние параметры камеры $\mathbf{K}$ считаются известными. 
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    \begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{triangulation.pdf}
+\end{figure}
+
+\textbf{Triangulation problem: реконструкция точек сцены} 
+\vspace{0.5cm}
+
+Зная внешние и внутренние параметры камер $\mathbf{K}_j$, $\mathbf{R}_j$, $\mathbf{t}_j$ 
+и координаты точек на изображениях $(x_{ij}, y_{ij})$, 
+требуется оценить координаты точек на плоскости сцены $(X_i, Y_i)$.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{calibration.jpg}
+\end{figure}
+
+\textbf{Camera calibration problem: калибровка камеры} 
+\vspace{0.5cm}
+
+Зная координаты точек на плоских шаблонах $(X_i, Y_i)$ 
+и их проекции на нескольких изображениях с одной камеры 
+$(x_{ij},y_{ij})$, требуется оценить внутренние параметры камеры 
+$\mathbf{K}$ и коэффициенты дисторсии
+$$
+    k_1\,,k_2\,,k_3\,,p_1\,,p_2
+$$
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{chess.jpeg}
+    \includegraphics[height=0.45\textheight]{aruco.png}
+\end{figure}
+
+\textbf{Для калибровки можно использовать:}
+
+\begin{itemize}
+    \item \href{https://markhedleyjones.com/projects/calibration-checkerboard-collection}
+        {Checkerboard patterns}
+    
+    \item \href{https://chev.me/arucogen/}{AruCo patterns} 
+\end{itemize}
+\hspace{0.5cm}
+
+Для калибровки необходимо как минимум 3 изображения калибровочного паттерна под разными ракурсами.
+
+Обычно используют $\sim 30$ изображений паттерна.
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.4\textheight]{distortion.jpg}
+    \hspace{1cm}
+    \includegraphics[height=0.45\textheight]{fisheye_image.jpg}
+\end{figure}
+\begin{itemize}
+    \item Дисторсия возникает из-за несовершенства оптических систем камер.
+    
+    \item Для fisheye-камер дисторсия делается для увеличения поля зрения камеры 
+    (FOV – Field of View).
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+    Дисторсия координат происходит перед умножением на матрицу $\mathbf{K}$:
+    $$
+        \lambda\cdot
+        \begin{bmatrix}
+            x \\ y \\ 1 
+        \end{bmatrix} =
+        \mathbf{K} \cdot
+        \begin{bmatrix}
+            \mathbf{R} \mid \mathbf{t}
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            X \\ Y \\ Z \\ 1 
+        \end{bmatrix}
+    $$
+    \begin{itemize}
+    \item из мировой системы в систему координат камеры:
+    $$
+        \begin{bmatrix}
+            X \\ Y \\ Z 
+        \end{bmatrix}
+        \quad\rightarrow\quad
+        \begin{bmatrix}
+            X_c \\ Y_c \\ Z_c 
+        \end{bmatrix} = 
+        \mathbf{R}\cdot
+        \begin{bmatrix}
+            X \\ Y \\ Z 
+        \end{bmatrix} +
+        \mathbf{t}
+        \quad\rightarrow
+    $$
+    \item переход к нормализованным координатам:
+    $$
+        \begin{bmatrix}
+            X_c \\ Y_c \\ Z_c 
+        \end{bmatrix}
+        \quad\rightarrow\quad
+        \begin{bmatrix}
+            x \\ y 
+        \end{bmatrix} = 
+        \begin{bmatrix}
+            X_c/Z_c \\ Y_c/Z_c 
+        \end{bmatrix}
+        \quad\rightarrow
+    $$
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\begin{itemize}
+    \item дисторсия координат (добавление \textbf{карт ректификации} $m_x$, $m_y$):
+    $$
+        \begin{bmatrix}
+            x \\ y 
+        \end{bmatrix}
+        \quad\rightarrow\quad
+        \begin{bmatrix}
+            x_d \\ y_d 
+        \end{bmatrix} = 
+        \begin{bmatrix}
+            x + m_x \\ y + m_y 
+        \end{bmatrix}
+        \quad\rightarrow
+    $$
+    \item переход к координатам пикселей на изображении
+    $$
+        \begin{bmatrix}
+            x_d \\ y_d 
+        \end{bmatrix}
+        \quad\rightarrow\quad
+        \begin{bmatrix}
+            x \\ y \\ 1 
+        \end{bmatrix} = 
+        \mathbf{K}\cdot
+        \begin{bmatrix}
+            x_d \\ y_d \\ 1 
+        \end{bmatrix}
+    $$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}
+\begin{itemize}
+    \item \textbf{Модель радиальной дисторсии}
+    $$
+        m_x = x_{d} - x = x \cdot (k_1 r^2 + k_2 r^4 + k_3 r^6) 
+    $$
+    где
+    $$
+        r = \sqrt{(x - c_x)^2 + (y - c_y)^2}
+    $$
+
+    \item \textbf{Модель тангенциальной дисторсии}
+    $$
+        m_x = 2 p_1 x y + p_2 (r^2 + 2 x^2)
+    $$
+    $$
+        m_y = p_1 (r^2 + 2 y^2) + 2 p_2 x y
+    $$
+
+    \item Для fisheye-камеры есть своя модель, которую мы не рассматриваем.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \textbf{Замечания к трём задачам:}
+    \hspace{1cm}
+    
+    \begin{itemize}
+        \item Все три задачи решаются методами нелинейной оптимизации.
+        
+        \item Для получения начального приближения используются методы DLT (Direct Linear Transform).
+        
+        \item DLT алгоритмы используются для аугментации изображений в DL/CV.
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}[fragile]
+    \begin{figure}[h]
+    \centering
+    \includegraphics[height=0.35\textheight]{calib.jpg}
+\end{figure}
+\textbf{Функции OpenCV для калибровки камеры}
+\begin{itemize}
+    \item Поиск угловых точек на калибровочном паттерне
+    \begin{verbatim}
+    _, points = cv2.findChessboardCorners(gray_image, patternSize)
+    \end{verbatim}
+    \item Калибровка камеры
+    \begin{verbatim}
+    _, K, dist_coeff, rvecs, tvecs = cv2.calibrateCamera(
+    objectPoints,  # список координат угловых точек в 3D 
+    imagePoints,   # список координат угловых точек на изображениях
+    (W, H),        # размер изображения
+    ...
+)
+    \end{verbatim}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}[fragile]
+\textbf{Функции OpenCV для коррекции дисторсии}
+\begin{itemize}
+    \item Построение карт ректификации
+    \begin{verbatim}
+    mx, my = cv2.initUndistortRectifyMap(
+        K, 
+        dist_coeff, 
+        None, None, 
+        (image_width, image_height), 
+        cv2.CV_32FC1
+    )
+    \end{verbatim}
+    \item Коррекция дисторсии
+    \begin{verbatim}
+    rectified_image = cv2.remap(
+        distorted_image, 
+        mx, my, 
+        interpolation=cv2.INTER_LINEAR
+    )
+    \end{verbatim}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}[fragile]
+\textbf{Функции OpenCV для PnP задачи}
+\begin{itemize}
+\item Фильтрация точек с помощью алгоритма RANSAC
+\begin{verbatim}
+_, rvec, tvec, inliers = cv2.solvePnPRansac(
+    objectPoints, # координаты точек в 3D
+    imagePoints,  # координаты точек на изображении
+    K,            # camera intrinsics
+    dist_coeff,   # коэффициенты дисторсии или None
+    ...
+)
+\end{verbatim}
+\item Оценка camera extrinsics с помощью нелинейной оптимизации
+\begin{verbatim}
+_, rvec, tvec = cv2.solvePnP(
+    objectPoints, 
+    imagePoints, 
+    K, 
+    dist_coeff
+)
+\end{verbatim}
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------------------
+\end{document}
+
+        

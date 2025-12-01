@@ -21,6 +21,6 @@ __pycache__
 lectures/_minted
 /build
 /output
-/solutions
+solutions/
 /doc
 /homeworks
