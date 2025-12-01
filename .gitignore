@@ -1,5 +1,6 @@
 .vscode
 .venv
+.idea
 __pycache__
 .ruff_cache
 .DS_Store
@@ -21,6 +22,6 @@ __pycache__
 lectures/_minted
 /build
 /output
-/solutions
+solutions/
 /doc
 /homeworks
